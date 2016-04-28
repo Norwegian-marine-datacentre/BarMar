@@ -1,0 +1,11 @@
+#java specific
+*.class
+*.jar
+
+#files
+.classpath
+.project
+
+#folders
+target/*
+.settings/*
