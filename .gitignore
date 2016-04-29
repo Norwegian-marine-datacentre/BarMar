@@ -5,7 +5,16 @@
 #files
 .classpath
 .project
+maven-eclipse.xml
 
 #folders
 target/*
+.externalToolBuilders/*
 .settings/*
+.metadata/*
+lib/*
+tests/*
+build/*
+bin/*
+externals/*
+${war-src}/*

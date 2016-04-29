@@ -1,5 +1,6 @@
 package no.imr.barmar.controller;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,13 +46,18 @@ public class BarMarController {
     @Autowired( required = true )
     private GetWFSList gwfs  = null;
 
+    @RequestMapping("/barmar.json")
+    public String getMareanoJson() throws IOException {
+        return "dummy:json";
+    }
+    
     /**
      * FILLS THE COMBOBOX FOR GRIDS:
      * @param request
      * @return
      * @throws Exception
      */
-    @RequestMapping("/parameter")
+    @RequestMapping("/parameter.jsp")
     public ModelAndView parameter(HttpServletRequest request) throws Exception {
         
         grid = request.getParameter( GRID );

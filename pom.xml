@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>no.imr</groupId>
     <artifactId>BarMar</artifactId>
-    <packaging>war</packaging>
+<!--     <packaging>war</packaging> -->
     <name>BarMar</name>
     <version>0.1</version>
 
@@ -110,7 +110,7 @@
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
-            <version>3.1.0</version>
+            <version>3.0.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -118,19 +118,60 @@
             <artifactId>junit</artifactId>
             <version>4.8.1</version>
             <scope>test</scope>
-        </dependency>        
+        </dependency>
+        <dependency>
+            <groupId>commons-configuration</groupId>
+            <artifactId>commons-configuration</artifactId>
+            <version>${commons.configuration.version}</version>
+            <exclusions>
+                <!-- Commons logging is excluded because it is overriden by JCL-over-slf4j -->
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>    
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>2.6.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.6.2</version>
+        </dependency>
     </dependencies>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <org.springframework.version>4.1.5.RELEASE</org.springframework.version>
         <org.junit.version>4.11</org.junit.version>
         <war-src>${project.build.directory}/${project.artifactId}-src</war-src>
-
         <maven.build.timestamp.format>E MMM dd, yyyy @ HH:mm z</maven.build.timestamp.format>
         <build.prettydate>${maven.build.timestamp}</build.prettydate>
         <build.date>${git.build.time}</build.date>
         <build.profile></build.profile>
+        <commons.configuration.version>1.10</commons.configuration.version>
     </properties>
     <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>2.3</version>
+                <configuration>
+                    <warName>${project.artifactId}</warName>
+                    <warSourceDirectory>src/main/webapp</warSourceDirectory>
+                    <webappDirectory>${project.build.directory}/${project.artifactId}</webappDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>war</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
     </build>
 </project>
