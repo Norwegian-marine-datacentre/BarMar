@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>no.imr</groupId>
     <artifactId>BarMar</artifactId>
-<!--     <packaging>war</packaging> -->
+    <packaging>war</packaging>
     <name>BarMar</name>
     <version>0.1</version>
 
@@ -162,6 +162,7 @@
                     <warName>${project.artifactId}</warName>
                     <warSourceDirectory>src/main/webapp</warSourceDirectory>
                     <webappDirectory>${project.build.directory}/${project.artifactId}</webappDirectory>
+                    <outputDirectory>F:\apache-tomcat-7.0.53\webapps</outputDirectory>
                 </configuration>
                 <executions>
                     <execution>
@@ -172,6 +173,15 @@
                     </execution>
                 </executions>
             </plugin>
+			<plugin>
+			  <groupId>org.apache.tomcat.maven</groupId>
+			  <artifactId>tomcat7-maven-plugin</artifactId>
+			  <version>2.2</version>
+			  <configuration>
+			    <port>9090</port>
+			    <path>/</path>
+			  </configuration>
+			</plugin>            
         </plugins>
     </build>
 </project>

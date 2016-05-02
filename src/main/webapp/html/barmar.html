@@ -50,26 +50,65 @@
                 top: 1em;
                 right: 50em;
                 width: 800px;
-                z-index: 20000;
+                z-index: 20001;
                 background-color: white;
                 padding: 0 0.5em 0.5em 0.5em;
             }
         </style>
+        
+        
              
     </head>
     <body>
-   
-<div id="barmar" >
+
+    <script>
+        var xmlhttp = new XMLHttpRequest();
+        var url = "../barmar.json?grid=BarMar&species=Cod";
+        var myArr = null;
+        xmlhttp.onreadystatechange = function() {
+            if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                myArr = JSON.parse(xmlhttp.responseText);
+                console.log(myArr);
+                var gridAdd = function( txt ) {
+                    $("#grid").append( '<li><a href="#" data-value="' + txt + '">' + txt + '</a></li>' );
+                };
+                var grid = myArr['grid']
+                console.log("grid:"+grid);
+                for (var i=0; i< grid.length; i++) {
+                    gridAdd(grid[i]);
+                }
+                
+                var speciesAdd = function( txt ) {
+                    $("#species").append( '<li><a href="#" data-value="' + txt + '">' + txt + '</a></li>' );
+                };
+                var species = myArr['species']
+                console.log("species:"+species);
+                for (var i=0; i< species.length; i++) {
+                    speciesAdd(species[i]);
+                }
+                
+                var speciesSubAdd = function( txt ) {
+                    $("#speciesSubGroup").append( '<li><a href="#" data-value="' + txt + '">' + txt + '</a></li>' );
+                };
+                var speciesSubgroup = myArr['speciesSubgroup']
+                console.log("speciesSubgroup:"+speciesSubgroup);
+                for (var i=0; i< speciesSubgroup.length; i++) {
+                    speciesSubAdd(speciesSubgroup[i]);
+                }    
+            }
+        };
+        xmlhttp.open("GET", url, true);
+        xmlhttp.send();
+    </script>
+
+ <div id="barmar" >
     <label for="grid" style="float: left">Grid</label>
     <div class="dropdown" style="float: left">
       <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
         BarMar
         <span class="caret"></span>
       </button>
-      <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-        <li><a href="#" data-value="BarMar">BarMar</a></li>
-        <li><a href="#" data-value="NorMar">NorMar</a></li>
-        <li><a href="#" data-value="WMOsquares">WMOsquares</a></li>
+      <ul class="dropdown-menu" id="grid" aria-labelledby="dropdownMenu1">
       </ul>
     </div>
     
@@ -79,10 +118,7 @@
         Cod
         <span class="caret"></span>
       </button>
-      <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-        <li><a href="#" data-value="BarMar">Cod</a></li>
-        <li><a href="#" data-value="NorMar">Herring</a></li>
-        <li><a href="#" data-value="WMOsquares">Salmon</a></li>
+      <ul class="dropdown-menu" id="species" aria-labelledby="dropdownMenu1">
       </ul>
     </div> 
     <label for="subspecies" style="float: left">Sub Species</label>
@@ -91,10 +127,7 @@
         Cod_survey_trawl
         <span class="caret"></span>
       </button>
-      <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-        <li><a href="#" data-value="BarMar">Cod_survey_trawl</a></li>
-        <li><a href="#" data-value="NorMar">Herring_survey_trawl</a></li>
-        <li><a href="#" data-value="WMOsquares">Salmon_survey_trawl</a></li>
+      <ul class="dropdown-menu" id="speciesSubGroup" aria-labelledby="dropdownMenu1">
       </ul>
     </div>  
     <label for="depth" style="float: left">depth</label>

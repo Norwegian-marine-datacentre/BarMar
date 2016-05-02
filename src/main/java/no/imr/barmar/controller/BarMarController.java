@@ -2,7 +2,9 @@ package no.imr.barmar.controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -13,6 +15,9 @@ import no.imr.barmar.pojo.BarMarPojo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -43,13 +48,36 @@ public class BarMarController {
     private final static String PARAMETERS = "parameters";
     private final static String METADATA = "metadata";
     
+    private final static String urlRequest = UrlConsts.BASE_URL_REQUEST + UrlConsts.GRID_PARAMETER_NAME_BARMAR; 
+    
     @Autowired( required = true )
     private GetWFSList gwfs  = null;
 
     @RequestMapping("/barmar.json")
-    public String getMareanoJson() throws IOException {
-        return "dummy:json";
+    public @ResponseBody Map getBarMarJson( 
+            @RequestParam(value = "grid", required=false) String grid, 
+            @RequestParam(value="species", required=false) String species) throws IOException, Exception {
+        
+        Map m = new HashMap<String, String>(1); 
+        m.put("string", "dummy");
+        m.put("url", urlRequest);
+        
+        List<String> grids = gwfs.getWFSList("gridname", null, urlRequest );
+        m.put("grid", grids);
+        
+        List<String> speciesSubgroups = getSpeciesSubgroupFromWFSlist( urlRequest );
+        
+        m.put("species", getSpecies(speciesSubgroups));
+        
+        System.out.println(speciesSubgroups);
+        if ( species != null) {
+            List<String> speciesSubgroup = getSpeciesSubgroups( speciesSubgroups, species);
+            m.put("speciesSubgroup", speciesSubgroup);
+        }
+        
+        return m;
     }
+   
     
     /**
      * FILLS THE COMBOBOX FOR GRIDS:
@@ -57,56 +85,48 @@ public class BarMarController {
      * @return
      * @throws Exception
      */
-    @RequestMapping("/parameter.jsp")
-    public ModelAndView parameter(HttpServletRequest request) throws Exception {
-        
-        grid = request.getParameter( GRID );
-        gridValue = request.getParameter( GRID_VALUE );
-        dataset = request.getParameter( DATASET );
-        datasetValue = request.getParameter( DATASET_VALUE );
-        parameter = request.getParameter( PARAMETER );
-        parameterValue = request.getParameter( PARAMETER_VALUE );
-                        
+    @RequestMapping("/barmarParameters.json")
+    public ModelAndView  parameter(HttpServletRequest request) throws Exception {
+//        
+//        grid = request.getParameter( GRID );
+//        gridValue = request.getParameter( GRID_VALUE );
+//        dataset = request.getParameter( DATASET );
+//        datasetValue = request.getParameter( DATASET_VALUE );
+//        parameter = request.getParameter( PARAMETER );
+//        parameterValue = request.getParameter( PARAMETER_VALUE );
+//                        
         ModelAndView mav = new ModelAndView("parameters");
-        String urlRequest = UrlConsts.BASE_URL_REQUEST + UrlConsts.GRID_PARAMETER_NAME_BARMAR; 
-
-        List<String> grids = gwfs.getWFSList("gridname", null, urlRequest );
-        mav.addObject(GRIDS, grids);
-
-        List<String> speciesSubgroups = getSpeciesSubgroupFromWFSlist( urlRequest );
-        addSpecies( mav, speciesSubgroups );
-        addSpeciesSubgroups( mav, speciesSubgroups );
-        periodDepthlayersAndMetadata( mav, urlRequest, request );
+//        String urlRequest = UrlConsts.BASE_URL_REQUEST + UrlConsts.GRID_PARAMETER_NAME_BARMAR; 
+//
+//        List<String> grids = gwfs.getWFSList("gridname", null, urlRequest );
+//        mav.addObject(GRIDS, grids);
+//
+//        List<String> speciesSubgroups = getSpeciesSubgroupFromWFSlist( urlRequest );
+//        addSpecies( mav, speciesSubgroups );
+//        addSpeciesSubgroups( mav, speciesSubgroups );
+//        periodDepthlayersAndMetadata( mav, urlRequest, request );
         return mav;
     }
     
-    private void addSpecies( ModelAndView mav, List<String> speciesSubgroups ) throws Exception {
-        if ( grid != null && gridValue != null ) {
-            mav.addObject("grid_value_selected", gridValue );
-            List<String> species = new ArrayList<String>();
-            for(int i=0; i<speciesSubgroups.size(); i++) {
-                String speciesName = getWFSSpeciesName( speciesSubgroups, i );
-                if(!species.contains( speciesName )){
-                    species.add( speciesName );
-                }
+    private List<String> getSpecies( List<String> speciesSubgroups ) throws Exception {
+        List<String> species = new ArrayList<String>();
+        for(int i=0; i<speciesSubgroups.size(); i++) {
+            String speciesName = getWFSSpeciesName( speciesSubgroups, i );
+            if(!species.contains( speciesName )){
+                species.add( speciesName );
             }
-            mav.addObject(DATASETS, species);
         }
+        return species;
     }
     
-    private void addSpeciesSubgroups( ModelAndView mav, List<String> speciesSubgroups ) throws Exception {
-        if ( dataset != null ) {
-            mav.addObject("dataset_value_selected", datasetValue);
-            List <String> thisSpeciesSubgroup = new ArrayList<String>();
-            for(int i=0; i<speciesSubgroups.size(); i++) {
-                String speciesName = getWFSSpeciesName( speciesSubgroups, i );
-                String speciesChoosen = datasetValue;
-                if (speciesChoosen.equalsIgnoreCase( speciesName ) && !thisSpeciesSubgroup.contains( speciesName)) {
-                    thisSpeciesSubgroup.add(speciesSubgroups.get(i));
-                }
+    private List<String> getSpeciesSubgroups( List<String> speciesSubgroups, String speciesPrefix ) throws Exception {
+        List <String> thisSpeciesSubgroup = new ArrayList<String>();
+        for( String aSubgroup : speciesSubgroups ) {
+            if ( aSubgroup.startsWith(speciesPrefix)) {
+                thisSpeciesSubgroup.add( aSubgroup );
             }
-            mav.addObject(PARAMETERS, thisSpeciesSubgroup);
         }
+        return thisSpeciesSubgroup;
     }
     
     private List<String> getSpeciesSubgroupFromWFSlist( String urlRequest ) throws Exception {

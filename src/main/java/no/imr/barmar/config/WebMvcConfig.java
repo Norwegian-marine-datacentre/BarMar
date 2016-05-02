@@ -86,11 +86,11 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
 
         List<ViewResolver> resolvers = new ArrayList<ViewResolver>();
 
-        InternalResourceViewResolver r1 = new InternalResourceViewResolver();
-        r1.setPrefix("/WEB-INF/pages/");
-        r1.setSuffix(".jsp");
-        r1.setViewClass(JstlView.class);
-        resolvers.add(r1);
+//        InternalResourceViewResolver r1 = new InternalResourceViewResolver();
+//        r1.setPrefix("/WEB-INF/pages/");
+//        r1.setSuffix(".jsp");
+//        r1.setViewClass(JstlView.class);
+//        resolvers.add(r1);
 
         JsonViewResolver r2 = new JsonViewResolver();
         resolvers.add(r2);
