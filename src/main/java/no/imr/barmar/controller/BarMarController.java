@@ -48,7 +48,10 @@ public class BarMarController {
     private final static String PARAMETERS = "parameters";
     private final static String METADATA = "metadata";
     
-    private final static String urlRequest = UrlConsts.BASE_URL_REQUEST + UrlConsts.GRID_PARAMETER_NAME_BARMAR; 
+    private final static String urlRequestParameterName = UrlConsts.BASE_URL_REQUEST + UrlConsts.GRID_PARAMETER_NAME_BARMAR;
+    private final static String urlRequestMetadata = UrlConsts.BASE_URL_REQUEST + UrlConsts.GRID_PARAMETER_NAME_BARMAR;
+    private final static String urlRequestPeriodName = UrlConsts.BASE_URL_REQUEST + UrlConsts.GRID_PARAMETER_TIME;;
+    private final static String urlRequestDepthName = UrlConsts.BASE_URL_REQUEST + UrlConsts.GRID_PARAMETER_DEPTH;
     
     @Autowired( required = true )
     private GetWFSList gwfs  = null;
@@ -56,23 +59,49 @@ public class BarMarController {
     @RequestMapping("/barmar.json")
     public @ResponseBody Map getBarMarJson( 
             @RequestParam(value = "grid", required=false) String grid, 
-            @RequestParam(value="species", required=false) String species) throws IOException, Exception {
+            @RequestParam(value="species", required=false) String species,
+            @RequestParam(value="subSpecies", required=false) String subSpecie) throws IOException, Exception {
         
         Map m = new HashMap<String, String>(1); 
         m.put("string", "dummy");
-        m.put("url", urlRequest);
+        m.put("url", urlRequestParameterName);
         
-        List<String> grids = gwfs.getWFSList("gridname", null, urlRequest );
+        List<String> grids = gwfs.getWFSList("gridname", null, urlRequestParameterName );
         m.put("grid", grids);
         
-        List<String> speciesSubgroups = getSpeciesSubgroupFromWFSlist( urlRequest );
+        List<String> speciesSubgroups = getSpeciesSubgroupFromWFSlist( urlRequestParameterName );
         
         m.put("species", getSpecies(speciesSubgroups));
         
-        System.out.println(speciesSubgroups);
+        System.out.println("species:"+species);
         if ( species != null) {
             List<String> speciesSubgroup = getSpeciesSubgroups( speciesSubgroups, species);
             m.put("speciesSubgroup", speciesSubgroup);
+        }
+        
+        System.out.println("speciesSubgroup:"+subSpecie);
+        if ( subSpecie != null) {
+            BarMarPojo pojo = new BarMarPojo(grid, subSpecie, new ArrayList<String>(0),new ArrayList<String>(0));
+
+            List<String> descriptions = gwfs.getWFSList("description", pojo, urlRequestMetadata);
+            if ( descriptions.size() > 0 ) {
+                m.put("metadata", descriptions.get(0));
+            } else {
+                m.put("metadata", "Fant ingen metadata");
+            }
+            
+            String urlRequestTime = UrlConsts.BASE_URL_REQUEST + UrlConsts.GRID_PARAMETER_TIME;
+            System.out.println("time url:"+urlRequestTime);
+            List<String> period = gwfs.getWFSList( "periodname", pojo, urlRequestPeriodName );
+            m.put("periods", period);
+
+            String urlRequestDepth = UrlConsts.BASE_URL_REQUEST + UrlConsts.GRID_PARAMETER_DEPTH;
+            List<String> depths = gwfs.getWFSList( "layername", pojo, urlRequestDepthName );
+            m.put("depth", depths);
+            
+            System.out.println("metadata:"+descriptions);
+            System.out.println("depth:"+depths);
+            System.out.println("period:"+period);
         }
         
         return m;

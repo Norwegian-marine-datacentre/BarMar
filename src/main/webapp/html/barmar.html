@@ -38,7 +38,7 @@
             #text {
                 position: absolute;
                 bottom: 1em;
-                left: 1em;
+                right: 1em;
                 width: 512px;
                 z-index: 20000;
                 background-color: white;
@@ -55,15 +55,12 @@
                 padding: 0 0.5em 0.5em 0.5em;
             }
         </style>
-        
-        
-             
     </head>
     <body>
 
     <script>
         var xmlhttp = new XMLHttpRequest();
-        var url = "../barmar.json?grid=BarMar&species=Cod";
+        var url = "../barmar.json?grid=BarMar&species=Cod&subSpecies=Cod_survey_trawl_ecosystem_0-4cm";
         var myArr = null;
         xmlhttp.onreadystatechange = function() {
             if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
@@ -92,9 +89,18 @@
                 };
                 var speciesSubgroup = myArr['speciesSubgroup']
                 console.log("speciesSubgroup:"+speciesSubgroup);
-                for (var i=0; i< speciesSubgroup.length; i++) {
+                for (var i=0; speciesSubgroup != null && i < speciesSubgroup.length; i++) {
                     speciesSubAdd(speciesSubgroup[i]);
                 }    
+                
+                var depthAdd = function( txt ) {
+                    $("#depth").append( '<li><a href="#" data-value="' + txt + '">' + txt + '</a></li>' );
+                };
+                var depth = myArr['depth']
+                console.log( "depth:" + depth );
+                for (var i=0; depth != null && i< depth.length; i++) {
+                    depthAdd(depth[i]);
+                }                   
             }
         };
         xmlhttp.open("GET", url, true);
@@ -136,10 +142,7 @@
         All depths
         <span class="caret"></span>
       </button>
-      <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-        <li><a href="#" data-value="BarMar">0-10</a></li>
-        <li><a href="#" data-value="NorMar">Bottom 50</a></li>
-        <li><a href="#" data-value="WMOsquares">all depths</a></li>
+      <ul class="dropdown-menu" id="depth" aria-labelledby="dropdownMenu1">
       </ul>
     </div>    
     <label for="period" style="float: left">period</label>
