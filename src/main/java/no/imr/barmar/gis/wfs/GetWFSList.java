@@ -60,7 +60,7 @@ public class GetWFSList {
                 urlRequest = urlRequest + "&filter=" + filter;
             }
         }
-        
+        System.out.println("wfs url:"+urlRequest);
         gfs.readXML(urlRequest, searchProperty);
         List<String> params = gfs.getList();
         gfs.deleteList();

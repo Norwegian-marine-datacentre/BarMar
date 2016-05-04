@@ -21,6 +21,8 @@
     
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.3.12/proj4.js"></script>
     
+    <script type="text/javascript" src="/html/combobox.js"></script>
+    
     <script>
         proj4.defs('EPSG:32633', '+proj=utm +zone=33 +ellps=WGS84 +datum=WGS84 +units=m +no_defs');
         var proj32633 = ol.proj.get('EPSG:32633');
@@ -48,12 +50,19 @@
             #barmar {
                 position: absolute;
                 top: 1em;
-                right: 50em;
-                width: 800px;
+                left: 5em;
+                width: 100%;
                 z-index: 20001;
                 background-color: white;
                 padding: 0 0.5em 0.5em 0.5em;
             }
+            
+            .scrollable-menu {
+                height: auto;
+                max-height:90%;
+                max-height:90vh;
+                overflow-x: hidden;
+            }   
         </style>
     </head>
     <body>
@@ -65,53 +74,58 @@
         xmlhttp.onreadystatechange = function() {
             if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
                 myArr = JSON.parse(xmlhttp.responseText);
-                console.log(myArr);
-                var gridAdd = function( txt ) {
-                    $("#grid").append( '<li><a href="#" data-value="' + txt + '">' + txt + '</a></li>' );
+                var dropDownAdd = function( buttonId, optionTxt, index ) {
+                    if ( index === 0 ) {
+                        $(buttonId).parents(".dropdown").find('.btn').html(optionTxt + ' <span class="caret"></span>');
+                        $(buttonId).parents(".dropdown").find('.btn').val(optionTxt);
+                    }
+                    $( buttonId ).append( '<li><a href="#" data-value="' + optionTxt + '">' + optionTxt + '</a></li>' );
                 };
+                
                 var grid = myArr['grid']
-                console.log("grid:"+grid);
                 for (var i=0; i< grid.length; i++) {
-                    gridAdd(grid[i]);
+                    dropDownAdd("#grid", grid[i], i);
                 }
                 
-                var speciesAdd = function( txt ) {
-                    $("#species").append( '<li><a href="#" data-value="' + txt + '">' + txt + '</a></li>' );
-                };
                 var species = myArr['species']
-                console.log("species:"+species);
                 for (var i=0; i< species.length; i++) {
-                    speciesAdd(species[i]);
+                    dropDownAdd( "#species", species[i], i);
                 }
                 
-                var speciesSubAdd = function( txt ) {
-                    $("#speciesSubGroup").append( '<li><a href="#" data-value="' + txt + '">' + txt + '</a></li>' );
-                };
                 var speciesSubgroup = myArr['speciesSubgroup']
-                console.log("speciesSubgroup:"+speciesSubgroup);
                 for (var i=0; speciesSubgroup != null && i < speciesSubgroup.length; i++) {
-                    speciesSubAdd(speciesSubgroup[i]);
+                    dropDownAdd("#speciesSubGroup", speciesSubgroup[i], i);
                 }    
                 
-                var depthAdd = function( txt ) {
-                    $("#depth").append( '<li><a href="#" data-value="' + txt + '">' + txt + '</a></li>' );
-                };
                 var depth = myArr['depth']
-                console.log( "depth:" + depth );
                 for (var i=0; depth != null && i< depth.length; i++) {
-                    depthAdd(depth[i]);
-                }                   
+                    dropDownAdd("#depth", depth[i], -1);
+                }   
+                
+                var period = myArr['periods']
+                for (var i=0; period != null && i< period.length; i++) {
+                    dropDownAdd("#period", period[i], -1);
+                }
+                
+                var metadataAdd = function( txt ) {
+                    $("#metadata").html( '<p>' + txt + '</p>');
+                };
+                metadataAdd(myArr['metadata']);
+                
+                $(".dropdown-menu li a").click(function(){
+                    $(this).parents(".dropdown").find('.btn').html($(this).text() + ' <span class="caret"></span>');
+                    $(this).parents(".dropdown").find('.btn').val($(this).data('value'));
+                  });
             }
         };
         xmlhttp.open("GET", url, true);
         xmlhttp.send();
     </script>
 
- <div id="barmar" >
+ <div id="barmar" class="row" >
     <label for="grid" style="float: left">Grid</label>
     <div class="dropdown" style="float: left">
       <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-        BarMar
         <span class="caret"></span>
       </button>
       <ul class="dropdown-menu" id="grid" aria-labelledby="dropdownMenu1">
@@ -121,46 +135,59 @@
     <label for="species" style="float: left">Species</label>
     <div class="dropdown" style="float: left">
       <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-        Cod
         <span class="caret"></span>
       </button>
-      <ul class="dropdown-menu" id="species" aria-labelledby="dropdownMenu1">
+      <ul class="dropdown-menu scrollable-menu" id="species" aria-labelledby="dropdownMenu1">
       </ul>
     </div> 
     <label for="subspecies" style="float: left">Sub Species</label>
     <div class="dropdown" style="float: left">
       <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-        Cod_survey_trawl
         <span class="caret"></span>
       </button>
-      <ul class="dropdown-menu" id="speciesSubGroup" aria-labelledby="dropdownMenu1">
+      <ul class="dropdown-menu scrollable-menu" id="speciesSubGroup" aria-labelledby="dropdownMenu1">
       </ul>
     </div>  
     <label for="depth" style="float: left">depth</label>
     <div class="dropdown" style="float: left">
       <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-        All depths
+        Depth
         <span class="caret"></span>
       </button>
-      <ul class="dropdown-menu" id="depth" aria-labelledby="dropdownMenu1">
+      <ul class="dropdown-menu scrollable-menu" id="depth" aria-labelledby="dropdownMenu1">
       </ul>
     </div>    
     <label for="period" style="float: left">period</label>
     <div class="dropdown" style="float: left">
       <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-        all periods
+        Period
         <span class="caret"></span>
       </button>
-      <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-        <li><a href="#" data-value="BarMar">February 2010</a></li>
-        <li><a href="#" data-value="NorMar">all periods</a></li>
+      <ul class="dropdown-menu scrollable-menu" id="period" aria-labelledby="dropdownMenu1">
       </ul>   
-    </div>      
+    </div>   
+    <button type="button" class="btn btn-default" id="createMap">Create Map</button>   
 </div>
     <script> 
     $(".dropdown-menu li a").click(function(){
         $(this).parents(".dropdown").find('.btn').html($(this).text() + ' <span class="caret"></span>');
         $(this).parents(".dropdown").find('.btn').val($(this).data('value'));
+      });
+    
+    $("#createMap").click(function(){
+        console.log($("#grid").parents(".dropdown").find('.btn').val());
+        console.log($("#species").parents(".dropdown").find('.btn').val());
+        console.log($("#speciesSubGroup").parents(".dropdown").find('.btn').val());
+        console.log($("#depth").parents(".dropdown").find('.btn').val());
+        console.log($("#period").parents(".dropdown").find('.btn').val());
+        
+        
+        comboboxGrid = "BarMar";
+        comboboxParameter = $("#speciesSubGroup").parents(".dropdown").find('.btn').val(); 
+        comboboxPeriod = "F";
+        comboboxDepth = "F";
+        drawmap(map);
+
       });
     </script>    
     
@@ -199,8 +226,8 @@
         <div id="text">
             <h1 id="title">Metadata</h1>
 
-            <div id="docs">
-                <p>The 0-group survey has been conducted annually in the Barents Sea since 1965 by the Institute of Marine Research, (IMR), Norway, and the Polar Research Institute of Marine Fisheries and Oceanography (PINRO), Russia. The data presented in the BarMar database covers the period 1980- 2012 (ongoing), and are sampled in August - October.</p>
+            <div id="metadata">
+                <p>Metadata</p>
             </div> 
         </div>   
     </body>
