@@ -1,4 +1,4 @@
-package no.imr.barmargis.sld.color;
+package no.imr.barmar.gis.sld.color;
 
 import java.awt.Color;
 import java.util.ArrayList;

@@ -21,7 +21,7 @@
     
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.3.12/proj4.js"></script>
     
-    <script type="text/javascript" src="/html/combobox.js"></script>
+    <script type="text/javascript" src="combobox.js"></script>
     
     <script>
         proj4.defs('EPSG:32633', '+proj=utm +zone=33 +ellps=WGS84 +datum=WGS84 +units=m +no_defs');
@@ -69,7 +69,7 @@
 
     <script>
         var xmlhttp = new XMLHttpRequest();
-        var url = "../barmar.json?grid=BarMar&species=Cod&subSpecies=Cod_survey_trawl_ecosystem_0-4cm";
+        var url = "barmar.json?grid=BarMar&species=Cod&subSpecies=Cod_survey_trawl_ecosystem_0-4cm";
         var myArr = null;
         xmlhttp.onreadystatechange = function() {
             if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
@@ -194,35 +194,36 @@
     
     <div id="map" class="map"></div>      
     <script>
-      var layers = [
+    var layers = [
         new ol.layer.Tile({
-          source: new ol.source.TileWMS({
-            url: 'http://opencache.statkart.no/gatekeeper/gk/gk.open',
-            params: {
-              'layers': 'barentswatch_grunnkart', 
-              'VERSION':'1.1.1' 
-            }
-          })
+            source: new ol.source.TileWMS({
+                url: 'http://maps.imr.no/geoserver/wms',
+                params: {
+                    'LAYERS': 'landareal_europa',
+                    'VERSION': '1.1.1',
+                    'TRANSPARENT': 'true'
+                }
+            }),
+            'zIndex': 1
         })
-      ];
+    ];
 
-      var map = new ol.Map({
+    var map = new ol.Map({
         controls: ol.control.defaults().extend([
-          new ol.control.ScaleLine({
-            units: ol.control.ScaleLineUnits.METRIC
-          })
+            new ol.control.ScaleLine({
+                units: ol.control.ScaleLineUnits.METRIC
+            })
         ]),
         layers: layers,
         target: 'map',
         view: new ol.View({
-          projection: 'EPSG:32633',
-          center: [1088474,8089849],
-          zoom:4
+            projection: 'EPSG:32633',
+            center: [1088474,8089849],
+            zoom:3
         })
-      });
-    </script> 
-    
+    });
 
+    </script> 
         <div id="text">
             <h1 id="title">Metadata</h1>
 

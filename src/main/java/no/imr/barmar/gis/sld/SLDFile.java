@@ -6,8 +6,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import no.imr.barmar.gis.sld.color.HSVtoRGB;
 import no.imr.barmar.pojo.BarMarPojo;
-import no.imr.barmargis.sld.color.HSVtoRGB;
 
 /**
  * @author trondwe

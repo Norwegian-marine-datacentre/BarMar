@@ -69,7 +69,9 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/html/**").addResourceLocations("/html/");
+        System.out.println("retister resource handler");
+        registry.addResourceHandler("/**").addResourceLocations("/html/"); //for development for tomcat embeded in maven build
+        //registry.addResourceHandler("/html/**").addResourceLocations("/html/");
 
     }
 
