@@ -1,19 +1,15 @@
 package no.imr.barmar.controller;
 
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.web.servlet.ModelAndView;
 
 /**
  * 
@@ -35,28 +31,26 @@ public class BarMarControllerTest {
         req.setParameter("grid", "gridname");
 //      req.setParameter("grid_value", "FishExChange");
         req.setParameter("grid_value", "BarMar");
-        ModelAndView mav = barmarController.parameter( req );
-        Map<String, Object> mavMap = mav.getModel();
-        assertsForGridAndSpecies( mavMap );
+        Map mav = barmarController.getBarMarJson("BarMar", "Cod", "");
+        assertsForGridAndSpecies( mav );
     }
     
 //    @SuppressWarnings("unchecked")
 //    @Test
     public void getSpeciesSubgroupForCod() throws Exception {
-        MockHttpServletRequest req = new MockHttpServletRequest();
-        req.setParameter("grid", "gridname");
-        req.setParameter("grid_value", "BarMar");
-        req.setParameter("dataset", "datasetname");
-        req.setParameter("dataset_value", "cod");
-        ModelAndView mav = barmarController.parameter( req );
+//        MockHttpServletRequest req = new MockHttpServletRequest();
+//        req.setParameter("grid", "gridname");
+//        req.setParameter("grid_value", "BarMar");
+//        req.setParameter("dataset", "datasetname");
+//        req.setParameter("dataset_value", "cod");
+        Map mav = barmarController.getBarMarJson("BarMar", "Cod", "");
         
-        Map<String, Object> mavMap = mav.getModel();
-        assertsForGridAndSpecies( mavMap );
+        assertsForGridAndSpecies( mav );
         
-        String datasets_value = (String) mavMap.get( "dataset_value_selected" );
+        String datasets_value = (String) mav.get( "dataset_value_selected" );
         assertEquals( "cod", datasets_value );
         
-        List<String> parameters = (List<String>) mavMap.get( "parameters" );
+        List<String> parameters = (List<String>) mav.get( "parameters" );
         for ( String speciesSubgroup : parameters ) {
 //          System.out.println(speciesSubgroup);
             assertTrue( speciesSubgroup.toLowerCase().contains( "cod" ) );

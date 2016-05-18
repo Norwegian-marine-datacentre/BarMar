@@ -4,7 +4,7 @@
         <title>BarMar</title>
         <meta charset="utf-8" />
         
-<script   src="https://code.jquery.com/jquery-2.2.3.min.js"   integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo="   crossorigin="anonymous"></script>
+<script   src="https://code.jquery.com/jquery-2.2.3.min.js" integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo=" crossorigin="anonymous"></script>
         
     <!-- Latest compiled and minified CSS -->
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
@@ -21,6 +21,7 @@
     
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.3.12/proj4.js"></script>
     
+    <script type="text/javascript" src="getParametersAsJson.js"></script>
     <script type="text/javascript" src="combobox.js"></script>
     
     <script>
@@ -67,65 +68,10 @@
     </head>
     <body>
 
-    <script>
-        var xmlhttp = new XMLHttpRequest();
-        var url = "barmar.json?grid=BarMar&species=Cod&subSpecies=Cod_survey_trawl_ecosystem_0-4cm";
-        var myArr = null;
-        xmlhttp.onreadystatechange = function() {
-            if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-                myArr = JSON.parse(xmlhttp.responseText);
-                var dropDownAdd = function( buttonId, optionTxt, index ) {
-                    if ( index === 0 ) {
-                        $(buttonId).parents(".dropdown").find('.btn').html(optionTxt + ' <span class="caret"></span>');
-                        $(buttonId).parents(".dropdown").find('.btn').val(optionTxt);
-                    }
-                    $( buttonId ).append( '<li><a href="#" data-value="' + optionTxt + '">' + optionTxt + '</a></li>' );
-                };
-                
-                var grid = myArr['grid']
-                for (var i=0; i< grid.length; i++) {
-                    dropDownAdd("#grid", grid[i], i);
-                }
-                
-                var species = myArr['species']
-                for (var i=0; i< species.length; i++) {
-                    dropDownAdd( "#species", species[i], i);
-                }
-                
-                var speciesSubgroup = myArr['speciesSubgroup']
-                for (var i=0; speciesSubgroup != null && i < speciesSubgroup.length; i++) {
-                    dropDownAdd("#speciesSubGroup", speciesSubgroup[i], i);
-                }    
-                
-                var depth = myArr['depth']
-                for (var i=0; depth != null && i< depth.length; i++) {
-                    dropDownAdd("#depth", depth[i], -1);
-                }   
-                
-                var period = myArr['periods']
-                for (var i=0; period != null && i< period.length; i++) {
-                    dropDownAdd("#period", period[i], -1);
-                }
-                
-                var metadataAdd = function( txt ) {
-                    $("#metadata").html( '<p>' + txt + '</p>');
-                };
-                metadataAdd(myArr['metadata']);
-                
-                $(".dropdown-menu li a").click(function(){
-                    $(this).parents(".dropdown").find('.btn').html($(this).text() + ' <span class="caret"></span>');
-                    $(this).parents(".dropdown").find('.btn').val($(this).data('value'));
-                  });
-            }
-        };
-        xmlhttp.open("GET", url, true);
-        xmlhttp.send();
-    </script>
-
  <div id="barmar" class="row" >
     <label for="grid" style="float: left">Grid</label>
     <div class="dropdown" style="float: left">
-      <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+      <button class="btn btn-default dropdown-toggle" id="gridBtn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
         <span class="caret"></span>
       </button>
       <ul class="dropdown-menu" id="grid" aria-labelledby="dropdownMenu1">
@@ -134,7 +80,7 @@
     
     <label for="species" style="float: left">Species</label>
     <div class="dropdown" style="float: left">
-      <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+      <button class="btn btn-default dropdown-toggle" id="speciesBtn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
         <span class="caret"></span>
       </button>
       <ul class="dropdown-menu scrollable-menu" id="species" aria-labelledby="dropdownMenu1">
@@ -142,24 +88,24 @@
     </div> 
     <label for="subspecies" style="float: left">Sub Species</label>
     <div class="dropdown" style="float: left">
-      <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+      <button class="btn btn-default dropdown-toggle" id="speciesSubGroupBtn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
         <span class="caret"></span>
       </button>
       <ul class="dropdown-menu scrollable-menu" id="speciesSubGroup" aria-labelledby="dropdownMenu1">
       </ul>
     </div>  
-    <label for="depth" style="float: left">depth</label>
+    <label for="depth" style="float: left">Depth</label>
     <div class="dropdown" style="float: left">
-      <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+      <button class="btn btn-default dropdown-toggle" id="depthBtn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
         Depth
         <span class="caret"></span>
       </button>
       <ul class="dropdown-menu scrollable-menu" id="depth" aria-labelledby="dropdownMenu1">
       </ul>
     </div>    
-    <label for="period" style="float: left">period</label>
+    <label for="period" style="float: left">Period</label>
     <div class="dropdown" style="float: left">
-      <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+      <button class="btn btn-default dropdown-toggle" id="periodBtn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
         Period
         <span class="caret"></span>
       </button>
@@ -168,27 +114,23 @@
     </div>   
     <button type="button" class="btn btn-default" id="createMap">Create Map</button>   
 </div>
-    <script> 
-    $(".dropdown-menu li a").click(function(){
-        $(this).parents(".dropdown").find('.btn').html($(this).text() + ' <span class="caret"></span>');
-        $(this).parents(".dropdown").find('.btn').val($(this).data('value'));
-      });
+    <script>
+        getParametersAsJson("BarMar", "Cod", "Cod_survey_trawl_ecosystem_0-4cm");
     
-    $("#createMap").click(function(){
-        console.log($("#grid").parents(".dropdown").find('.btn').val());
-        console.log($("#species").parents(".dropdown").find('.btn').val());
-        console.log($("#speciesSubGroup").parents(".dropdown").find('.btn').val());
-        console.log($("#depth").parents(".dropdown").find('.btn').val());
-        console.log($("#period").parents(".dropdown").find('.btn').val());
+        $("#createMap").click(function() {
+            console.log("grid:"+$("#grid").parents(".dropdown").find('.btn').val());
+            console.log("species:"+$("#species").parents(".dropdown").find('.btn').val());
+            console.log("subgroup:"+$("#speciesSubGroup").parents(".dropdown").find('.btn').val());
+            console.log("depth:"+$("#depth").parents(".dropdown").find('.btn').val());
+            console.log("period:"+$("#period").parents(".dropdown").find('.btn').val());
+            
+            comboboxGrid = "BarMar";
+            comboboxParameter = $("#speciesSubGroup").parents(".dropdown").find('.btn').val(); 
+            comboboxPeriod = "F";
+            comboboxDepth = "F";
+            drawmap(map);
+        });
         
-        
-        comboboxGrid = "BarMar";
-        comboboxParameter = $("#speciesSubGroup").parents(".dropdown").find('.btn').val(); 
-        comboboxPeriod = "F";
-        comboboxDepth = "F";
-        drawmap(map);
-
-      });
     </script>    
     
     

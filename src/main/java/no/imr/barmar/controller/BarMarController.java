@@ -29,24 +29,24 @@ import org.springframework.web.servlet.ModelAndView;
 public class BarMarController {
 
     
-    private String grid;
-    private String gridValue;
-    private String dataset;
-    private String datasetValue;
-    private String parameter;
-    private String parameterValue;
-    
-    private final static String GRID = "grid";
-    private final static String GRID_VALUE = "grid_value";
-    private final static String DATASET = "dataset";
-    private final static String DATASET_VALUE = "dataset_value";
-    private final static String PARAMETER = "parameter";
-    private final static String PARAMETER_VALUE = "parameter_value";
-    
-    private final static String GRIDS = "grids";
-    private final static String DATASETS = "datasets";
-    private final static String PARAMETERS = "parameters";
-    private final static String METADATA = "metadata";
+//    private String grid;
+//    private String gridValue;
+//    private String dataset;
+//    private String datasetValue;
+//    private String parameter;
+//    private String parameterValue;
+//    
+//    private final static String GRID = "grid";
+//    private final static String GRID_VALUE = "grid_value";
+//    private final static String DATASET = "dataset";
+//    private final static String DATASET_VALUE = "dataset_value";
+//    private final static String PARAMETER = "parameter";
+//    private final static String PARAMETER_VALUE = "parameter_value";
+//    
+//    private final static String GRIDS = "grids";
+//    private final static String DATASETS = "datasets";
+//    private final static String PARAMETERS = "parameters";
+//    private final static String METADATA = "metadata";
     
     private final static String urlRequestParameterName = UrlConsts.BASE_URL_REQUEST + UrlConsts.GRID_PARAMETER_NAME_BARMAR;
     private final static String urlRequestMetadata = UrlConsts.BASE_URL_REQUEST + UrlConsts.GRID_PARAMETER_NAME_BARMAR;
@@ -56,55 +56,51 @@ public class BarMarController {
     @Autowired( required = true )
     private GetWFSList gwfs  = null;
 
+    /**
+     * FILLS THE COMBOBOX FOR GRIDS:
+     * @param grid
+     * @param species
+     * @param subSpecie
+     * @return
+     * @throws IOException
+     * @throws Exception
+     */
     @RequestMapping("/barmar.json")
     public @ResponseBody Map getBarMarJson( 
             @RequestParam(value = "grid", required=false) String grid, 
             @RequestParam(value="species", required=false) String species,
             @RequestParam(value="subSpecies", required=false) String subSpecie) throws IOException, Exception {
         
-        Map m = new HashMap<String, String>(1); 
-        m.put("string", "dummy");
-        m.put("url", urlRequestParameterName);
+        Map<String, Object> barMarParameteres = new HashMap<String, Object>(1); //object is List<String> or String
         
         List<String> grids = gwfs.getWFSList("gridname", null, urlRequestParameterName );
-        m.put("grid", grids);
+        barMarParameteres.put("grid", grids);
         
-        List<String> speciesSubgroups = getSpeciesSubgroupFromWFSlist( urlRequestParameterName );
+        List<String> speciesSubgroups = getSpeciesSubgroupFromWFSlist( grid, urlRequestParameterName );        
+        barMarParameteres.put("species", getSpecies(speciesSubgroups));
         
-        m.put("species", getSpecies(speciesSubgroups));
-        
-        System.out.println("species:"+species);
         if ( species != null) {
             List<String> speciesSubgroup = getSpeciesSubgroups( speciesSubgroups, species);
-            m.put("speciesSubgroup", speciesSubgroup);
+            barMarParameteres.put("speciesSubgroup", speciesSubgroup);
         }
         
-        System.out.println("speciesSubgroup:"+subSpecie);
         if ( subSpecie != null) {
             BarMarPojo pojo = new BarMarPojo(grid, subSpecie, new ArrayList<String>(0),new ArrayList<String>(0));
 
             List<String> descriptions = gwfs.getWFSList("description", pojo, urlRequestMetadata);
             if ( descriptions.size() > 0 ) {
-                m.put("metadata", descriptions.get(0));
+                barMarParameteres.put("metadata", descriptions.get(0));
             } else {
-                m.put("metadata", "Fant ingen metadata");
+                barMarParameteres.put("metadata", "No metadata found for selected parameteres");
             }
             
-            String urlRequestTime = UrlConsts.BASE_URL_REQUEST + UrlConsts.GRID_PARAMETER_TIME;
-            System.out.println("time url:"+urlRequestTime);
             List<String> period = gwfs.getWFSList( "periodname", pojo, urlRequestPeriodName );
-            m.put("periods", period);
+            barMarParameteres.put("periods", period);
 
-            String urlRequestDepth = UrlConsts.BASE_URL_REQUEST + UrlConsts.GRID_PARAMETER_DEPTH;
             List<String> depths = gwfs.getWFSList( "layername", pojo, urlRequestDepthName );
-            m.put("depth", depths);
-            
-            System.out.println("metadata:"+descriptions);
-            System.out.println("depth:"+depths);
-            System.out.println("period:"+period);
+            barMarParameteres.put("depth", depths);
         }
-        
-        return m;
+        return barMarParameteres;
     }
    
     
@@ -114,8 +110,8 @@ public class BarMarController {
      * @return
      * @throws Exception
      */
-    @RequestMapping("/barmarParameters.json")
-    public ModelAndView  parameter(HttpServletRequest request) throws Exception {
+//    @RequestMapping("/barmarParameters.json")
+//    public ModelAndView  parameter(HttpServletRequest request) throws Exception {
 //        
 //        grid = request.getParameter( GRID );
 //        gridValue = request.getParameter( GRID_VALUE );
@@ -124,7 +120,7 @@ public class BarMarController {
 //        parameter = request.getParameter( PARAMETER );
 //        parameterValue = request.getParameter( PARAMETER_VALUE );
 //                        
-        ModelAndView mav = new ModelAndView("parameters");
+//        ModelAndView mav = new ModelAndView("parameters");
 //        String urlRequest = UrlConsts.BASE_URL_REQUEST + UrlConsts.GRID_PARAMETER_NAME_BARMAR; 
 //
 //        List<String> grids = gwfs.getWFSList("gridname", null, urlRequest );
@@ -134,8 +130,8 @@ public class BarMarController {
 //        addSpecies( mav, speciesSubgroups );
 //        addSpeciesSubgroups( mav, speciesSubgroups );
 //        periodDepthlayersAndMetadata( mav, urlRequest, request );
-        return mav;
-    }
+//        return mav;
+//    }
     
     private List<String> getSpecies( List<String> speciesSubgroups ) throws Exception {
         List<String> species = new ArrayList<String>();
@@ -158,7 +154,7 @@ public class BarMarController {
         return thisSpeciesSubgroup;
     }
     
-    private List<String> getSpeciesSubgroupFromWFSlist( String urlRequest ) throws Exception {
+    private List<String> getSpeciesSubgroupFromWFSlist( String gridValue, String urlRequest ) throws Exception {
         BarMarPojo pojo = new BarMarPojo(gridValue, "", new ArrayList<String>(0), new ArrayList<String>(0));
         return gwfs.getWFSList( "parametername", pojo, urlRequest );
     }
@@ -167,29 +163,29 @@ public class BarMarController {
         String WFSSpeciesName = params.get( i );
         String[] theSpeciesNameWithAllSylables = WFSSpeciesName.split( "_" );
         String theFirstNameOfSpecie = theSpeciesNameWithAllSylables[0];
-        return theFirstNameOfSpecie.toLowerCase();
+        return theFirstNameOfSpecie;
     }
     
-    private void periodDepthlayersAndMetadata( ModelAndView mav, String urlRequest, HttpServletRequest request ) throws Exception {
-        if ( parameter != null ) {
-            mav.addObject( "parameter_value_selected", parameterValue );
-            BarMarPojo pojo = new BarMarPojo(gridValue, parameterValue, new ArrayList<String>(0),new ArrayList<String>(0));
-
-            List<String> descriptions = gwfs.getWFSList("description", pojo, urlRequest);
-            if ( descriptions.size() > 0 ) {
-                mav.addObject(METADATA,descriptions.get(0));
-                request.getSession().setAttribute(METADATA, descriptions.get(0));
-            } else {
-                request.getSession().setAttribute( METADATA, "Fant ingen metadata" );
-            }
-            
-            urlRequest = UrlConsts.BASE_URL_REQUEST + UrlConsts.GRID_PARAMETER_TIME;
-            List<String> params = gwfs.getWFSList( "periodname", pojo, urlRequest );
-            mav.addObject("periods", params);
-
-            urlRequest = UrlConsts.BASE_URL_REQUEST + UrlConsts.GRID_PARAMETER_DEPTH;
-            params = gwfs.getWFSList( "layername", pojo, urlRequest );
-            mav.addObject("depthlayers", params);
-        }
-    }
+//    private void periodDepthlayersAndMetadata( ModelAndView mav, String urlRequest, HttpServletRequest request ) throws Exception {
+//        if ( parameter != null ) {
+//            mav.addObject( "parameter_value_selected", parameterValue );
+//            BarMarPojo pojo = new BarMarPojo(gridValue, parameterValue, new ArrayList<String>(0),new ArrayList<String>(0));
+//
+//            List<String> descriptions = gwfs.getWFSList("description", pojo, urlRequest);
+//            if ( descriptions.size() > 0 ) {
+//                mav.addObject(METADATA,descriptions.get(0));
+//                request.getSession().setAttribute(METADATA, descriptions.get(0));
+//            } else {
+//                request.getSession().setAttribute( METADATA, "No metadata found for selected parameteres" );
+//            }
+//            
+//            urlRequest = UrlConsts.BASE_URL_REQUEST + UrlConsts.GRID_PARAMETER_TIME;
+//            List<String> params = gwfs.getWFSList( "periodname", pojo, urlRequest );
+//            mav.addObject("periods", params);
+//
+//            urlRequest = UrlConsts.BASE_URL_REQUEST + UrlConsts.GRID_PARAMETER_DEPTH;
+//            params = gwfs.getWFSList( "layername", pojo, urlRequest );
+//            mav.addObject("depthlayers", params);
+//        }
+//    }
 }
