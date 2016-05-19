@@ -32,88 +32,110 @@
      
      
         <style type="text/css">
+        
             html, body, #map {
                 margin: 0;
                 width: 100%;
                 height: 100%;
+                position: absolute;
             }
 
-            #text {
+            #metadataText {
                 position: absolute;
-                bottom: 1em;
+                bottom: 2em;
                 right: 1em;
                 width: 512px;
-                z-index: 20000;
-                background-color: white;
                 padding: 0 0.5em 0.5em 0.5em;
+                background-color:white;
             }
             
             #barmar {
-                position: absolute;
+                position: relative;
                 top: 1em;
                 left: 5em;
-                width: 100%;
-                z-index: 20001;
-                background-color: white;
                 padding: 0 0.5em 0.5em 0.5em;
+                background-color:white; 
             }
-            
-            .scrollable-menu {
+                        
+            .scrollable-menu { /*dropdown boxes*/
                 height: auto;
                 max-height:90%;
                 max-height:90vh;
                 overflow-x: hidden;
             }   
+            
+            #imrHeading {
+                width: 1200px;
+                background-image:url('imr/background_top_trans.jpg');
+                background-color:rgb(221,​ 228,​ 238);
+                background-repeat:no-repeat;
+                background-position:100% 0%;
+                background-attachement:scroll;
+                background-clip:border-box;
+                background-origin:padding-box;
+                background-size:auto auto;
+                    
+                
+            }
         </style>
     </head>
     <body>
 
- <div id="barmar" class="row" >
-    <label for="grid" style="float: left">Grid</label>
-    <div class="dropdown" style="float: left">
-      <button class="btn btn-default dropdown-toggle" id="gridBtn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-        <span class="caret"></span>
-      </button>
-      <ul class="dropdown-menu" id="grid" aria-labelledby="dropdownMenu1">
-      </ul>
-    </div>
-    
-    <label for="species" style="float: left">Species</label>
-    <div class="dropdown" style="float: left">
-      <button class="btn btn-default dropdown-toggle" id="speciesBtn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-        <span class="caret"></span>
-      </button>
-      <ul class="dropdown-menu scrollable-menu" id="species" aria-labelledby="dropdownMenu1">
-      </ul>
-    </div> 
-    <label for="subspecies" style="float: left">Sub Species</label>
-    <div class="dropdown" style="float: left">
-      <button class="btn btn-default dropdown-toggle" id="speciesSubGroupBtn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-        <span class="caret"></span>
-      </button>
-      <ul class="dropdown-menu scrollable-menu" id="speciesSubGroup" aria-labelledby="dropdownMenu1">
-      </ul>
-    </div>  
-    <label for="depth" style="float: left">Depth</label>
-    <div class="dropdown" style="float: left">
-      <button class="btn btn-default dropdown-toggle" id="depthBtn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-        Depth
-        <span class="caret"></span>
-      </button>
-      <ul class="dropdown-menu scrollable-menu" id="depth" aria-labelledby="dropdownMenu1">
-      </ul>
-    </div>    
-    <label for="period" style="float: left">Period</label>
-    <div class="dropdown" style="float: left">
-      <button class="btn btn-default dropdown-toggle" id="periodBtn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-        Period
-        <span class="caret"></span>
-      </button>
-      <ul class="dropdown-menu scrollable-menu" id="period" aria-labelledby="dropdownMenu1">
-      </ul>   
-    </div>   
-    <button type="button" class="btn btn-default" id="createMap">Create Map</button>   
+
+<div id="map" class="map"></div>     
+ 
+<div class="container" style="z-index:3;">
+  <div class="row" id="imrHeading" style="height:118px;">
+    <a href="http://www.imr.no/nb-no"><img src="imr/logo_imr.png" /></a>
+  </div>
 </div>
+<div class="container">
+  <div id="barmar" class="row" >
+     <label for="grid" style="float: left;position: relative;">Grid</label>
+     <div class="dropdown" style="float: left">
+       <button class="btn btn-default dropdown-toggle" id="gridBtn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+         <span class="caret"></span>
+       </button>
+       <ul class="dropdown-menu" id="grid" aria-labelledby="dropdownMenu1">
+       </ul>
+     </div>
+     
+     <label for="species" style="float:left;">Species</label>
+     <div class="dropdown" style="float: left">
+       <button class="btn btn-default dropdown-toggle" id="speciesBtn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+         <span class="caret"></span>
+       </button>
+       <ul class="dropdown-menu scrollable-menu" id="species" aria-labelledby="dropdownMenu1">
+       </ul>
+     </div> 
+     <label for="subspecies" style="float:left;">Sub Species</label>
+     <div class="dropdown" style="float: left">
+       <button class="btn btn-default dropdown-toggle" id="speciesSubGroupBtn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+         <span class="caret"></span>
+       </button>
+       <ul class="dropdown-menu scrollable-menu" id="speciesSubGroup" aria-labelledby="dropdownMenu1">
+       </ul>
+     </div>  
+     <label for="depth" style="float:left;">Depth</label>
+     <div class="dropdown" style="float: left">
+       <button class="btn btn-default dropdown-toggle" id="depthBtn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+         <span class="caret"></span>
+       </button>
+       <ul class="dropdown-menu scrollable-menu" id="depth" aria-labelledby="dropdownMenu1">
+       </ul>
+     </div>    
+     <label for="period" style="float:left;">Period</label>
+     <div class="dropdown" style="float: left">
+        <button class="btn btn-default dropdown-toggle" id="periodBtn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+          <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu scrollable-menu" id="period" aria-labelledby="dropdownMenu1">
+        </ul>   
+     </div>   
+     <button type="button" class="btn btn-default" id="createMap">Create Map</button>   
+  </div>
+</div>
+
     <script>
         getParametersAsJson("BarMar", "Cod", "Cod_survey_trawl_ecosystem_0-4cm");
     
@@ -132,9 +154,7 @@
         });
         
     </script>    
-    
-    
-    <div id="map" class="map"></div>      
+
     <script>
     var layers = [
         new ol.layer.Tile({
@@ -166,7 +186,7 @@
     });
 
     </script> 
-        <div id="text">
+        <div id="metadataText">
             <h1 id="title">Metadata</h1>
 
             <div id="metadata">
