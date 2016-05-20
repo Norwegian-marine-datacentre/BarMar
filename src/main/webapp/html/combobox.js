@@ -8,33 +8,24 @@ var felayer;
 
 var MAPS_IMR_NO = "http://10.1.9.230:8080/geoserver/wms?";
 
-var LAYER_POINTVALUE = "postgis:pointvalue";
-var LAYER_AREAVALUE = "postgis:areavalue";
-//var LAYER_POINTVALUE = "test:pointvalue";
-//var LAYER_AREAVALUE = "test:areavalue";
-
-var PUNKTVISNING = "punktvisning";
-var AREALVISNING = "arealvisning";
-
 var NORMAR_GRID = 11;
 
 var BASE_URL = location.href.substring(0,location.href.lastIndexOf('/')) + "/";
 
 //var BASE_URL = "http://10.1.9.230:9090/"; // for development
 
-var comboboxGrid = ""; //jQuery("#grid :selected").val();
-var comboboxParameter = ""; //jQuery("#parameter :selected").val();
-var comboboxPeriod = ""; //jQuery("#period :selected").val(),
+var comboboxGrid = ""; 
+var comboboxParameter = ""; 
+var comboboxPeriod = ""; 
 var comboboxDepth = ""; //jQuery("#depthlayer :selected").val(),
+var displayType = "";
+var layername = "";
 
 function drawmap(mapp){
 	jQuery.support.cors = true;
 
+	console.log("layername:"+layername);
     // create sld 
-	var layername = viewChoosen();
-	var displayType = "";
-	if (layername == LAYER_POINTVALUE) displayType = PUNKTVISNING;
-	else displayType = AREALVISNING;
     jQuery.ajax({
         url:"createsld",
         data:{
@@ -59,17 +50,6 @@ function drawmap(mapp){
     })
 }
 
-function viewChoosen() {
-    var punktVisning = jQuery("#punkt").is(':checked');
-    var layername = "";
-    if(punktVisning){
-        layername = LAYER_POINTVALUE;
-    }else{
-        layername = LAYER_AREAVALUE;
-    }  
-    return layername;
-}
-
 function addLayerToMap(layername, message, mapp) {
     src = MAPS_IMR_NO + "service=WMS&version=1.1.1&request=GetLegendGraphic&layer="+
 	layername+"&width=22&height=24&format=image/png&SLD="+BASE_URL + "getsld?file=" + message;
@@ -86,13 +66,7 @@ function addLayerToMap(layername, message, mapp) {
         })
     });
     mapp.addLayer(felayer);
-    
-    
-    console.log("map:"+mapp.layers);
-    console.log("map:"+mapp.overlays);
-    
-    console.log("map layer length:" + mapp.getLayers());
-    console.log("map overlay length:" + mapp.getOverlays().length);
+
     var layerss = mapp.getLayers();
     for ( var i=0; i < mapp.getLayers().array_.length;i++) {
         var alayer = mapp.getLayers().array_[i]
@@ -121,7 +95,6 @@ function getHTTPObject() {
 
 function createPDF(){
 	var showLayers = showVisibleLayers();
-	var layername = viewChoosen();
 	var displayType = "";
 	if (layername == LAYER_POINTVALUE) displayType = PUNKTVISNING;
 	else displayType = AREALVISNING;
@@ -174,50 +147,4 @@ function showVisibleLayers() {
 	return strLayers;
 }
 
-function rememberState(showSpan) {
-	if ( isAdvanced ) showHiddenSelect();
-	hideShow(showSpan);
-}
-/* used in parameter.js to hide/show help feature*/
-var newHelp='';
-function hideShow(showSpan) {
-	newHelp = showSpan;
-	if ( newHelp == '') {
-		jQuery('.hiddenFirstHelptext').show('fast');
-	} else {
-		jQuery('.hiddenFirstHelptext').hide('fast');
-		jQuery('.hiddenGridHelp').hide('fast');
-		jQuery('.hiddenSpeciesHelp').hide('fast');
-		jQuery('.hiddenSubgroupHelp').hide('fast');
-		jQuery('.hiddenDepthHelp').hide('fast');
-		jQuery('.hiddenPeriodHelp').hide('fast');
-		jQuery('.'+showSpan).show('fast');
-	}
-}
 
-var isAdvanced=false;
-function showHiddenSelect() {
-	jQuery("#advanced").hide('fast');
-	jQuery("#simple").show('fast');
-	jQuery("#gridColumn").show('fast');
-	jQuery("#depthLayerColumn").show('fast');
-	jQuery("#periodColumn").show('fast');
-	isAdvanced=true;
-}
-
-function hideSelect() {
-	jQuery("#advanced").show("fast");
-	jQuery("#simple").hide('fast');
-	jQuery("#gridColumn").hide('fast');
-	jQuery("#depthLayerColumn").hide('fast');
-	jQuery("#periodColumn").hide('fast');
-	isAdvanced=false;
-}
-
-function notSelectedDataset(){
-	return jQuery('#dataset').val()!="Select value" && jQuery('#dataset').val()!="Velg verdi";
-} 
-
-function notSelectedParameter(){
-	return jQuery('#parameter').val()!="Select value" && jQuery('#parameter').val()!="Velg verdi";
-}

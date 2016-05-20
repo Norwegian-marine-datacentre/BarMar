@@ -54,13 +54,12 @@
                 top: 1em;
                 left: 5em;
                 padding: 0 0.5em 0.5em 0.5em;
-                background-color:white; 
+                background-color:transparent; 
             }
                         
             .scrollable-menu { /*dropdown boxes*/
                 height: auto;
-                max-height:90%;
-                max-height:90vh;
+                max-height:60vh;
                 overflow-x: hidden;
             }   
             
@@ -89,67 +88,102 @@
     <a href="http://www.imr.no/nb-no"><img src="imr/logo_imr.png" /></a>
   </div>
 </div>
-<div class="container">
-  <div id="barmar" class="row" >
-     <label for="grid" style="float: left;position: relative;">Grid</label>
-     <div class="dropdown" style="float: left">
-       <button class="btn btn-default dropdown-toggle" id="gridBtn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-         <span class="caret"></span>
-       </button>
-       <ul class="dropdown-menu" id="grid" aria-labelledby="dropdownMenu1">
-       </ul>
-     </div>
-     
-     <label for="species" style="float:left;">Species</label>
-     <div class="dropdown" style="float: left">
-       <button class="btn btn-default dropdown-toggle" id="speciesBtn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-         <span class="caret"></span>
-       </button>
-       <ul class="dropdown-menu scrollable-menu" id="species" aria-labelledby="dropdownMenu1">
-       </ul>
-     </div> 
-     <label for="subspecies" style="float:left;">Sub Species</label>
-     <div class="dropdown" style="float: left">
-       <button class="btn btn-default dropdown-toggle" id="speciesSubGroupBtn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-         <span class="caret"></span>
-       </button>
-       <ul class="dropdown-menu scrollable-menu" id="speciesSubGroup" aria-labelledby="dropdownMenu1">
-       </ul>
-     </div>  
-     <label for="depth" style="float:left;">Depth</label>
-     <div class="dropdown" style="float: left">
-       <button class="btn btn-default dropdown-toggle" id="depthBtn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-         <span class="caret"></span>
-       </button>
-       <ul class="dropdown-menu scrollable-menu" id="depth" aria-labelledby="dropdownMenu1">
-       </ul>
-     </div>    
-     <label for="period" style="float:left;">Period</label>
-     <div class="dropdown" style="float: left">
-        <button class="btn btn-default dropdown-toggle" id="periodBtn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-          <span class="caret"></span>
-        </button>
-        <ul class="dropdown-menu scrollable-menu" id="period" aria-labelledby="dropdownMenu1">
-        </ul>   
-     </div>   
-     <button type="button" class="btn btn-default" id="createMap">Create Map</button>   
-  </div>
+<div class="container" style="">
+    <div id="barmar" class="row" >
+        <div style="float: left">
+            <label for="grid" style="background-color:white">Grid</label>
+            <div class="dropdown">
+                <button class="btn btn-default dropdown-toggle" id="gridBtn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" id="grid" aria-labelledby="dropdownMenu1">
+                </ul>
+            </div>
+        </div>
+        <div style="float: left">
+            <label for="species" style="background-color:white">Species</label>
+            <div class="dropdown">
+                <button class="btn btn-default dropdown-toggle" id="speciesBtn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu scrollable-menu" id="species" aria-labelledby="dropdownMenu1">
+                </ul>
+            </div>
+        </div>
+                     
+        <div style="float: left">                     
+            <label for="subspecies" style="margin-left:10px;background-color:white">Sub Species</label>
+            <div class="dropdown">
+                <button class="btn btn-default dropdown-toggle" id="speciesSubGroupBtn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu scrollable-menu" id="speciesSubGroup" aria-labelledby="dropdownMenu1">
+                </ul>
+            </div>
+        </div>        
+
+        <div style="float:left">       
+            <label for="depth" style="background-color:white">Depth</label>
+            <div class="dropdown">
+                <button class="btn btn-default dropdown-toggle" id="depthBtn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu scrollable-menu" id="depth" aria-labelledby="dropdownMenu1">
+                </ul>
+            </div>
+        </div>
+
+        <div style="float:left">        
+            <label for="period" style="background-color:white">Period</label>
+            <div class="dropdown">
+                <button class="btn btn-default dropdown-toggle" id="periodBtn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu scrollable-menu" id="period" aria-labelledby="dropdownMenu1">
+                </ul>   
+            </div>
+        </div>
+
+        <div style="float:left">
+            <label for="period">&nbsp;</label> <br/>       
+            <div class="btn-group" role="group" aria-label="...">
+               <button type="button" class="btn btn-default" id="punktvisning">Punktvisning</button>
+               <button type="button" class="btn btn-default" id="arealvisning">Arealvisning</button>
+             </div>     
+             <button type="button" class="btn btn-default" id="createMap">Create Map</button>   
+        </div>
+    </div>  
 </div>
 
     <script>
+    console.log("punktvisning:"+$(".punktvisning"));
+        $("#punktvisning").button('toggle');
+        
         getParametersAsJson("BarMar", "Cod", "Cod_survey_trawl_ecosystem_0-4cm");
+        
+        var PUNKTVISNING = "punktvisning";
+        var AREALVISNING = "arealvisning";
+        var LAYER_POINTVALUE = "postgis:pointvalue";
+        var LAYER_AREAVALUE = "postgis:areavalue";
+        //var LAYER_POINTVALUE = "test:pointvalue";
+        //var LAYER_AREAVALUE = "test:areavalue";
     
         $("#createMap").click(function() {
-            console.log("grid:"+$("#grid").parents(".dropdown").find('.btn').val());
-            console.log("species:"+$("#species").parents(".dropdown").find('.btn').val());
-            console.log("subgroup:"+$("#speciesSubGroup").parents(".dropdown").find('.btn').val());
-            console.log("depth:"+$("#depth").parents(".dropdown").find('.btn').val());
-            console.log("period:"+$("#period").parents(".dropdown").find('.btn').val());
-            
-            comboboxGrid = "BarMar";
+            comboboxGrid = $("#grid").parents(".dropdown").find('.btn').val();
             comboboxParameter = $("#speciesSubGroup").parents(".dropdown").find('.btn').val(); 
-            comboboxPeriod = "F";
-            comboboxDepth = "F";
+            comboboxPeriod = $("#period").parents(".dropdown").find('.btn').val();
+            comboboxDepth = $("#depth").parents(".dropdown").find('.btn').val();
+            
+            if ( comboboxPeriod=="Select Value") comboboxPeriod = "";
+            if ( comboboxDepth=="Select Value") comboboxDepth = "";
+
+            if ( $("#punktvisning").hasClass("active") ) {
+                displayType = PUNKTVISNING;
+                layername = LAYER_POINTVALUE;
+            } else {
+                displayType = AREALVISNING;
+                layername = LAYER_AREAVALUE;
+            }
             drawmap(map);
         });
         
