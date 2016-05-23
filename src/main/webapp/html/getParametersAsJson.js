@@ -1,8 +1,5 @@
 function getParametersAsJson(grid, species, speciesSubGroup, depth, period, displaytype) {
     var SELECT_VALUE = "Select Value";
-    var addLI = function( optionTxt ) {
-        return '<li><a href="#" data-value="' + optionTxt + '">' + optionTxt + '</a></li>';
-    }
     return function() {
         var xmlhttp = new XMLHttpRequest();
         var url = "barmar.json?grid="+grid+"&species="+species+"&subSpecies="+speciesSubGroup;
@@ -23,11 +20,6 @@ function getParametersAsJson(grid, species, speciesSubGroup, depth, period, disp
                         setSelectedValue( buttonId, SELECT_VALUE );
                     }
                 };
-                
-                var setSelectedValue = function( buttonId, optionTxt) {
-                    $(buttonId).parents(".dropdown").find('.btn').html( optionTxt + ' <span class="caret"></span>' );
-                    $(buttonId).parents(".dropdown").find('.btn').val( optionTxt );
-                }
                 
                 var emptyBtnList = function( buttonId, theBtnListElement ) {
                     if ( theBtnListElement == null || theBtnListElement.length == 0 ) {
@@ -100,4 +92,13 @@ function getParametersAsJson(grid, species, speciesSubGroup, depth, period, disp
         xmlhttp.open("GET", url, true);
         xmlhttp.send();
     }();
+};
+
+var setSelectedValue = function( buttonId, optionTxt) {
+    $(buttonId).parents(".dropdown").find('.btn').html( optionTxt + ' <span class="caret"></span>' );
+    $(buttonId).parents(".dropdown").find('.btn').val( optionTxt );
+}
+
+var addLI = function( optionTxt ) {
+    return '<li><a href="#" data-value="' + optionTxt + '">' + optionTxt + '</a></li>';
 }

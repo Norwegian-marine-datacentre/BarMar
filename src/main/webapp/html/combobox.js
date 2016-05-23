@@ -24,30 +24,17 @@ var layername = "";
 function drawmap(mapp){
 	jQuery.support.cors = true;
 
-	console.log("layername:"+layername);
-    // create sld 
-    jQuery.ajax({
-        url:"createsld",
-        data:{
-            grid : comboboxGrid,
-            parameter: comboboxParameter,
-            time: comboboxPeriod,
-            depth: comboboxDepth,
-            displaytype: displayType
-        },
-        method: "post",
-        success: function(message){
-            // add layer to map
-            if(felayer != null){
-                mapp.removeLayer(felayer);
-            }
-            
-            addLayerToMap(layername, message, mapp);
-        },
-        error: function(req, status, errThrown) {
-    		alert("ie error req:"+req+" status:"+status+" errThrown:"+errThrown);
-    	}
-    })
+	var onSuccessFunction = function (message) {
+	    if(felayer != null){
+	        mapp.removeLayer(felayer);
+	    }
+	    addLayerToMap(layername, message, mapp);
+	}
+	
+	var onErrorFunction = function(req, status, errThrown) {
+	    alert("ie error req:"+req+" status:"+status+" errThrown:"+errThrown);
+	}
+	createSLD(onSuccessFunction, onErrorFunction);
 }
 
 function addLayerToMap(layername, message, mapp) {
@@ -93,45 +80,76 @@ function getHTTPObject() {
     return false;
 }
 
-function createPDF(){
-	var showLayers = showVisibleLayers();
-	var displayType = "";
-	if (layername == LAYER_POINTVALUE) displayType = PUNKTVISNING;
-	else displayType = AREALVISNING;
+function createSLD(onSuccessFunction, onErrorFunction) {
+    
     jQuery.ajax({
-        url: "spring/createsld",
+        url:"createsld",
         data:{
-            grid : jQuery("#grid :selected").val(),
-            parameter: jQuery("#parameter :selected").val(),
-            time: jQuery("#period :selected").val(),
-            depth: jQuery("#depthlayer :selected").val(),
+            grid : comboboxGrid,
+            parameter: comboboxParameter,
+            time: comboboxPeriod,
+            depth: comboboxDepth,
             displaytype: displayType
         },
         method: "post",
         success: function(message){
-        	var mapp = Ext.ComponentMgr.all.find(function(c) {
-        		return c instanceof GeoExt.MapPanel;
-        	});
-
-            var pdfUrl = "spring/createpdfreport?bbox="+mapp.map.getExtent().toBBOX()+
-            	"&sld="+BASE_URL + "getsld?file=" + message +
-            	"&srs="+mapp.map.getProjection()+
-            	"&layer="+layername+
-            	"&layerson="+showLayers+
-            	"&width="+mapp.map.getSize().w+
-            	"&height="+mapp.map.getSize().h;        
-            
-            document.getElementById("hidden_pdf").action = pdfUrl;
-            jQuery("#hidden_pdf").submit();
+            onSuccessFunction(message);
+        },
+        error: function(req, status, errThrown) {
+            onErrorFunction(req, status, errThrown);
         }
-    })
+    });    
 }
 
-function showVisibleLayers() {
-	var mapp = Ext.ComponentMgr.all.find(function(c) {
-		return c instanceof GeoExt.MapPanel;
-	});
-	var tmpLayers = mapp.map.layers;
+function createPDF(mapp) {
+    
+    var onSuccessFunction = function (message) {
+        var showLayers = showVisibleLayers(mapp);
+        
+        console.log("bbox:"+mapp.getView().calculateExtent(mapp.getSize()));
+        console.log("width:"+mapp.getSize()[0]);
+        console.log("width:"+mapp.getSize().w);
+        
+        var pdfUrl = "createpdfreport?bbox="+mapp.getView().calculateExtent(map.getSize())+
+            "&sld="+BASE_URL + "getsld?file=" + message +
+            "&srs="+mapp.getView().getProjection()+
+            "&layer="+layername+
+            "&layerson="+showLayers+
+            "&width="+mapp.getSize()[0]+ //width
+            "&height="+mapp.getSize()[1]; //height        
+        
+        document.getElementById("hidden_pdf").action = pdfUrl;
+        jQuery("#hidden_pdf").submit();        
+    }
+    
+    var onErrorFunction = function(req, status, errThrown) {
+        alert("ie error req:"+req+" status:"+status+" errThrown:"+errThrown);
+    }
+    
+    createSLD(onSuccessFunction, onErrorFunction);
+    
+//	var showLayers = showVisibleLayers();
+//	var displayType = "";
+//	if (layername == LAYER_POINTVALUE) displayType = PUNKTVISNING;
+//	else displayType = AREALVISNING;
+//    jQuery.ajax({
+//        url: "spring/createsld",
+//        data:{
+//            grid : jQuery("#grid :selected").val(),
+//            parameter: jQuery("#parameter :selected").val(),
+//            time: jQuery("#period :selected").val(),
+//            depth: jQuery("#depthlayer :selected").val(),
+//            displaytype: displayType
+//        },
+//        method: "post",
+//        success: function(message){
+//
+//        }
+//    });
+}
+
+function showVisibleLayers(mapp) {
+	var tmpLayers = mapp.getLayers();
 	var strLayers = "";
 	for(var i=0; i<tmpLayers.length; i++) {
 		var aLayer = tmpLayers[i];

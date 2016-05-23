@@ -144,19 +144,32 @@
             </div>
         </div>
 
-        <div style="float:left">
-            <label for="period">&nbsp;</label> <br/>       
-            <div class="btn-group" role="group" aria-label="...">
-               <button type="button" class="btn btn-default" id="punktvisning">Punktvisning</button>
-               <button type="button" class="btn btn-default" id="arealvisning">Arealvisning</button>
-             </div>     
-             <button type="button" class="btn btn-default" id="createMap">Create Map</button>   
+        <div style="float:left">        
+            <label for="visning" style="background-color:white">View</label>
+            <div class="dropdown">
+                <button class="btn btn-default dropdown-toggle" id="visningBtn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu scrollable-menu" id="visning" aria-labelledby="dropdownMenu1">
+                    <li><a href="#" data-value="punktvisning">Punktvisning</a></li>
+                    <li><a href="#" data-value="arealvisning">Arealvisning</a></li>
+                </ul>   
+            </div>
         </div>
+
+        <div style="float:left">
+            <button type="button" class="btn btn-default" id="createMap">Create Map</button> <br/>
+            <button type="button" class="btn btn-default" id="createPDF">Create PDF</button>
+            <form id="hidden_pdf" method="post"></form>     
+        </div>
+   
     </div>  
 </div>
 
     <script>
     console.log("punktvisning:"+$(".punktvisning"));
+    setSelectedValue("#visning", "Punktvisning");
+    
         $("#punktvisning").button('toggle');
         
         getParametersAsJson("BarMar", "Cod", "Cod_survey_trawl_ecosystem_0-4cm");
@@ -186,6 +199,26 @@
             }
             drawmap(map);
         });
+
+        $("#createPDF").click(function() {
+            comboboxGrid = $("#grid").parents(".dropdown").find('.btn').val();
+            comboboxParameter = $("#speciesSubGroup").parents(".dropdown").find('.btn').val(); 
+            comboboxPeriod = $("#period").parents(".dropdown").find('.btn').val();
+            comboboxDepth = $("#depth").parents(".dropdown").find('.btn').val();
+            
+            if ( comboboxPeriod=="Select Value") comboboxPeriod = "";
+            if ( comboboxDepth=="Select Value") comboboxDepth = "";
+
+            if ( $("#punktvisning").hasClass("active") ) {
+                displayType = PUNKTVISNING;
+                layername = LAYER_POINTVALUE;
+            } else {
+                displayType = AREALVISNING;
+                layername = LAYER_AREAVALUE;
+            }
+            createPDF(map);
+        });
+        
         
     </script>    
 
