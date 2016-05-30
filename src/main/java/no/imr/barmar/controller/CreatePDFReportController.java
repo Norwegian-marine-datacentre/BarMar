@@ -2,6 +2,8 @@ package no.imr.barmar.controller;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -25,12 +27,17 @@ import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.JasperRunManager;
 import no.imr.barmar.geoserver.UrlConsts;
+import no.imr.barmar.pdf.pojo.PDF_FilenameResponse;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.support.ServletContextResourceLoader;
 
 /**
@@ -63,8 +70,10 @@ public class CreatePDFReportController {
     	" joint project between the Institute of Marine Research (IMR, http://www.imr.no)" +
     	"  and Institute for Research in Economics and Business Administration (SNF, http:// http://www.snf.no)"; 
 
+    private String tempImageFilePath = "";
+    
 	@RequestMapping("/createpdfreport")
-    public void createpdfreport( HttpServletRequest request,
+    public @ResponseBody PDF_FilenameResponse createpdfreport( HttpServletRequest request,
             HttpServletResponse response) throws IOException, JRException {
 
 		readRequestVars( request );
@@ -109,10 +118,53 @@ public class CreatePDFReportController {
         
         setupJasperReportWithTemplate();
         JasperPrint printWithParameter = JasperFillManager.fillReport(reportWithParameter, parameterHash, new JREmptyDataSource());
-        OutputStream outputfile = response.getOutputStream();
-        JasperExportManager.exportReportToPdfStream(printWithParameter, outputfile);
-        outputfile.close();
+//        OutputStream outputfile = response.getOutputStream();
+//        JasperExportManager.exportReportToPdfStream(printWithParameter, outputfile);
+//        outputfile.close();
+        
+        String fileName = "BarMarPdf_"+request.getParameter("displayLayerName")+".pdf";    
+        if ( tempImageFilePath.equals("")) { //Get temporary file path
+            File findDir = File.createTempFile("temp-file-name", ".tmp"); 
+            String path = findDir.getAbsolutePath();
+            tempImageFilePath = path.substring(0,path.lastIndexOf(File.separator));
+            findDir.delete();
+        }
+        System.out.println(tempImageFilePath);
+        JasperExportManager.exportReportToPdfFile(printWithParameter, tempImageFilePath + File.separator + fileName);
+        
+
+        PDF_FilenameResponse respJson = new PDF_FilenameResponse();
+        respJson.setFilename(fileName);
+        return respJson;
 	}
+	
+
+    @RequestMapping(value="/getPDF", method = RequestMethod.GET)
+    public void getMapImage(@RequestParam("printFilename") String filename, HttpServletResponse resp) throws Exception {
+        
+        if ( tempImageFilePath.equals("")) { //Get temporary file path
+            File findDir = File.createTempFile("temp-file-name", ".tmp"); 
+            String path = findDir.getAbsolutePath();
+            String tempFilePath = path.substring(0,path.lastIndexOf(File.separator));
+            tempImageFilePath = tempFilePath;
+        }
+        
+        File tempMapFile = new File(tempImageFilePath + File.separator + filename);
+        InputStream pdfStream = new FileInputStream(tempMapFile);
+        
+        byte[] buf = new byte[8192];
+        int c = 0;
+        while ((c = pdfStream.read(buf, 0, buf.length)) > 0) {
+            resp.getOutputStream().write(buf, 0, c);
+            resp.getOutputStream().flush();
+        }
+        resp.getOutputStream().close();
+        pdfStream.close();
+
+        resp.setContentType("application/x-pdf");
+        resp.setHeader("Content-disposition", "inline; filename='"+filename+"'");
+        resp.flushBuffer();        
+    }
 	
 	private void readRequestVars( HttpServletRequest request ) {
 		if ( request.getParameter("width") != null ) {

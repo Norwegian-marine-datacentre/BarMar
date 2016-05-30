@@ -12,7 +12,7 @@ var NORMAR_GRID = 11;
 
 var BASE_URL = location.href.substring(0,location.href.lastIndexOf('/')) + "/";
 
-//var BASE_URL = "http://10.1.9.230:9090/"; // for development
+var BASE_URL = "http://10.1.9.230:9090/"; // for development
 
 var comboboxGrid = ""; 
 var comboboxParameter = ""; 
@@ -21,14 +21,12 @@ var comboboxDepth = ""; //jQuery("#depthlayer :selected").val(),
 var displayType = "";
 var layername = "";
 
-function drawmap(mapp){
+function drawmap(mapp) {
 	jQuery.support.cors = true;
 
 	var onSuccessFunction = function (message) {
-	    if(felayer != null){
-	        mapp.removeLayer(felayer);
-	    }
 	    addLayerToMap(layername, message, mapp);
+	    initializeStack();
 	}
 	
 	var onErrorFunction = function(req, status, errThrown) {
@@ -48,17 +46,25 @@ function addLayerToMap(layername, message, mapp) {
                 'LAYERS': layername,
                 'TRANSPARENT': 'true',
                 sld: BASE_URL + "getsld?file=" + message,  
-            },
-        'zIndex': 2000
-        })
+            }
+        }),
+        'zIndex': 2000,
+        'name': comboboxParameter
     });
     mapp.addLayer(felayer);
+    
+    felayer.getSource().on('imageloadstart', function() {
+        $("#progress").removeAttr("style");
+        $("#progress").css("display", "inline");
+      });
 
-    var layerss = mapp.getLayers();
-    for ( var i=0; i < mapp.getLayers().array_.length;i++) {
-        var alayer = mapp.getLayers().array_[i]
-        console.log("zIndex:"+alayer.values_.zIndex);
-    }
+    felayer.getSource().on('imageloadend', function() {
+        $("#progress").removeAttr("style");
+        $("#progress").css("display", "none");
+      });
+    felayer.getSource().on('imageloaderror', function() {
+        alert("feil ved lasting av postgis lag")
+      });
     
     /** dns redirect to crius.nodc.no/geoserver/wms */
     var src = MAPS_IMR_NO + "service=WMS&version=1.1.1&request=GetLegendGraphic&layer="+
@@ -106,20 +112,36 @@ function createPDF(mapp) {
     var onSuccessFunction = function (message) {
         var showLayers = showVisibleLayers(mapp);
         
-        console.log("bbox:"+mapp.getView().calculateExtent(mapp.getSize()));
-        console.log("width:"+mapp.getSize()[0]);
-        console.log("width:"+mapp.getSize().w);
-        
         var pdfUrl = "createpdfreport?bbox="+mapp.getView().calculateExtent(map.getSize())+
             "&sld="+BASE_URL + "getsld?file=" + message +
             "&srs="+mapp.getView().getProjection()+
             "&layer="+layername+
             "&layerson="+showLayers+
             "&width="+mapp.getSize()[0]+ //width
-            "&height="+mapp.getSize()[1]; //height        
+            "&height="+mapp.getSize()[1]+ //height
+            "&displayLayerName="+comboboxParameter;         
         
-        document.getElementById("hidden_pdf").action = pdfUrl;
-        jQuery("#hidden_pdf").submit();        
+        $("#progress").removeAttr("style");
+        $("#progress").css("display", "inline");
+        jQuery.ajax({
+            url: pdfUrl,
+            method: "post",
+            success: function(data){
+                var mapImageLink = jQuery("<a id='downloadPrintMap' href='/getPDF?printFilename="+data.filename+"' hidden download='" + data.filename + "'></a>");
+                jQuery('body').append(mapImageLink);
+                var formDocument = document.getElementById("downloadPrintMap");
+                formDocument.click();
+                formDocument.remove();
+
+                $("#progress").removeAttr("style");
+                $("#progress").css("display", "none");
+            },
+            error: function(req, status, errThrown) {
+                $("#progress").removeAttr("style");
+                $("#progress").css("display", "none");
+                alert("feil ved lasting av postgis lag");
+            }
+        });    
     }
     
     var onErrorFunction = function(req, status, errThrown) {
@@ -127,25 +149,11 @@ function createPDF(mapp) {
     }
     
     createSLD(onSuccessFunction, onErrorFunction);
-    
-//	var showLayers = showVisibleLayers();
-//	var displayType = "";
-//	if (layername == LAYER_POINTVALUE) displayType = PUNKTVISNING;
-//	else displayType = AREALVISNING;
-//    jQuery.ajax({
-//        url: "spring/createsld",
-//        data:{
-//            grid : jQuery("#grid :selected").val(),
-//            parameter: jQuery("#parameter :selected").val(),
-//            time: jQuery("#period :selected").val(),
-//            depth: jQuery("#depthlayer :selected").val(),
-//            displaytype: displayType
-//        },
-//        method: "post",
-//        success: function(message){
-//
-//        }
-//    });
+}
+
+function ShowLoading() {
+    $("#progress").removeAttr("style");
+    $("#progress").css("display", "inline");
 }
 
 function showVisibleLayers(mapp) {
@@ -161,7 +169,6 @@ function showVisibleLayers(mapp) {
 			strLayers += tmpUrl + "-";
 		}
 	}
-//	alert("strLayers:"+strLayers);
 	return strLayers;
 }
 

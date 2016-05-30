@@ -21,16 +21,11 @@
     
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.3.12/proj4.js"></script>
     
-    <script type="text/javascript" src="getParametersAsJson.js"></script>
+    <script type="text/javascript" src="layer-list.js"></script>
+    <script type="text/javascript" src="get-parameters-as-json.js"></script>
     <script type="text/javascript" src="combobox.js"></script>
-    
-    <script>
-        proj4.defs('EPSG:32633', '+proj=utm +zone=33 +ellps=WGS84 +datum=WGS84 +units=m +no_defs');
-        var proj32633 = ol.proj.get('EPSG:32633');
-        proj32633.setExtent([-2500000.0,3500000.0,3045984.0,9045984.0]);
-    </script>
-     
-     
+    <script type="text/javascript" src="ol-map-config.js"></script>
+
         <style type="text/css">
         
             html, body, #map {
@@ -40,21 +35,16 @@
                 position: absolute;
             }
 
-            #metadataText {
-                position: absolute;
-                bottom: 2em;
-                right: 1em;
+            .metadataText {
                 width: 512px;
-                padding: 0 0.5em 0.5em 0.5em;
-                background-color:white;
             }
             
-            #barmar {
-                position: relative;
-                top: 1em;
-                left: 5em;
-                padding: 0 0.5em 0.5em 0.5em;
-                background-color:transparent; 
+             #barmar { 
+                 position: relative; 
+                 top: 1em; 
+                 left: 5em; 
+                 padding: 0 0.5em 0.5em 0.5em; 
+                 background-color:transparent;  
             }
                         
             .scrollable-menu { /*dropdown boxes*/
@@ -64,34 +54,120 @@
             }   
             
             #imrHeading {
-                width: 1200px;
-                background-image:url('imr/background_top_trans.jpg');
-                background-color:rgb(221,​ 228,​ 238);
-                background-repeat:no-repeat;
-                background-position:100% 0%;
-                background-attachement:scroll;
-                background-clip:border-box;
-                background-origin:padding-box;
-                background-size:auto auto;
-                    
-                
+                background-image:url('imr/background_body_None.jpg');
+                position: relative;
+            }
+            
+            // layerList styles:
+            ul.layerstack {
+                list-style: none;
+            }
+            ul.layerstack li {
+                border-bottom: 1px solid #ccc;
+                padding: 3px;
+            }
+            ul.layerstack li:hover {
+                background-color: #eee;
+            }
+            ul.layerstack li.selected {
+                background-color: #ddd;
+            }
+            .controls {
+                float: left;
+                margin-right: 5px;
+            }
+
+            /* scale line */
+            .ol-scale-line {
+                top: 8px;
+                right: 8px;
+                bottom:auto;
+                left:auto;    
+            }
+            
+            /* checkbox in layer list */
+            #checkboxes label {
+                float: left;
+            }
+            #checkboxes ul {
+                margin: 0;
+                list-style: none;
+                float: left;
             }
         </style>
     </head>
     <body>
 
-
 <div id="map" class="map"></div>     
  
-<div class="container" style="z-index:3;">
-  <div class="row" id="imrHeading" style="height:118px;">
-    <a href="http://www.imr.no/nb-no"><img src="imr/logo_imr.png" /></a>
-  </div>
+<div class="container" style="border-style: solid;width:957px">
+    <div class="row" >    
+        <table id="imrHeading">
+            <tr>
+              <td>
+                 <div style="display:inline-block;">
+                     <a href="http://www.imr.no"><img src="imr/logo_imr.png" height="67px" width="461" /></a>
+                 </div>
+              </td>
+              <td>    
+                 <span style="float:right;">
+                 <img src="imr/background_top_trans.jpg" alt="Havforskningsinstituttet" height="118px" width="490" ></span>
+              </td>
+            </tr>
+        </table>     
+    </div>
 </div>
-<div class="container" style="">
-    <div id="barmar" class="row" >
-        <div style="float: left">
-            <label for="grid" style="background-color:white">Grid</label>
+
+<div style="position: relative; " id="checkboxes">
+    <ul class="layerstack controls"></ul>
+    <div class="controls">
+        <button id="raise" class="btn btn-primary btn-xs"><span class="glyphicon glyphicon-arrow-up"></span></button><br/>
+        <button id="lower" class="btn btn-primary btn-xs"><span class="glyphicon glyphicon-arrow-down"></span></button>
+    </div>
+</div>
+
+<div style="display: none;" id="progress"><img src="imr/images/avatar-black.gif" /></div>
+
+
+  <div class="panel-group" id="accordion" style="position: absolute;bottom: 0em;right: 4em;border-style:solid;">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h4 class="panel-title">
+          <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo">
+            <span class="glyphicon glyphicon-minus"></span>
+            Metadata
+          </a>
+        </h4>
+      </div>
+      <div id="collapseTwo" class="panel-collapse collapse in">
+        <div class="panel-body"  style="width: 512px;">
+  
+    <div id="metadata">
+        <p>Metadata</p>
+    </div> 
+ 
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+<div class="panel-group" id="accordion" style="position: absolute;bottom:0px;left: 8px;">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
+          <span class="glyphicon glyphicon-minus"></span>
+          BarMar
+        </a>
+      </h4>
+    </div>
+    <div id="collapseOne" class="panel-collapse collapse in">
+      <div class="panel-body" style="border-style:solid;">
+      
+      <div style="float: left;display:none;">
+          <label for="grid" style="background-color:white;">Grid</label>
+          <div class="dropup">
             <div class="dropdown">
                 <button class="btn btn-default dropdown-toggle" id="gridBtn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                     <span class="caret"></span>
@@ -99,72 +175,86 @@
                 <ul class="dropdown-menu" id="grid" aria-labelledby="dropdownMenu1">
                 </ul>
             </div>
-        </div>
-        <div style="float: left">
-            <label for="species" style="background-color:white">Species</label>
-            <div class="dropdown">
-                <button class="btn btn-default dropdown-toggle" id="speciesBtn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                    <span class="caret"></span>
-                </button>
-                <ul class="dropdown-menu scrollable-menu" id="species" aria-labelledby="dropdownMenu1">
-                </ul>
-            </div>
-        </div>
-                     
-        <div style="float: left">                     
-            <label for="subspecies" style="margin-left:10px;background-color:white">Sub Species</label>
-            <div class="dropdown">
-                <button class="btn btn-default dropdown-toggle" id="speciesSubGroupBtn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                    <span class="caret"></span>
-                </button>
-                <ul class="dropdown-menu scrollable-menu" id="speciesSubGroup" aria-labelledby="dropdownMenu1">
-                </ul>
-            </div>
-        </div>        
+          </div>
+      </div>
+      <div style="float: left">
+          <label for="species" style="background-color:white">Species</label>
+          <div class="dropup">
+          <div class="dropdown">
+              <button class="btn btn-default dropdown-toggle" id="speciesBtn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                  <span class="caret"></span>
+              </button>
+              
+              <ul class="dropdown-menu scrollable-menu" id="species" aria-labelledby="dropdownMenu1">
+              </ul>
+          </div></div>
+      </div>
+                   
+      <div style="float: left">                     
+          <label for="subspecies" style="margin-left:10px;background-color:white">Sub Species</label>
+          <div class="dropup">
+          <div class="dropdown">
+              <button class="btn btn-default dropdown-toggle" id="speciesSubGroupBtn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                  <span class="caret"></span>
+              </button>
+              <ul class="dropdown-menu scrollable-menu" id="speciesSubGroup" aria-labelledby="dropdownMenu1">
+              </ul>
+          </div></div>
+      </div>        
 
-        <div style="float:left">       
-            <label for="depth" style="background-color:white">Depth</label>
-            <div class="dropdown">
-                <button class="btn btn-default dropdown-toggle" id="depthBtn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                    <span class="caret"></span>
-                </button>
-                <ul class="dropdown-menu scrollable-menu" id="depth" aria-labelledby="dropdownMenu1">
-                </ul>
-            </div>
-        </div>
+      <div style="float:left">       
+          <label for="depth" style="background-color:white">Depth</label>
+          <div class="dropup">
+          <div class="dropdown">
+              <button class="btn btn-default dropdown-toggle" id="depthBtn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                  <span class="caret"></span>
+              </button>
+              <ul class="dropdown-menu scrollable-menu" id="depth" aria-labelledby="dropdownMenu1">
+              </ul>
+          </div></div>
+      </div>
 
-        <div style="float:left">        
-            <label for="period" style="background-color:white">Period</label>
-            <div class="dropdown">
-                <button class="btn btn-default dropdown-toggle" id="periodBtn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                    <span class="caret"></span>
-                </button>
-                <ul class="dropdown-menu scrollable-menu" id="period" aria-labelledby="dropdownMenu1">
-                </ul>   
-            </div>
-        </div>
+      <div style="float:left">        
+          <label for="period" style="background-color:white">Period</label>
+          <div class="dropup">
+          <div class="dropdown">
+              <button class="btn btn-default dropdown-toggle" id="periodBtn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                  <span class="caret"></span>
+              </button>
+              <ul class="dropdown-menu scrollable-menu" id="period" aria-labelledby="dropdownMenu1">
+              </ul>   
+          </div></div>
+      </div>
 
-        <div style="float:left">        
-            <label for="visning" style="background-color:white">View</label>
-            <div class="dropdown">
-                <button class="btn btn-default dropdown-toggle" id="visningBtn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                    <span class="caret"></span>
-                </button>
-                <ul class="dropdown-menu scrollable-menu" id="visning" aria-labelledby="dropdownMenu1">
-                    <li><a href="#" data-value="punktvisning">Punktvisning</a></li>
-                    <li><a href="#" data-value="arealvisning">Arealvisning</a></li>
-                </ul>   
-            </div>
-        </div>
+      <div style="float:left">        
+          <label for="visning" style="background-color:white">View</label>
+          <div class="dropup">
+          <div class="dropdown">
+              <button class="btn btn-default dropdown-toggle" id="visningBtn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                  <span class="caret"></span>
+              </button>
+              <ul class="dropdown-menu scrollable-menu" id="visning" aria-labelledby="dropdownMenu1">
+                  <li><a href="#" data-value="punktvisning">Punktvisning</a></li>
+                  <li><a href="#" data-value="arealvisning">Arealvisning</a></li>
+              </ul>   
+          </div></div>
+      </div>
 
-        <div style="float:left">
-            <button type="button" class="btn btn-default" id="createMap">Create Map</button> <br/>
-            <button type="button" class="btn btn-default" id="createPDF">Create PDF</button>
-            <form id="hidden_pdf" method="post"></form>     
-        </div>
-   
-    </div>  
+      <div style="float:left">
+          <label for="visning" style="background-color:white">&nbsp;</label>
+          <div>
+              <button type="button" class="btn btn-default" id="createMap">Create Map</button>
+              <button type="button" class="btn btn-default" id="createPDF">Create PDF</button>
+          </div>
+          <form id="hidden_pdf" method="post" onsubmit="ShowLoading()"></form>     
+      </div>
+      
+      </div>
+    </div>
+  </div>
 </div>
+
+
 
     <script>
     console.log("punktvisning:"+$(".punktvisning"));
@@ -181,8 +271,11 @@
         //var LAYER_POINTVALUE = "test:pointvalue";
         //var LAYER_AREAVALUE = "test:areavalue";
     
+        var v = $("#createMap");
+        console.log("createMap:"+$("#createMap").text());
         $("#createMap").click(function() {
-            comboboxGrid = $("#grid").parents(".dropdown").find('.btn').val();
+            console.log("createMap");
+            comboboxGrid = "BarMar";//$("#grid").parents(".dropdown").find('.btn').val();
             comboboxParameter = $("#speciesSubGroup").parents(".dropdown").find('.btn').val(); 
             comboboxPeriod = $("#period").parents(".dropdown").find('.btn').val();
             comboboxDepth = $("#depth").parents(".dropdown").find('.btn').val();
@@ -190,7 +283,8 @@
             if ( comboboxPeriod=="Select Value") comboboxPeriod = "";
             if ( comboboxDepth=="Select Value") comboboxDepth = "";
 
-            if ( $("#punktvisning").hasClass("active") ) {
+            var visning = $("#visning").parents(".dropdown").find('.btn').val();
+            if ( visning === 'Punktvisning') {
                 displayType = PUNKTVISNING;
                 layername = LAYER_POINTVALUE;
             } else {
@@ -209,7 +303,9 @@
             if ( comboboxPeriod=="Select Value") comboboxPeriod = "";
             if ( comboboxDepth=="Select Value") comboboxDepth = "";
 
-            if ( $("#punktvisning").hasClass("active") ) {
+            var visning = $("#visning").parents(".dropdown").find('.btn').val();
+            if ( visning === 'Punktvisning') {
+//             if ( $("#punktvisning").hasClass("active") ) {
                 displayType = PUNKTVISNING;
                 layername = LAYER_POINTVALUE;
             } else {
@@ -219,46 +315,42 @@
             createPDF(map);
         });
         
-        
-    </script>    
-
-    <script>
-    var layers = [
-        new ol.layer.Tile({
-            source: new ol.source.TileWMS({
-                url: 'http://maps.imr.no/geoserver/wms',
-                params: {
-                    'LAYERS': 'landareal_europa',
-                    'VERSION': '1.1.1',
-                    'TRANSPARENT': 'true'
-                }
-            }),
-            'zIndex': 1
-        })
-    ];
-
-    var map = new ol.Map({
-        controls: ol.control.defaults().extend([
-            new ol.control.ScaleLine({
-                units: ol.control.ScaleLineUnits.METRIC
+        var layers = [
+            new ol.layer.Tile({
+                source: new ol.source.TileWMS({
+                    url: 'http://maps.imr.no/geoserver/wms',
+                    params: {
+                        'LAYERS': 'landareal_europa',
+                        'VERSION': '1.1.1',
+                        'TRANSPARENT': 'true'
+                    }
+                }),
+                'zIndex': 3,
+                'name': 'Europa'
             })
-        ]),
-        layers: layers,
-        target: 'map',
-        view: new ol.View({
-            projection: 'EPSG:32633',
-            center: [1088474,8089849],
-            zoom:3
-        })
-    });
+        ];
 
+        var map = new ol.Map({
+            controls: ol.control.defaults().extend([
+                new ol.control.ScaleLine({
+                    units: ol.control.ScaleLineUnits.METRIC,
+                    className: 'ol-scale-line',
+                    target: document.getElementById('scale-line')
+                })
+            ]),
+            layers: layers,
+            target: 'map',
+            view: new ol.View({
+                projection: 'EPSG:32633',
+                center: [1088474,8089849],
+                zoom:3
+            })
+        });
+                  
+        $('ul.layerstack').prepend(
+                '<li data-layerid="' + layers[0].get('name') + '"><input type="checkbox" checked="checked"> ' + layers[0].get('name') + '</li>'
+        );
+        
     </script> 
-        <div id="metadataText">
-            <h1 id="title">Metadata</h1>
-
-            <div id="metadata">
-                <p>Metadata</p>
-            </div> 
-        </div>   
     </body>
 </html>
