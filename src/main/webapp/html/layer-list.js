@@ -110,7 +110,7 @@ $(document).ready(function() {
             lowerLayer(layer);
         }
     });
-    $('input[type="checkbox"]').on('click', function() {
+    $('ul.layerstack').on('click', 'input[type="checkbox"]', function() {
         var layerid = $(this).parent().data('layerid');
         console.log("layerid:"+layerid);
         var layer = findByName(layerid);
