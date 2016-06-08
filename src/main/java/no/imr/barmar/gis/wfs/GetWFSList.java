@@ -9,12 +9,14 @@ import java.util.Map;
 
 import javax.xml.stream.XMLStreamException;
 
-import no.imr.barmar.pojo.BarMarPojo;
-import no.imr.barmar.gis.sld.SLDpojoSelectionRule;
-import no.imr.barmar.gis.sld.StAXreader.StAXreaderException;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import no.imr.barmar.gis.sld.SLDpojoSelectionRule;
+import no.imr.barmar.gis.sld.StAXreader.StAXreaderException;
+import no.imr.barmar.pojo.BarMarPojo;
 
 /**
  *
@@ -23,6 +25,8 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class GetWFSList {
+    
+    private static final Logger logger = LoggerFactory.getLogger(GetWFSList.class);
 
     @Autowired 
     private GetWFSParameterList gfs;
@@ -60,7 +64,7 @@ public class GetWFSList {
                 urlRequest = urlRequest + "&filter=" + filter;
             }
         }
-        System.out.println("wfs url:"+urlRequest);
+        logger.debug("wfs url:"+urlRequest);
         gfs.readXML(urlRequest, searchProperty);
         List<String> params = gfs.getList();
         gfs.deleteList();

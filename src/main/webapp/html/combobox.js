@@ -1,31 +1,34 @@
 var felayer;
 
 //PROD
-//var MAPS_IMR_NO = "http://maps.imr.no/geoserver/wms?";
+var MAPS_IMR_NO = "http://maps.imr.no/geoserver/wms?";
 
 //TEST: on local machine - use your ip address instead of localhost 
 //var MAPS_IMR_NO = "http://geb-test.nodc.no/geoserver/wms?";
 
-var MAPS_IMR_NO = "http://10.1.9.230:8080/geoserver/wms?";
+//var MAPS_IMR_NO = "http://10.1.9.230:8080/geoserver/wms?";
 
 var NORMAR_GRID = 11;
 
 var BASE_URL = location.href.substring(0,location.href.lastIndexOf('/')) + "/";
 
-var BASE_URL = "http://10.1.9.230:9090/"; // for development
+//var BASE_URL = "http://10.1.9.230:9090/"; // for development
 
 var comboboxGrid = ""; 
+var comboboxSpecies = "";
 var comboboxParameter = ""; 
 var comboboxPeriod = ""; 
 var comboboxDepth = ""; //jQuery("#depthlayer :selected").val(),
 var displayType = "";
 var layername = "";
+var displayName = "";
 
 function drawmap(mapp) {
 	jQuery.support.cors = true;
 
 	var onSuccessFunction = function (message) {
 	    addLayerToMap(layername, message, mapp);
+	    addPdfGenerationToStack(displayName, comboboxSpecies, comboboxParameter, comboboxPeriod, comboboxDepth, displayType);
 	    initializeStack();
 	}
 	
@@ -39,8 +42,8 @@ function addLayerToMap(layername, message, mapp) {
     src = MAPS_IMR_NO + "service=WMS&version=1.1.1&request=GetLegendGraphic&layer="+
 	layername+"&width=22&height=24&format=image/png&SLD="+BASE_URL + "getsld?file=" + message;
     
-    felayer = new ol.layer.Image({
-        source: new ol.source.ImageWMS({
+    felayer = new ol.layer.Tile({
+        source: new ol.source.TileWMS({
             url: MAPS_IMR_NO,
             params: {
                 'LAYERS': layername,
@@ -48,8 +51,7 @@ function addLayerToMap(layername, message, mapp) {
                 sld: BASE_URL + "getsld?file=" + message,  
             }
         }),
-        'zIndex': 2000,
-        'name': comboboxParameter
+        'name': displayName
     });
     mapp.addLayer(felayer);
     
@@ -63,13 +65,15 @@ function addLayerToMap(layername, message, mapp) {
         $("#progress").css("display", "none");
       });
     felayer.getSource().on('imageloaderror', function() {
-        alert("feil ved lasting av postgis lag")
+        $("#progress").removeAttr("style");
+        $("#progress").css("display", "none");
+        alert("feil ved lasting av postgis lag");
       });
     
     /** dns redirect to crius.nodc.no/geoserver/wms */
     var src = MAPS_IMR_NO + "service=WMS&version=1.1.1&request=GetLegendGraphic&layer="+
     	layername+"&width=22&height=24&format=image/png&SLD="+BASE_URL + "getsld?file=" + message;
-    jQuery("#legend").attr("src",src);      
+    jQuery("#legend").append('<p id='+displayName+'>'+displayName+'<br/><img src='+src+' /></p>');
 }
 
 function getHTTPObject() {
@@ -112,14 +116,16 @@ function createPDF(mapp) {
     var onSuccessFunction = function (message) {
         var showLayers = showVisibleLayers(mapp);
         
+        var projection = mapp.getView().getProjection().getCode();
+        console.log("srs:"+projection);
         var pdfUrl = "createpdfreport?bbox="+mapp.getView().calculateExtent(map.getSize())+
             "&sld="+BASE_URL + "getsld?file=" + message +
-            "&srs="+mapp.getView().getProjection()+
+            "&srs="+projection+
             "&layer="+layername+
             "&layerson="+showLayers+
             "&width="+mapp.getSize()[0]+ //width
             "&height="+mapp.getSize()[1]+ //height
-            "&displayLayerName="+comboboxParameter;         
+            "&displayLayerName="+displayName;         
         
         $("#progress").removeAttr("style");
         $("#progress").css("display", "inline");
@@ -127,7 +133,7 @@ function createPDF(mapp) {
             url: pdfUrl,
             method: "post",
             success: function(data){
-                var mapImageLink = jQuery("<a id='downloadPrintMap' href='/getPDF?printFilename="+data.filename+"' hidden download='" + data.filename + "'></a>");
+                var mapImageLink = jQuery("<a id='downloadPrintMap' href='getPDF?printFilename="+data.filename+"' hidden download='" + data.filename + "'></a>");
                 jQuery('body').append(mapImageLink);
                 var formDocument = document.getElementById("downloadPrintMap");
                 formDocument.click();

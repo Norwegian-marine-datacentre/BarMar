@@ -94,13 +94,23 @@
                 list-style: none;
                 float: left;
             }
+            
+            /**    
+ * Scrollbar to accordion
+ */
+ .panel-scroll {
+     max-height: 320px;
+ overflow: hidden;
+ overflow-y: auto;
+}
+/**********************/
         </style>
     </head>
     <body>
 
 <div id="map" class="map"></div>     
  
-<div class="container" style="border-style: solid;width:957px">
+<div class="container" style="border-style: solid;border-width:1px;width:957px">
     <div class="row" >    
         <table id="imrHeading">
             <tr>
@@ -129,7 +139,7 @@
 <div style="display: none;" id="progress"><img src="imr/images/avatar-black.gif" /></div>
 
 
-  <div class="panel-group" id="accordion" style="position: absolute;bottom: 0em;right: 4em;border-style:solid;">
+  <div class="panel-group" id="accordionMeta" style="position: absolute;bottom: 0em;right: 4em;border-width:1px">
     <div class="panel panel-default">
       <div class="panel-heading">
         <h4 class="panel-title">
@@ -149,10 +159,31 @@
         </div>
       </div>
     </div>
+    
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h4 class="panel-title">
+          <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapseThree">
+            <span class="glyphicon glyphicon-minus"></span>
+            Legend
+          </a>
+        </h4>
+      </div>
+      <div id="collapseThree" class="panel-collapse collapse in panel-scroll">
+        <div class="panel-body"  style="width: 512px;">
+  
+    <div id="legend"></div> 
+ 
+        </div>
+      </div>
+    </div>
+        
   </div>
+  
+  
 
 
-<div class="panel-group" id="accordion" style="position: absolute;bottom:0px;left: 8px;">
+<div class="panel-group" id="accordionBarMar" style="position: absolute;bottom:0px;left: 8px;">
   <div class="panel panel-default">
     <div class="panel-heading">
       <h4 class="panel-title">
@@ -163,7 +194,7 @@
       </h4>
     </div>
     <div id="collapseOne" class="panel-collapse collapse in">
-      <div class="panel-body" style="border-style:solid;">
+      <div class="panel-body" style="border-width:1px">
       
       <div style="float: left;display:none;">
           <label for="grid" style="background-color:white;">Grid</label>
@@ -230,12 +261,12 @@
           <label for="visning" style="background-color:white">View</label>
           <div class="dropup">
           <div class="dropdown">
-              <button class="btn btn-default dropdown-toggle" id="visningBtn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+              <button class="btn btn-default dropdown-toggle" id="displayTypeBtn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                   <span class="caret"></span>
               </button>
               <ul class="dropdown-menu scrollable-menu" id="visning" aria-labelledby="dropdownMenu1">
-                  <li><a href="#" data-value="punktvisning">Punktvisning</a></li>
-                  <li><a href="#" data-value="arealvisning">Arealvisning</a></li>
+                  <li><a href="#" data-value="punktvisning">punktvisning</a></li>
+                  <li><a href="#" data-value="arealvisning">arealvisning</a></li>
               </ul>   
           </div></div>
       </div>
@@ -244,7 +275,7 @@
           <label for="visning" style="background-color:white">&nbsp;</label>
           <div>
               <button type="button" class="btn btn-default" id="createMap">Create Map</button>
-              <button type="button" class="btn btn-default" id="createPDF">Create PDF</button>
+              <button type="button" class="btn btn-default" id="createPDF" style="display:none">Create PDF</button>
           </div>
           <form id="hidden_pdf" method="post" onsubmit="ShowLoading()"></form>     
       </div>
@@ -257,8 +288,10 @@
 
 
     <script>
+
+    
     console.log("punktvisning:"+$(".punktvisning"));
-    setSelectedValue("#visning", "Punktvisning");
+    setSelectedValue("#visning", "punktvisning");
     
         $("#punktvisning").button('toggle');
         
@@ -274,46 +307,34 @@
         var v = $("#createMap");
         console.log("createMap:"+$("#createMap").text());
         $("#createMap").click(function() {
-            console.log("createMap");
-            comboboxGrid = "BarMar";//$("#grid").parents(".dropdown").find('.btn').val();
-            comboboxParameter = $("#speciesSubGroup").parents(".dropdown").find('.btn').val(); 
-            comboboxPeriod = $("#period").parents(".dropdown").find('.btn').val();
-            comboboxDepth = $("#depth").parents(".dropdown").find('.btn').val();
-            
-            if ( comboboxPeriod=="Select Value") comboboxPeriod = "";
-            if ( comboboxDepth=="Select Value") comboboxDepth = "";
-
-            var visning = $("#visning").parents(".dropdown").find('.btn').val();
-            if ( visning === 'Punktvisning') {
-                displayType = PUNKTVISNING;
-                layername = LAYER_POINTVALUE;
-            } else {
-                displayType = AREALVISNING;
-                layername = LAYER_AREAVALUE;
-            }
+            readBarMar();
             drawmap(map);
         });
 
         $("#createPDF").click(function() {
-            comboboxGrid = $("#grid").parents(".dropdown").find('.btn').val();
-            comboboxParameter = $("#speciesSubGroup").parents(".dropdown").find('.btn').val(); 
-            comboboxPeriod = $("#period").parents(".dropdown").find('.btn').val();
-            comboboxDepth = $("#depth").parents(".dropdown").find('.btn').val();
-            
-            if ( comboboxPeriod=="Select Value") comboboxPeriod = "";
-            if ( comboboxDepth=="Select Value") comboboxDepth = "";
-
-            var visning = $("#visning").parents(".dropdown").find('.btn').val();
-            if ( visning === 'Punktvisning') {
-//             if ( $("#punktvisning").hasClass("active") ) {
+            readBarMar();
+            createPDF(map);
+        });
+        
+        function readBarMar() {
+            comboboxGrid = "BarMar";//$("#grid").parents(".dropdown").find('.btn').val();
+            comboboxSpecies = $("#speciesBtn").val();
+            comboboxParameter = $("#speciesSubGroupBtn").val(); 
+            comboboxPeriod = $("#periodBtn").val();
+            comboboxDepth = $("#depthBtn").val();
+            var visning = $("#displayTypeBtn").val();
+            if ( visning === 'punktvisning') {
                 displayType = PUNKTVISNING;
                 layername = LAYER_POINTVALUE;
             } else {
                 displayType = AREALVISNING;
                 layername = LAYER_AREAVALUE;
             }
-            createPDF(map);
-        });
+            displayName = createDisplayName(comboboxParameter, comboboxPeriod, comboboxDepth, displayType);
+            
+            if ( comboboxPeriod==="Select Value") comboboxPeriod = "F";
+            if ( comboboxDepth==="Select Value") comboboxDepth = "F";
+        }
         
         var layers = [
             new ol.layer.Tile({
@@ -325,7 +346,6 @@
                         'TRANSPARENT': 'true'
                     }
                 }),
-                'zIndex': 3,
                 'name': 'Europa'
             })
         ];
@@ -351,6 +371,17 @@
                 '<li data-layerid="' + layers[0].get('name') + '"><input type="checkbox" checked="checked"> ' + layers[0].get('name') + '</li>'
         );
         
+        function createDisplayName(param, period, depth, displayType) {
+            var adisplayName = param;
+            if ( period != "Select Value" ) {
+                adisplayName+= "_" + period;
+            }
+            if ( depth != "Select Value" ) {
+                adisplayName+= "_" + depth;
+            }
+            adisplayName += "_" + displayType;
+            return adisplayName;
+        }
     </script> 
     </body>
 </html>

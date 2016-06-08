@@ -8,9 +8,14 @@ function initializeStack() {
     $('ul.layerstack').html('');
     for (var i = 0; i < length; i++) {
         layerName = layers.item(i).get('name');
-        $('ul.layerstack').append(
+        if ( i > 0) { // layer at 0 is baselayer
+            $('ul.layerstack').append(
                 '<li data-layerid="' + layerName + '"><input type="checkbox" checked="checked"> ' + layerName
-                        + '</li>');
+                        + '<a href="#" id="'+layerName+'"><img src="imr/images/pdf.jpg" width="16" height="20"/></a></li>');
+        } else {
+            $('ul.layerstack').append(
+                    '<li data-layerid="' + layerName + '"><input type="checkbox" checked="checked"> ' + layerName + '</li>');
+        }
     }
 
     // Change style when select a layer
@@ -18,6 +23,12 @@ function initializeStack() {
         $('ul.layerstack li').removeClass('selected');
         $(this).addClass('selected');
     });
+}
+
+var pdfHash = {};
+/** Display icon with pdf generation */
+function addPdfGenerationToStack(layerName, comboboxSpecies, comboboxParameter, comboboxPeriod, comboboxDepth, displayType) {
+    pdfHash[layerName] = {'species': comboboxSpecies, 'subSpecies':comboboxParameter, 'period': comboboxPeriod, 'depth':comboboxDepth, 'displayType':displayType};
 }
 
 /**
@@ -44,7 +55,7 @@ function findByName(name) {
     var layers = map.getLayers();
     var length = layers.getLength();
     if ( layers != undefined ) {
-        for (var i = 0; i < length; i++) {
+        for (var i = 0; i < length; i++) { // dont find base layer (=1)
             if (name === layers.item(i).get('name')) {
                 return layers.item(i);
             }
@@ -62,7 +73,7 @@ function raiseLayer(layer) {
     if ( layer === undefined ) return;
     var layers = map.getLayers();
     var index = indexOf(layers, layer);
-    if (index > 1) { // > 1 instead of > 0 so not to raise layer above base layer 
+    if (index > 0) { // > 1 instead of > 0 so not to raise layer above base layer 
         var next = layers.item(index - 1);
         layers.removeAt(index);
         layers.insertAt(index-1, layer);
@@ -115,5 +126,40 @@ $(document).ready(function() {
         console.log("layerid:"+layerid);
         var layer = findByName(layerid);
         layer.setVisible( $(this).is(':checked') );
+        
+        //gray out/in legend of checked layer
+        if ( $(this).is(':checked') === false )
+            jQuery("#legend p[id='"+layerid+"'").fadeTo(500, 0.2);
+        else
+            jQuery("#legend p[id='"+layerid+"'").fadeTo(500, 1);
+    });
+    
+    var carat = " <span class=\"caret\"></span>";
+    $('ul.layerstack').on('click', 'a', function() {
+        var layer = $(this).attr('id');
+        var pdfGen = pdfHash[layer];
+
+        $("#speciesBtn").val(pdfGen.species);
+        $("#speciesBtn").html(pdfGen.species + carat);
+        $("#speciesSubGroupBtn").val(pdfGen.subSpecies);
+        $("#speciesSubGroupBtn").html(pdfGen.subSpecies + carat);
+        if ( pdfGen.depth === "" ) {
+            $("#depthBtn").val( "Select Value" );
+            $("#depthBtn").html( "Select Value" + carat);            
+        } else {
+            $("#depthBtn").val( pdfGen.depth );
+            $("#depthBtn").html( pdfGen.depth + carat);            
+        }
+        if ( pdfGen.period === "" ) {
+            $("#periodBtn").val( "Select Value" );
+            $("#periodBtn").html("Select Value" + carat);
+        } else {
+            $("#periodBtn").val( pdfGen.period );
+            $("#periodBtn").html( pdfGen.period + carat);
+        }
+        $("#displayTypeBtn").val(pdfGen.displayType);
+        $("#displayTypeBtn").html(pdfGen.displayType + carat);        
+        
+        $("#createPDF").click();
     });
 });

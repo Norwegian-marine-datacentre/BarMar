@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -20,17 +19,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.sf.jasperreports.engine.JREmptyDataSource;
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JasperCompileManager;
-import net.sf.jasperreports.engine.JasperExportManager;
-import net.sf.jasperreports.engine.JasperFillManager;
-import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.JasperReport;
-import net.sf.jasperreports.engine.JasperRunManager;
-import no.imr.barmar.geoserver.UrlConsts;
-import no.imr.barmar.pdf.pojo.PDF_FilenameResponse;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Controller;
@@ -40,6 +30,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.support.ServletContextResourceLoader;
 
+import net.sf.jasperreports.engine.JREmptyDataSource;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperExportManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import no.imr.barmar.geoserver.UrlConsts;
+import no.imr.barmar.pdf.pojo.PDF_FilenameResponse;
+
 /**
  *
  * @author trondwe
@@ -47,6 +47,8 @@ import org.springframework.web.context.support.ServletContextResourceLoader;
  */
 @Controller
 public class CreatePDFReportController {
+    
+    private static final Logger logger = LoggerFactory.getLogger(CreatePDFReportController.class);
 	
 	private ResourceLoader resourceLoader = null;
 	private BufferedImage theIMRLogoImage = null;
@@ -82,7 +84,9 @@ public class CreatePDFReportController {
         String legendUrl = createFishExchangeLegend();
         
         BufferedImage baseLayer = ImageIO.read( new URL(url) );
+        logger.debug("pdf overlay:"+secondLayer);
         BufferedImage second = ImageIO.read( new URL(secondLayer) );
+        logger.debug("pdf overlay image:"+second);
         BufferedImage legendImg = ImageIO.read( new URL(legendUrl) );
 
         BufferedImage theMapImage = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
@@ -129,7 +133,7 @@ public class CreatePDFReportController {
             tempImageFilePath = path.substring(0,path.lastIndexOf(File.separator));
             findDir.delete();
         }
-        System.out.println(tempImageFilePath);
+        logger.debug(tempImageFilePath);
         JasperExportManager.exportReportToPdfFile(printWithParameter, tempImageFilePath + File.separator + fileName);
         
 
@@ -228,10 +232,10 @@ public class CreatePDFReportController {
     	fishEx = fishEx.concat("REQUEST=GetMap");
     	fishEx = fishEx.concat("&SERVICE=WMS");
     	fishEx = fishEx.concat("&FORMAT=image/png");
-    	fishEx = fishEx.concat("&srs=EPSG:32633");
+    	fishEx = fishEx.concat("&CRS=EPSG:32633");
         //fishEx = fishEx.concat("&srs=" + request.getParameter("srs"));
     	fishEx = fishEx.concat("&transparent=true");
-        fishEx = fishEx.concat("&version=1.1.1");
+        fishEx = fishEx.concat("&version=1.3.0");
         fishEx = fishEx.concat("&width=" + width);
         fishEx = fishEx.concat("&height=" + height);
         fishEx = fishEx.concat("&SLD=" + sld);
