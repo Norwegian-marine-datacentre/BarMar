@@ -4,9 +4,9 @@ public class UrlConsts {
 	
 	// Change url to change test environment - also change in comboboxNorMar.js 
 	// And use your local ip address when testing - e.g. http://10.1.9.221/geodata/nordicSeaMarineAtlas.html
-	public final static String MAIN_URL = "http://maps.imr.no/geoserver/wms?";
+//	public final static String MAIN_URL = "http://maps.imr.no/geoserver/wms?";
 //	public final static String MAIN_URL = "http://geb-test.nodc.no/geoserver/wms?";
-//	public final static String MAIN_URL = "http://10.1.9.230:8080/geoserver/wms?";
+	public final static String MAIN_URL = "http://10.1.9.230:8080/geoserver/wms?";
 	
 	
 	public final static String SERVICE = "service=WFS";

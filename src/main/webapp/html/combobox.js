@@ -1,12 +1,12 @@
 var felayer;
 
 //PROD
-var MAPS_IMR_NO = "http://maps.imr.no/geoserver/wms?";
+//var MAPS_IMR_NO = "http://maps.imr.no/geoserver/wms?";
 
 //TEST: on local machine - use your ip address instead of localhost 
 //var MAPS_IMR_NO = "http://geb-test.nodc.no/geoserver/wms?";
 
-//var MAPS_IMR_NO = "http://10.1.9.230:8080/geoserver/wms?";
+var MAPS_IMR_NO = "http://10.1.9.230:8080/geoserver/wms?";
 
 var NORMAR_GRID = 11;
 
