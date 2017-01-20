@@ -1,0 +1,134 @@
+<html></html>
+<head>
+
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="googlebot" content="noindex, nofollow">
+<script type="text/javascript" src="//code.jquery.com/jquery-1.9.1.js"></script>
+<script type="text/javascript" src="//code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+<link rel="stylesheet" type="text/css" href="//code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" />
+<link rel="stylesheet" type="text/css" href="/css/result-light.css" />
+<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
+<script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://rawgit.com/silviomoreto/bootstrap-select/master/dist/css/bootstrap-select.css" />
+<script type="text/javascript" src="https://rawgit.com/silviomoreto/bootstrap-select/master/dist/js/bootstrap-select.js"></script>
+
+<title> by synz</title>
+<script type="text/javascript">
+//<![CDATA[
+$(window).load(function(){
+	$("li").on('click', function(){
+		var base 		= $(this).closest(".bootstrap-select");
+		var select 	= base.find("select");
+
+		if(base.length && select.prop("multiple")){ // check if this .dropdown-header is part of bootstrap-select AND multiple or not
+
+			var group 	= $(this).data("optgroup")-1;
+			var group2 	= group+1;
+			var select 	= $(this).closest(".bootstrap-select").find("select");
+
+			if($(this).hasClass("dropdown-header")){
+
+				if(base.find("li[data-optgroup=" + group2 + "]:not(.selected)").length === 1)
+					$(this).closest(".bootstrap-select").find("select > optgroup:eq(" + group + ") > option").prop("selected",false);
+				else
+					$(this).closest(".bootstrap-select").find("select > optgroup:eq(" + group + ") > option").prop("selected",true);
+
+				select.selectpicker('render');
+				var rs 	= select.mySelect();
+				$(".result").text(rs);
+
+			}else{
+				setTimeout(function() { // set timeout because waiting for some bootstrap-select event done.
+					var rs 	= select.mySelect();
+					$(".result").text(rs);
+				}, 100);
+			}
+		}else{
+			$(".result").text("not a bootstrap-select");
+		}
+	});
+
+	/* function onchange */
+	$.fn.mySelect = function(){ 
+		var arr = new Array();
+		$(this).find("option").each(function()
+		{
+			if($(this).is(":selected"))
+			{             
+				id = $(this).attr("id");
+				class_dept = $(this).attr("class");
+				if(id == class_dept){
+					//do something
+				}
+
+				if(arr.indexOf(id) == -1)
+				{
+					arr.push(id); 
+				}
+			}
+			else
+			{
+				id = $(this).attr("id");
+				arr = jQuery.grep(arr, function(value) {
+					return value != id;
+				});             
+			}
+		});
+
+		return "Last selected : " + arr[arr.length-1] +" | array_item:"+ arr;
+
+	}
+});//]]> 
+
+</script>
+</head>
+<body>
+<div class="result"></div>
+<br/>
+  <div class="dropdown">
+    <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">Try Click Me!
+    <span class="caret"></span></button>
+    <ul class="dropdown-menu">
+      <li class="dropdown-header">Dropdown header 1</li>
+      <li><a href="#">HTML</a></li>
+      <li><a href="#">CSS</a></li>
+      <li><a href="#">JavaScript</a></li>
+      <li class="divider"></li>
+      <li class="dropdown-header">Dropdown header 2</li>
+      <li><a href="#">About Us</a></li>
+    </ul>
+  </div>
+<br/>
+<select class="selectpicker dcc" id="join_person" multiple>
+
+     <optgroup label="GROUP A (Click Me To Select All)">
+    <option class="A d" id="1">andy</option>
+    <option class="A" id="2">peter</option>
+    <option class="A" id="3">amy</option>
+</optgroup>
+     <optgroup label="GROUP B (Click Me To Select All)">
+    <option id="B">group2</option>
+    <option class="B" id="4">kelly</option>
+    <option class="B" id="5">tim</option>
+</optgroup>
+
+</select>
+
+<select class="selectpicker" id="join_person" multiple>
+
+     <optgroup label="GROUP A (Click Me To Select All)">
+    <option class="A d" id="1">andy</option>
+    <option class="A" id="2">peter</option>
+    <option class="A" id="3">amy</option>
+</optgroup>
+     <optgroup label="GROUP B (Click Me To Select All)">
+    <option id="B">group2</option>
+    <option class="B" id="4">kelly</option>
+    <option class="B" id="5">tim</option>
+</optgroup>
+
+</select>
+
+</body>
+</html>

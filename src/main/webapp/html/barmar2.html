@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>BarMar</title>
+        <meta charset="utf-8" />
+        
+
+    
+<link rel="stylesheet" href="http://openlayers.org/en/v3.15.1/css/ol.css" type="text/css">        
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+
+<script   src="https://code.jquery.com/jquery-2.2.3.min.js" integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo=" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+<script src="ol-debug.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.3.12/proj4.js"></script>
+    
+    <script type="text/javascript" src="layer-list.js"></script>
+    <script type="text/javascript" src="get-parameters-as-json.js"></script>
+    <script type="text/javascript" src="combobox.js"></script>
+    <script type="text/javascript" src="ol-map-config.js"></script>
+    
+    <script type="text/javascript" src="multiselectDropdown.js"></script>
+	<!-- link rel="stylesheet" type="text/css" href="https://rawgit.com/silviomoreto/bootstrap-select/master/dist/css/bootstrap-select.css" / -->
+	<!-- script type="text/javascript" src="https://rawgit.com/silviomoreto/bootstrap-select/master/dist/js/bootstrap-select.js"></script -->
+
+	<link rel="stylesheet" type="text/css" href="bootstrap-select/css/bootstrap-select.css" />
+	<script type="text/javascript" src="bootstrap-select/js/bootstrap-select.js"></script>        
+
+    <link rel="stylesheet" type="text/css" href="barmar.css" />
+    
+    </head>
+    <body>
+
+<div id="map" class="map"></div>     
+ 
+<div class="container" style="border-style: solid;border-width:1px;width:957px">
+    <div class="row" >    
+        <table id="imrHeading">
+            <tr>
+              <td>
+                 <div style="display:inline-block;">
+                     <a href="http://www.imr.no"><img src="imr/logo_imr.png" height="67px" width="461" /></a>
+                 </div>
+              </td>
+              <td>    
+                 <span style="float:right;">
+                 <img src="imr/background_top_trans.jpg" alt="Havforskningsinstituttet" height="118px" width="490" ></span>
+              </td>
+            </tr>
+        </table>     
+    </div>
+</div>
+
+<div style="position: relative; " id="checkboxes">
+    <ul class="layerstack controls"></ul>
+    <div class="controls">
+        <button id="raise" class="btn btn-primary btn-xs"><span class="glyphicon glyphicon-arrow-up"></span></button><br/>
+        <button id="lower" class="btn btn-primary btn-xs"><span class="glyphicon glyphicon-arrow-down"></span></button>
+    </div>
+</div>
+
+<div style="display: none;" id="progress"><img src="imr/images/avatar-black.gif" /></div>
+
+
+  <div class="panel-group" id="accordionMeta" style="position: absolute;bottom: 0em;right: 4em;border-width:1px">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h4 class="panel-title">
+          <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo">
+            <span class="glyphicon glyphicon-minus"></span>
+            Metadata
+          </a>
+        </h4>
+      </div>
+      <div id="collapseTwo" class="panel-collapse collapse in">
+        <div class="panel-body"  style="width: 512px;">
+  
+    <div id="metadata">
+        <p>Metadata</p>
+    </div> 
+ 
+        </div>
+      </div>
+    </div>
+    
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h4 class="panel-title">
+          <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapseThree">
+            <span class="glyphicon glyphicon-minus"></span>
+            Legend
+          </a>
+        </h4>
+      </div>
+      <div id="collapseThree" class="panel-collapse collapse in panel-scroll">
+        <div class="panel-body"  style="width: 512px;">
+  
+    <div id="legend"></div> 
+ 
+        </div>
+      </div>
+    </div>
+        
+  </div>
+  
+  
+
+
+<div class="panel-group" id="accordionBarMar" style="position: absolute;bottom:0px;left: 8px;">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
+          <span class="glyphicon glyphicon-minus"></span>
+          BarMar
+        </a>
+      </h4>
+    </div>
+
+<select class="selectpicker dcc" id="join_person" multiple>
+
+    <optgroup label="Length (Click Me To Select All)">
+    <option class="A d" id="1">andy</option>
+    <option class="A" id="2">peter</option>
+    <option class="A" id="3">amy</option>
+</optgroup>
+     <optgroup label="Age (Click Me To Select All)">
+    <option id="B">group2</option>
+    <option class="B" id="4">kelly</option>
+    <option class="B" id="5">tim</option>
+</optgroup>
+</optgroup>
+     <optgroup label="Other (Click Me To Select All)">
+    <option id="C">group3</option>
+    <option class="B" id="4">kelly</option>
+    <option class="B" id="5">tim</option>
+</optgroup>
+
+</select>
+
+  </div>
+</div>
+
+
+
+    <script>    
+    	setSelectedValue("#visning", "punktvisning");
+    
+        $("#punktvisning").button('toggle');
+        
+        getParametersAsJson("BarMar", "Cod", "Cod_survey_trawl_ecosystem_0-4cm");
+        
+        var PUNKTVISNING = "punktvisning";
+        var AREALVISNING = "arealvisning";
+        var LAYER_POINTVALUE = "postgis:pointvalue";
+        var LAYER_AREAVALUE = "postgis:areavalue";
+        //var LAYER_POINTVALUE = "test:pointvalue";
+        //var LAYER_AREAVALUE = "test:areavalue";
+    
+        var v = $("#createMap");
+        console.log("createMap:"+$("#createMap").text());
+        $("#createMap").click(function() {
+            readBarMar();
+            drawmap(map);
+        });
+
+        $("#createPDF").click(function() {
+            readBarMar();
+            createPDF(map);
+        });
+        
+        function readBarMar() {
+            comboboxGrid = "BarMar";//$("#grid").parents(".dropdown").find('.btn').val();
+            comboboxSpecies = $("#speciesBtn").val();
+            comboboxParameter = $("#speciesSubGroupBtn").val(); 
+            comboboxPeriod = $("#periodBtn").val();
+            comboboxDepth = $("#depthBtn").val();
+            var visning = $("#displayTypeBtn").val();
+            if ( visning === 'punktvisning') {
+                displayType = PUNKTVISNING;
+                layername = LAYER_POINTVALUE;
+            } else {
+                displayType = AREALVISNING;
+                layername = LAYER_AREAVALUE;
+            }
+            displayName = createDisplayName(comboboxParameter, comboboxPeriod, comboboxDepth, displayType);
+            
+            if ( comboboxPeriod==="Select Value") comboboxPeriod = "F";
+            if ( comboboxDepth==="Select Value") comboboxDepth = "F";
+        }
+        
+        var layers = [
+            new ol.layer.Tile({
+                source: new ol.source.TileWMS({
+                    url: 'http://maps.imr.no/geoserver/wms',
+                    params: {
+                        'LAYERS': 'landareal_europa',
+                        'VERSION': '1.1.1',
+                        'TRANSPARENT': 'true'
+                    }
+                }),
+                'name': 'Europa'
+            })
+        ];
+
+        var map = new ol.Map({
+            controls: ol.control.defaults().extend([
+                new ol.control.ScaleLine({
+                    units: ol.control.ScaleLineUnits.METRIC,
+                    className: 'ol-scale-line',
+                    target: document.getElementById('scale-line')
+                })
+            ]),
+            layers: layers,
+            target: 'map',
+            view: new ol.View({
+                projection: 'EPSG:32633',
+                center: [1088474,8089849],
+                zoom:3
+            })
+        });
+                  
+        $('ul.layerstack').prepend(
+                '<li data-layerid="' + layers[0].get('name') + '"><input type="checkbox" checked="checked"> ' + layers[0].get('name') + '</li>'
+        );
+        
+        function createDisplayName(param, period, depth, displayType) {
+            var adisplayName = param;
+            if ( period != "Select Value" ) {
+                adisplayName+= "_" + period;
+            }
+            if ( depth != "Select Value" ) {
+                adisplayName+= "_" + depth;
+            }
+            adisplayName += "_" + displayType;
+            return adisplayName;
+        }
+    </script> 
+    </body>
+</html>

@@ -1,5 +1,20 @@
+var SELECT_VALUE = "Select Value";
+
+var dropDownAdd = function( buttonId, optionTxt, index, selectedValue ) {
+    if ( index === 0 ) {
+        $( buttonId ).html( addLI(optionTxt) );
+        $(buttonId+'Btn').attr('disabled', false);
+    } else {
+        $( buttonId ).append( addLI(optionTxt) );
+    }
+    if ( optionTxt === selectedValue) {
+        setSelectedValue( buttonId, optionTxt );
+    } else if ( selectedValue === undefined ) {
+        setSelectedValue( buttonId, SELECT_VALUE );
+    }
+};
+
 function getParametersAsJson(grid, species, speciesSubGroup, depth, period, displaytype) {
-    var SELECT_VALUE = "Select Value";
     return function() {
         var xmlhttp = new XMLHttpRequest();
         var url = "barmar.json?grid="+grid+"&species="+species+"&subSpecies="+speciesSubGroup;
@@ -7,19 +22,6 @@ function getParametersAsJson(grid, species, speciesSubGroup, depth, period, disp
         xmlhttp.onreadystatechange = function() {
             if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
                 barMarParameters = JSON.parse(xmlhttp.responseText);
-                var dropDownAdd = function( buttonId, optionTxt, index, selectedValue ) {
-                    if ( index === 0 ) {
-                        $( buttonId ).html( addLI(optionTxt) );
-                        $(buttonId+'Btn').attr('disabled', false);
-                    } else {
-                        $( buttonId ).append( addLI(optionTxt) );
-                    }
-                    if ( optionTxt === selectedValue) {
-                        setSelectedValue( buttonId, optionTxt );
-                    } else if ( selectedValue === undefined ) {
-                        setSelectedValue( buttonId, SELECT_VALUE );
-                    }
-                };
                 
                 var emptyBtnList = function( buttonId, theBtnListElement ) {
                     if ( theBtnListElement == null || theBtnListElement.length == 0 ) {

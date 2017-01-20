@@ -2,23 +2,23 @@ package no.imr.barmar.controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import no.imr.barmar.gis.geoserver.UrlConsts;
 import no.imr.barmar.gis.wfs.GetWFSList;
 import no.imr.barmar.pojo.BarMarPojo;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.ModelAndView;
+import no.imr.barmar.pojo.ParameterPojo;
 
 /**
  *
@@ -28,6 +28,7 @@ import org.springframework.web.servlet.ModelAndView;
 @Controller
 public class BarMarController {
 
+	private static final Logger logger = LoggerFactory.getLogger(BarMarController.class);
     
 //    private String grid;
 //    private String gridValue;
@@ -56,6 +57,13 @@ public class BarMarController {
     @Autowired( required = true )
     private GetWFSList gwfs  = null;
 
+    @RequestMapping("/barmar2.json")
+    public @ResponseBody Map getBarMarJson2( 
+            @RequestParam(value = "grid", required=false) String grid, 
+            @RequestParam(value="species", required=false) String species,
+            @RequestParam(value="subSpecies", required=false) String subSpecie) throws IOException, Exception {
+    	return getBarMarJson(grid, species, subSpecie);
+    }
     /**
      * FILLS THE COMBOBOX FOR GRIDS:
      * @param grid
@@ -76,12 +84,21 @@ public class BarMarController {
         List<String> grids = gwfs.getWFSList("gridname", null, urlRequestParameterName );
         barMarParameteres.put("grid", grids);
         
-        List<String> speciesSubgroups = getSpeciesSubgroupFromWFSlist( grid, urlRequestParameterName );        
+        List<String> speciesSubgroups = getSpeciesSubgroupFromWFSlist( grid, urlRequestParameterName ); 
+//        for ( String l : speciesSubgroups ) {
+//        	System.out.println(l);
+        	logger.error("Cod:"+speciesSubgroups.toString());
+//        }
         barMarParameteres.put("species", getSpecies(speciesSubgroups));
         
         if ( species != null) {
             List<String> speciesSubgroup = getSpeciesSubgroups( speciesSubgroups, species);
-            barMarParameteres.put("speciesSubgroup", speciesSubgroup);
+            logger.error("speciesSubgroup length:"+speciesSubgroup.size());
+            
+            List<String> sortedSubGroups = sortSubSpecies( speciesSubgroup );
+            
+            barMarParameteres.put("speciesSubgroup", sortedSubGroups);
+            
         }
         
         if ( subSpecie != null) {
@@ -102,7 +119,104 @@ public class BarMarController {
         }
         return barMarParameteres;
     }
-   
+
+    
+    protected List<String> sortSubSpecies( List<String> speciesSubgroup ) {
+        Map<ParameterPojo, String> lengthSubgroup = new HashMap<ParameterPojo, String>();
+        Map<ParameterPojo, String> ageSubgroup = new HashMap<ParameterPojo, String>();
+        List<String> otherSubGroup = new ArrayList<String>();
+        
+        logger.error("records length:"+speciesSubgroup.size());
+        int v = 0;
+        for ( String aspecies : speciesSubgroup ) {
+        	v++;
+        	String dataType = ""; //cm, year or other
+        	int indexOfDigitsForType = 0;
+        	String[] result = aspecies.split("_");
+            for (int x=4; x<result.length; x++) { //start reading length or year from 5th '_'
+            	//logger.error("result[x]"+result[x]);
+            	if ( result[x].contains("cm") ) {
+            		dataType = "cm";
+            		indexOfDigitsForType = aspecies.indexOf(result[x]);
+//            		break;
+            	} else if ( result[x].contains("yr") || result[x].contains("0-group") ) {
+            		dataType = "yr";
+            		indexOfDigitsForType = aspecies.indexOf(result[x]);
+//            		break;
+            	} else {
+            		logger.error("what record is this?:"+result[x]);
+            	}
+            }
+        	
+//            logger.error("record:"+aspecies+" v:"+v);
+        	if ( dataType.toLowerCase().contains( "cm" ) ) {
+        		int alength = 0;
+        		StringBuffer lengthAsStr = new StringBuffer();
+        		boolean foundDigit = false;
+        		String speciesName = "";
+        		for ( int i=indexOfDigitsForType; i < aspecies.length(); i++ ) {
+        			if ( Character.isDigit( aspecies.charAt(i) ) ) {
+        				if ( foundDigit == false && i > 0) {
+            				speciesName = aspecies.substring(0, i-1);
+        				}
+        					
+        				foundDigit = true;
+        				lengthAsStr.append( aspecies.charAt(i) );
+        			} else if ( foundDigit == true ) {
+        				break;
+        			}
+        		}
+        		logger.error("cm:"+aspecies+" v:"+v);
+    			alength = new Integer( lengthAsStr.toString() );
+    			lengthSubgroup.put(new ParameterPojo(speciesName, alength), aspecies);
+        	} else if ( dataType.toLowerCase().contains("yr") || dataType.toLowerCase().contains("0-group")) {
+        		int alength = 0;
+        		StringBuffer lengthAsStr = new StringBuffer();
+        		boolean foundDigit = false;
+        		String speciesName = "";
+        		for ( int i=0; i < aspecies.length(); i++ ) {
+        			if ( Character.isDigit( aspecies.charAt(i) ) ) {
+        				if ( foundDigit == false && i > 0) {
+            				speciesName = aspecies.substring(0, i-1);
+        				}
+        				foundDigit = true;
+        				lengthAsStr.append( aspecies.charAt(i) );
+        			}
+        		}
+        		logger.error("year:"+aspecies+" v:"+v);
+    			alength = new Integer( lengthAsStr.toString() );
+    			ageSubgroup.put(new ParameterPojo(speciesName, alength), aspecies);            		
+        	} else {
+        		logger.error("other:"+aspecies+" v:"+v);
+        		otherSubGroup.add(aspecies);
+        	}
+        }
+        logger.error("v:"+v);
+        
+        List<ParameterPojo> sortedKeys = new ArrayList<ParameterPojo>(lengthSubgroup.keySet());
+        Collections.sort(sortedKeys);
+        List<String> lengthSorted = new ArrayList<String>();
+        for ( ParameterPojo pLength : sortedKeys ) {
+        	lengthSorted.add( lengthSubgroup.get(pLength) );
+        }
+
+        List<ParameterPojo> sortedKeys2 = new ArrayList<ParameterPojo>(ageSubgroup.keySet());
+        Collections.sort(sortedKeys2);
+        List<String> ageSorted = new ArrayList<String>();
+        for ( ParameterPojo pAge : sortedKeys2 ) {
+        	ageSorted.add( ageSubgroup.get(pAge) );
+        }
+        List<String> sortedSubGroups = new ArrayList<String>();
+        
+        sortedSubGroups.addAll(lengthSorted);
+        sortedSubGroups.addAll(ageSorted);
+        sortedSubGroups.addAll(otherSubGroup);
+        System.out.println("lengthSorted:"+lengthSorted.size());
+        System.out.println("ageSorted:"+ageSorted.size());
+        System.out.println("otherSubGroup:"+otherSubGroup.size());
+        System.out.println("sortedSubGroups:"+sortedSubGroups.size());
+        return sortedSubGroups;
+    }
     
     /**
      * FILLS THE COMBOBOX FOR GRIDS:
@@ -149,7 +263,11 @@ public class BarMarController {
         for( String aSubgroup : speciesSubgroups ) {
             if ( aSubgroup.startsWith(speciesPrefix)) {
                 thisSpeciesSubgroup.add( aSubgroup );
-            }
+//                logger.error("add:"+aSubgroup);
+            } 
+//            else {
+//            	logger.error("!Cod:"+aSubgroup);
+//            }
         }
         return thisSpeciesSubgroup;
     }

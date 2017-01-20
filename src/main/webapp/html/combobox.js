@@ -6,13 +6,14 @@ var felayer;
 //TEST: on local machine - use your ip address instead of localhost 
 //var MAPS_IMR_NO = "http://geb-test.nodc.no/geoserver/wms?";
 
-var MAPS_IMR_NO = "http://10.1.9.230:8080/geoserver/wms?";
+//DEV:
+var MAPS_IMR_NO = "http://10.1.9.138:8080/geoserver/wms?";
 
 var NORMAR_GRID = 11;
 
 var BASE_URL = location.href.substring(0,location.href.lastIndexOf('/')) + "/";
 
-//var BASE_URL = "http://10.1.9.230:9090/"; // for development
+//var BASE_URL = "http://10.1.9.230:9090/"; 
 
 var comboboxGrid = ""; 
 var comboboxSpecies = "";

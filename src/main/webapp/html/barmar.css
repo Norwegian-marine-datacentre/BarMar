@@ -1,0 +1,76 @@
+            html, body, #map {
+                margin: 0;
+                width: 100%;
+                height: 100%;
+                position: absolute;
+            }
+
+            .metadataText {
+                width: 512px;
+            }
+            
+             #barmar { 
+                 position: relative; 
+                 top: 1em; 
+                 left: 5em; 
+                 padding: 0 0.5em 0.5em 0.5em; 
+                 background-color:transparent;  
+            }
+                        
+            .scrollable-menu { /*dropdown boxes*/
+                height: auto;
+                max-height:60vh;
+                overflow-x: hidden;
+            }   
+            
+            #imrHeading {
+                background-image:url('imr/background_body_None.jpg');
+                position: relative;
+            }
+            
+            // layerList styles:
+            ul.layerstack {
+                list-style: none;
+            }
+            ul.layerstack li {
+                border-bottom: 1px solid #ccc;
+                padding: 3px;
+            }
+            ul.layerstack li:hover {
+                background-color: #eee;
+            }
+            ul.layerstack li.selected {
+                background-color: #ddd;
+            }
+            .controls {
+                float: left;
+                margin-right: 5px;
+            }
+
+            /* scale line */
+            .ol-scale-line {
+                top: 8px;
+                right: 8px;
+                bottom:auto;
+                left:auto;    
+            }
+            
+            /* checkbox in layer list */
+            #checkboxes label {
+                float: left;
+            }
+            #checkboxes ul {
+                margin: 0;
+                list-style: none;
+                float: left;
+            }
+            
+            /**    
+ * Scrollbar to accordion
+ */
+ .panel-scroll {
+     max-height: 320px;
+ overflow: hidden;
+ overflow-y: auto;
+}
+/**********************/

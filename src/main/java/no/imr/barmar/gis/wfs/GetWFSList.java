@@ -58,7 +58,7 @@ public class GetWFSList {
             String filter = filterStart;
             filter += sldFromMap.getSelectionRule( pojo);
             filter += andOperatorEnd + filterEnd;
-            
+            logger.error("filter url:"+urlRequest + "&filter=" + filter);
             if (filter != null) {
                 filter = URLEncoder.encode(filter, "UTF-8");
                 urlRequest = urlRequest + "&filter=" + filter;

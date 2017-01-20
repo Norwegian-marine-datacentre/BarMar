@@ -25,6 +25,13 @@
     <script type="text/javascript" src="get-parameters-as-json.js"></script>
     <script type="text/javascript" src="combobox.js"></script>
     <script type="text/javascript" src="ol-map-config.js"></script>
+    
+    <script type="text/javascript" src="multiselectDropdown.js"></script>
+<link rel="stylesheet" type="text/css" href="https://rawgit.com/silviomoreto/bootstrap-select/master/dist/css/bootstrap-select.css" />
+<script type="text/javascript" src="https://rawgit.com/silviomoreto/bootstrap-select/master/dist/js/bootstrap-select.js"></script>
+
+<link rel="stylesheet" type="text/css" href="bootstrap-select/css/bootstrap-select.css" />
+<script type="text/javascript" src="bootstrap-select/js/bootstrap-select.js"></script>        
 
         <style type="text/css">
         
@@ -193,6 +200,24 @@
         </a>
       </h4>
     </div>
+    
+    <div>
+<select class="selectpicker dcc" id="join_person" multiple>
+
+     <optgroup label="GROUP A (Click Me To Select All)">
+    <option class="A d" id="1">andy</option>
+    <option class="A" id="2">peter</option>
+    <option class="A" id="3">amy</option>
+</optgroup>
+     <optgroup label="GROUP B (Click Me To Select All)">
+    <option id="B">group2</option>
+    <option class="B" id="4">kelly</option>
+    <option class="B" id="5">tim</option>
+</optgroup>
+
+</select>
+    </div>
+    
     <div id="collapseOne" class="panel-collapse collapse in">
       <div class="panel-body" style="border-width:1px">
       
@@ -287,9 +312,7 @@
 
 
 
-    <script>
-
-    
+    <script>    
     console.log("punktvisning:"+$(".punktvisning"));
     setSelectedValue("#visning", "punktvisning");
     
