@@ -1,12 +1,15 @@
 package no.imr.barmar.config;
 
+import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.servlet.ViewResolver;
@@ -34,10 +37,6 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
     @Override
     public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
         configurer
-//                .favorPathExtension(false)
-//                .favorParameter(true)
-                // ignoreAcceptHeader(true)
-//                .parameterName("format").useJaf(false)
                 .defaultContentType(MediaType.APPLICATION_JSON)
                 .mediaType("json", MediaType.APPLICATION_JSON)
                 .mediaType("html", MediaType.TEXT_HTML);
@@ -50,7 +49,19 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
      */
     @Override
     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-        converters.add(getMappingJacksonHttpMessageConverter());
+    	converters.add(stringConverter());
+        converters.add(mappingJackson2HttpMessageConverter());
+        super.configureMessageConverters(converters);
+    }
+    
+    @Bean
+    public StringHttpMessageConverter stringConverter() {
+        final StringHttpMessageConverter stringConverter = new StringHttpMessageConverter( Charset.forName("UTF-8") );
+        stringConverter.setSupportedMediaTypes(Arrays.asList(
+                MediaType.TEXT_PLAIN,
+                MediaType.TEXT_HTML,
+                MediaType.APPLICATION_JSON));
+        return stringConverter;
     }
 
     /**
@@ -59,7 +70,7 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
      * @return The json converter.
      */
     @Bean(name = "mappingJacksonHttpMessageConverter")
-    public HttpMessageConverter getMappingJacksonHttpMessageConverter() {
+    public HttpMessageConverter mappingJackson2HttpMessageConverter() {
         MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
         converter.setPrettyPrint(true);
         // converter.getObjectMapper().configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS,
@@ -73,25 +84,11 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
         //registry.addResourceHandler("/html/**").addResourceLocations("/html/");
 
     }
-
-//    @Bean
-//    public ViewResolver getViewResolver() {
-//        InternalResourceViewResolver resolver = new InternalResourceViewResolver();
-//        resolver.setPrefix("/WEB-INF/jsp/");
-//        resolver.setSuffix(".jsp");
-//        return resolver;
-//    }
     
     @Bean
     public ViewResolver contentNegotiatingViewResolver(ContentNegotiationManager manager) {
 
         List<ViewResolver> resolvers = new ArrayList<ViewResolver>();
-
-//        InternalResourceViewResolver r1 = new InternalResourceViewResolver();
-//        r1.setPrefix("/WEB-INF/pages/");
-//        r1.setSuffix(".jsp");
-//        r1.setViewClass(JstlView.class);
-//        resolvers.add(r1);
 
         JsonViewResolver r2 = new JsonViewResolver();
         resolvers.add(r2);

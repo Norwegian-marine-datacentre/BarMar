@@ -8,7 +8,7 @@ import javax.xml.stream.XMLStreamException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import no.imr.barmar.gis.geoserver.UrlConsts;
+import no.imr.barmar.geoserver.UrlConsts;
 import no.imr.barmar.gis.sld.StAXreader.StAXreaderException;
 import no.imr.barmar.pojo.BarMarPojo;
 

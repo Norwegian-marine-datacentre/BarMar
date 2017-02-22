@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper      
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"      
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="no.imr.barmar.pojo.mybatis.DepthMapper"> 
+
+	<resultMap id="DepthResult" type="no.imr.barmar.pojo.mybatis.Depth">
+    	<id property="id" column="id_vcell"/>
+    	<result property="name" column="name"/>
+	</resultMap>
+	    
+	<select id="getDepth" resultMap="DepthResult" resultType="java.util.ArrayList" parameterType="map">
+   		SELECT pv.id_vcell as id_vcell, v.name as name FROM parameter_vcell pv, vcell v where pv.id_parameter=#{parameterId} and pv.id_grid=#{gridId} and pv.id_vcell=v.id ORDER BY v.name
+	</select>
+				
+</mapper>

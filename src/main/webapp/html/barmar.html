@@ -4,114 +4,31 @@
         <title>BarMar</title>
         <meta charset="utf-8" />
         
-<script   src="https://code.jquery.com/jquery-2.2.3.min.js" integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo=" crossorigin="anonymous"></script>
-        
-    <!-- Latest compiled and minified CSS -->
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 
-<!-- Optional theme -->
+    
+<link rel="stylesheet" href="http://openlayers.org/en/v3.15.1/css/ol.css" type="text/css">        
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
 
-<!-- Latest compiled and minified JavaScript -->
+<script   src="https://code.jquery.com/jquery-2.2.3.min.js" integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo=" crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
-
-    <link rel="stylesheet" href="http://openlayers.org/en/v3.15.1/css/ol.css" type="text/css">
-    <!-- script src="http://openlayers.org/en/v3.15.1/build/ol.js"></script -->
-    <script src="ol-debug.js"></script>
-    
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.3.12/proj4.js"></script>
+<script src="ol-debug.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.3.12/proj4.js"></script>
     
     <script type="text/javascript" src="layer-list.js"></script>
-    <script type="text/javascript" src="get-parameters-as-json.js"></script>
+    <script type="text/javascript" src="get-parameters-as-json2.js"></script>
     <script type="text/javascript" src="combobox.js"></script>
     <script type="text/javascript" src="ol-map-config.js"></script>
     
     <script type="text/javascript" src="multiselectDropdown.js"></script>
-<link rel="stylesheet" type="text/css" href="https://rawgit.com/silviomoreto/bootstrap-select/master/dist/css/bootstrap-select.css" />
-<script type="text/javascript" src="https://rawgit.com/silviomoreto/bootstrap-select/master/dist/js/bootstrap-select.js"></script>
+	<!-- link rel="stylesheet" type="text/css" href="https://rawgit.com/silviomoreto/bootstrap-select/master/dist/css/bootstrap-select.css" / -->
+	<!-- script type="text/javascript" src="https://rawgit.com/silviomoreto/bootstrap-select/master/dist/js/bootstrap-select.js"></script -->
 
-<link rel="stylesheet" type="text/css" href="bootstrap-select/css/bootstrap-select.css" />
-<script type="text/javascript" src="bootstrap-select/js/bootstrap-select.js"></script>        
+	<link rel="stylesheet" type="text/css" href="bootstrap-select/css/bootstrap-select.css" />
+	<script type="text/javascript" src="bootstrap-select/js/bootstrap-select.js"></script>        
 
-        <style type="text/css">
-        
-            html, body, #map {
-                margin: 0;
-                width: 100%;
-                height: 100%;
-                position: absolute;
-            }
-
-            .metadataText {
-                width: 512px;
-            }
-            
-             #barmar { 
-                 position: relative; 
-                 top: 1em; 
-                 left: 5em; 
-                 padding: 0 0.5em 0.5em 0.5em; 
-                 background-color:transparent;  
-            }
-                        
-            .scrollable-menu { /*dropdown boxes*/
-                height: auto;
-                max-height:60vh;
-                overflow-x: hidden;
-            }   
-            
-            #imrHeading {
-                background-image:url('imr/background_body_None.jpg');
-                position: relative;
-            }
-            
-            // layerList styles:
-            ul.layerstack {
-                list-style: none;
-            }
-            ul.layerstack li {
-                border-bottom: 1px solid #ccc;
-                padding: 3px;
-            }
-            ul.layerstack li:hover {
-                background-color: #eee;
-            }
-            ul.layerstack li.selected {
-                background-color: #ddd;
-            }
-            .controls {
-                float: left;
-                margin-right: 5px;
-            }
-
-            /* scale line */
-            .ol-scale-line {
-                top: 8px;
-                right: 8px;
-                bottom:auto;
-                left:auto;    
-            }
-            
-            /* checkbox in layer list */
-            #checkboxes label {
-                float: left;
-            }
-            #checkboxes ul {
-                margin: 0;
-                list-style: none;
-                float: left;
-            }
-            
-            /**    
- * Scrollbar to accordion
- */
- .panel-scroll {
-     max-height: 320px;
- overflow: hidden;
- overflow-y: auto;
-}
-/**********************/
-        </style>
+    <link rel="stylesheet" type="text/css" href="barmar.css" />
+    
     </head>
     <body>
 
@@ -184,11 +101,7 @@
         </div>
       </div>
     </div>
-        
   </div>
-  
-  
-
 
 <div class="panel-group" id="accordionBarMar" style="position: absolute;bottom:0px;left: 8px;">
   <div class="panel panel-default">
@@ -200,121 +113,90 @@
         </a>
       </h4>
     </div>
-    
-    <div>
-<select class="selectpicker dcc" id="join_person" multiple>
-
-     <optgroup label="GROUP A (Click Me To Select All)">
-    <option class="A d" id="1">andy</option>
-    <option class="A" id="2">peter</option>
-    <option class="A" id="3">amy</option>
-</optgroup>
-     <optgroup label="GROUP B (Click Me To Select All)">
-    <option id="B">group2</option>
-    <option class="B" id="4">kelly</option>
-    <option class="B" id="5">tim</option>
-</optgroup>
-
-</select>
-    </div>
-    
     <div id="collapseOne" class="panel-collapse collapse in">
       <div class="panel-body" style="border-width:1px">
-      
-      <div style="float: left;display:none;">
-          <label for="grid" style="background-color:white;">Grid</label>
-          <div class="dropup">
-            <div class="dropdown">
-                <button class="btn btn-default dropdown-toggle" id="gridBtn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                    <span class="caret"></span>
-                </button>
-                <ul class="dropdown-menu" id="grid" aria-labelledby="dropdownMenu1">
-                </ul>
-            </div>
-          </div>
-      </div>
-      <div style="float: left">
-          <label for="species" style="background-color:white">Species</label>
-          <div class="dropup">
-          <div class="dropdown">
-              <button class="btn btn-default dropdown-toggle" id="speciesBtn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                  <span class="caret"></span>
-              </button>
-              
-              <ul class="dropdown-menu scrollable-menu" id="species" aria-labelledby="dropdownMenu1">
-              </ul>
-          </div></div>
-      </div>
-                   
-      <div style="float: left">                     
-          <label for="subspecies" style="margin-left:10px;background-color:white">Sub Species</label>
-          <div class="dropup">
-          <div class="dropdown">
-              <button class="btn btn-default dropdown-toggle" id="speciesSubGroupBtn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                  <span class="caret"></span>
-              </button>
-              <ul class="dropdown-menu scrollable-menu" id="speciesSubGroup" aria-labelledby="dropdownMenu1">
-              </ul>
-          </div></div>
-      </div>        
 
-      <div style="float:left">       
-          <label for="depth" style="background-color:white">Depth</label>
-          <div class="dropup">
-          <div class="dropdown">
-              <button class="btn btn-default dropdown-toggle" id="depthBtn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                  <span class="caret"></span>
-              </button>
-              <ul class="dropdown-menu scrollable-menu" id="depth" aria-labelledby="dropdownMenu1">
-              </ul>
-          </div></div>
-      </div>
+<div style="float:left">
+	<label for="grid" style="background-color:white;">Grid</label>	
+	<div>	
+		<select class="selectpicker dcc" id="gridselect" data-width="90px">
+			<optgroup label="Grid" id="grid">
+			</optgroup>
+		</select>
+	</div>
+</div>
 
-      <div style="float:left">        
-          <label for="period" style="background-color:white">Period</label>
-          <div class="dropup">
-          <div class="dropdown">
-              <button class="btn btn-default dropdown-toggle" id="periodBtn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                  <span class="caret"></span>
-              </button>
-              <ul class="dropdown-menu scrollable-menu" id="period" aria-labelledby="dropdownMenu1">
-              </ul>   
-          </div></div>
-      </div>
+<div style="float:left">
+	<label style="background-color:white;">Species</label>	
+	<div>
+	<select class="selectpicker" id="speciesselect" data-live-search="true" data-width="100px">
+		<optgroup label="Species" id="species">
+		</optgroup>
+	</select>
+	</div>
+</div>
 
-      <div style="float:left">        
-          <label for="visning" style="background-color:white">View</label>
-          <div class="dropup">
-          <div class="dropdown">
-              <button class="btn btn-default dropdown-toggle" id="displayTypeBtn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                  <span class="caret"></span>
-              </button>
-              <ul class="dropdown-menu scrollable-menu" id="visning" aria-labelledby="dropdownMenu1">
-                  <li><a href="#" data-value="punktvisning">punktvisning</a></li>
-                  <li><a href="#" data-value="arealvisning">arealvisning</a></li>
-              </ul>   
-          </div></div>
-      </div>
+<div style="float:left">
+	<label style="background-color:white;">Species Length, Age, or Other</label>	
+	<div>
+		<select class="selectpicker dcc" id="speciesSubGroupselect" data-live-search="true" data-width="css-width" multiple>
+			<optgroup label="Species length" id="speciesSubGroupLength">
+			</optgroup>
+			<optgroup label="Species Age" id="speciesSubGroupAge">
+			</optgroup>
+			<optgroup label="Species Other" id="speciesSubGroupOther">
+			</optgroup>
+		</select>
+	</div>
+</div>
 
-      <div style="float:left">
-          <label for="visning" style="background-color:white">&nbsp;</label>
-          <div>
-              <button type="button" class="btn btn-default" id="createMap">Create Map</button>
-              <button type="button" class="btn btn-default" id="createPDF" style="display:none">Create PDF</button>
-          </div>
-          <form id="hidden_pdf" method="post" onsubmit="ShowLoading()"></form>     
-      </div>
-      
-      </div>
-    </div>
+<div style="float:left">
+	<label style="background-color:white;">Depth</label>	
+	<div>
+		<select class="selectpicker dcc input-small" id="depthselect" data-width="95px">
+			<optgroup label="Depth" id="depth">
+			</optgroup>
+		</select>
+	</div>
+</div>
+
+<div style="float:left">
+	<label style="background-color:white;">Period</label>	
+	<div>
+		<select class="selectpicker dcc input-small" id="periodselect" data-width="105px">
+			<optgroup label="Period" id="period">
+			</optgroup>
+		</select>
+	</div>
+</div>
+
+<div style="float:left">
+	<label style="background-color:white;">View</label>	
+	<div>
+		<select class="selectpicker dcc" id="visning" data-width="120px">
+			<option class="A" id="punktvisning">punktvisning</option>
+			<option class="A" id="arealvisning">arealvisning</option>
+		</select>
+	</div>
+</div>
+
+<div style="float:left">
+  <label for="visning" style="background-color:white">&nbsp;</label>
+  <div>
+	  <button type="button" class="btn btn-default" id="createMap">Create Map</button>
   </div>
+  <form id="hidden_pdf" method="post" onsubmit="ShowLoading()"></form>     
+</div>
+
+			</div>
+		</div>
+	</div>
 </div>
 
 
 
     <script>    
-    console.log("punktvisning:"+$(".punktvisning"));
-    setSelectedValue("#visning", "punktvisning");
+    	setSelectedValue("punktvisning");
     
         $("#punktvisning").button('toggle');
         

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper      
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"      
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="no.imr.barmar.pojo.mybatis.TimeMapper"> 
+
+	<resultMap id="TimeResult" type="no.imr.barmar.pojo.mybatis.Time">
+    	<id property="id" column="id_tcell"/>
+    	<result property="name" column="name"/>
+	</resultMap>
+	    
+	<select id="getTime" resultMap="TimeResult" resultType="java.util.ArrayList" parameterType="map">
+   		SELECT pt.id_tcell, t.name FROM parameter_tcell pt, tcell t WHERE pt.id_parameter=#{parameterId} and pt.id_grid=#{gridId} and pt.id_tcell=t.id ORDER BY t.name
+	</select>
+				
+</mapper>

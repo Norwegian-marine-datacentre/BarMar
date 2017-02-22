@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import no.imr.barmar.gis.sld.SLDFile;
 import no.imr.barmar.gis.wfs.GetWFSList;
@@ -37,7 +38,7 @@ public class CreateSLDController {
     
     @Autowired( required = true )
     private SLDFile sldFile;
-	
+    	
 	@RequestMapping("/createsld")
     public void createsld(
     		@RequestParam("grid") String grid,
@@ -46,17 +47,40 @@ public class CreateSLDController {
     		@RequestParam("depth") String depth,
     		@RequestParam("displaytype") String displaytype,  
             HttpServletResponse resp) throws Exception {
+		
 
         boolean areadisplay = isAreadisplay( displaytype );
         
-        BarMarPojo queryFishEx = new BarMarPojo( grid, parameter, Arrays.asList(depth), Arrays.asList(time) );
+        BarMarPojo queryFishEx = new BarMarPojo( grid, Arrays.asList(parameter), Arrays.asList(depth), Arrays.asList(time) );
         maxMinHelper.setMaxMinLegendValuesFromWFS( queryFishEx, null );
         
+        writeSldToResponse(queryFishEx, areadisplay, resp);
+    }	
+	
+	private void writeSldToResponse(BarMarPojo queryFishEx, boolean areadisplay, HttpServletResponse resp) throws Exception {
         String sld = sldFile.getSLDFile( queryFishEx, areadisplay );
         String filename = "sld_".concat(String.valueOf(Math.random() * 10000 % 1000)).concat(".sld");
         writeSldFileToTmpdir( sld, filename );
-        writeFilenameToResponse( resp, filename );
-    }	
+        writeFilenameToResponse( resp, filename );		
+	}
+	
+	@RequestMapping("/createBarMarsld")
+    public void createBarMarsld(
+    		@RequestParam("grid") String grid,
+    		@RequestParam("parameter[]") String[] parameters,
+    		@RequestParam("time") String time,
+    		@RequestParam("depth") String depth,
+    		@RequestParam("displaytype") String displaytype,  
+            HttpServletResponse resp) throws Exception {
+
+        boolean areadisplay = isAreadisplay( displaytype );
+        
+        BarMarPojo queryFishEx = new BarMarPojo( grid, Arrays.asList(parameters), Arrays.asList(depth), Arrays.asList(time) );
+        maxMinHelper.setMaxMinLegendValuesFromWFS( queryFishEx, null );
+        
+        writeSldToResponse(queryFishEx, areadisplay, resp);
+	}
+
 	
     public void createNorMarsld(String grid, List<String> parameter,
     		List<String> time, List<String> depth, String displaytype,  

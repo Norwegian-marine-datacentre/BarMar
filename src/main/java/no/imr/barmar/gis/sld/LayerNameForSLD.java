@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import no.imr.barmar.gis.geoserver.UrlConsts;
+import no.imr.barmar.geoserver.UrlConsts;
 import no.imr.barmar.pojo.BarMarPojo;
 
 @Component

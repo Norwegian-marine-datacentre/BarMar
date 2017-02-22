@@ -31,12 +31,7 @@ public class BarMarPojo {
         setTime( time );
         setDepth( depth );
     }
-    public BarMarPojo( String grid, String parameter, List<String> depth, List<String> time ) {
-        setGrid( grid );
-        addParameter( parameter );
-        setTime( time );
-        setDepth( depth );
-    }   
+  
     public BarMarPojo(){}
  
     public String getGrid() {
@@ -56,7 +51,10 @@ public class BarMarPojo {
         return parameter;
     }
     public String getParameter(int i) {
-        return parameter.get(i);
+    	if ( parameter.size() > i) {
+    		return parameter.get(i);
+    	}
+    	return "";
     }
     public void setParameter(List<String> parameter) {
         if ( parameter != null ) {

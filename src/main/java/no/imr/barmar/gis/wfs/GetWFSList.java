@@ -34,6 +34,13 @@ public class GetWFSList {
     @Autowired
     private SLDpojoSelectionRule sldFromMap;
     
+    public GetWFSList() {}
+    
+    public GetWFSList(GetWFSParameterList gfs, SLDpojoSelectionRule sldFromMap) {
+    	this.gfs = gfs;
+    	this.sldFromMap = sldFromMap;
+    }
+    
     private String filterStart = "<ogc:Filter xmlns:ogc=\"http://ogc.org\" xmlns:gml=\"http://www.opengis.net/gml\">";
     private String andOperatorStart = "<ogc:And>";
     private String andOperatorEnd = "</ogc:And>";
@@ -58,13 +65,13 @@ public class GetWFSList {
             String filter = filterStart;
             filter += sldFromMap.getSelectionRule( pojo);
             filter += andOperatorEnd + filterEnd;
-            logger.error("filter url:"+urlRequest + "&filter=" + filter);
             if (filter != null) {
                 filter = URLEncoder.encode(filter, "UTF-8");
                 urlRequest = urlRequest + "&filter=" + filter;
             }
         }
         logger.debug("wfs url:"+urlRequest);
+        System.out.println("wfs url:"+urlRequest);
         gfs.readXML(urlRequest, searchProperty);
         List<String> params = gfs.getList();
         gfs.deleteList();

@@ -16,7 +16,7 @@
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.3.12/proj4.js"></script>
     
     <script type="text/javascript" src="layer-list.js"></script>
-    <script type="text/javascript" src="get-parameters-as-json2.js"></script>
+    <script type="text/javascript" src="get-parameters-as-json3.js"></script>
     <script type="text/javascript" src="combobox2.js"></script>
     <script type="text/javascript" src="ol-map-config.js"></script>
     
@@ -62,7 +62,7 @@
 
 <div style="display: none;" id="progress"><img src="imr/images/avatar-black.gif" /></div>
 
-  <div class="panel-group" id="accordionMeta" style="position: absolute;bottom: 1em;right: 0.5em;border-width:1px">
+  <div class="panel-group" id="accordionMeta" style="position: absolute;bottom: 1em;right: 0.5em;border-width:1px;">
     <div class="panel panel-default">
       <div class="panel-heading">
         <h4 class="panel-title">
@@ -75,7 +75,7 @@
       <div id="collapseTwo" class="panel-collapse collapse in">
         <div class="panel-body"  style="width: 512px;">
   
-    <div id="metadata">
+    <div id="metadata" style="max-height:200px;overflow-y:scroll;">
         <p>Metadata</p>
     </div> 
  
@@ -95,7 +95,7 @@
       <div id="collapseThree" class="panel-collapse collapse in panel-scroll">
         <div class="panel-body"  style="width: 512px;">
   
-    <div id="legend"></div> 
+    <div id="legend" style="max-height:200px;overflow-y:scroll;" ></div> 
  
         </div>
       </div>
@@ -194,14 +194,12 @@
     
         $("#punktvisning").button('toggle');
         
-        getParametersAsJson("BarMar", "Cod", "Cod_survey_trawl_ecosystem_0-4cm");
-        
+        getParametersAsJson( "BarMar" );
+
         var PUNKTVISNING = "punktvisning";
         var AREALVISNING = "arealvisning";
         var LAYER_POINTVALUE = "postgis:pointvalue";
         var LAYER_AREAVALUE = "postgis:areavalue";
-        //var LAYER_POINTVALUE = "test:pointvalue";
-        //var LAYER_AREAVALUE = "test:areavalue";
     
         var v = $("#createMap");
         console.log("createMap:"+$("#createMap").text());
