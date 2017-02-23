@@ -6,7 +6,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class Parameter  implements Comparable<Parameter> {
-	@JsonIgnore
+	//@JsonIgnore
 	private Integer id;
 	@JsonIgnore
 	private String name;

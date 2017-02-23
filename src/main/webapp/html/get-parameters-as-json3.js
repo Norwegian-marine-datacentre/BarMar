@@ -35,7 +35,8 @@ function getParametersAsJson(grid) {
 		
         updateSpeciesSubgroup( "Cod" );
 		setSelectedValue( "Cod_survey_trawl_ecosystem_0-4cm", "speciesSubGroupselect" );
-		updateDepthAndTime( "Cod", "length", "Cod_survey_trawl_ecosystem_0-4cm" );
+		var speciesSubGroupList = $('#speciesSubGroupBtn .selectpicker option:selected');
+		updateDepthAndTime( "Cod", speciesSubGroupList );
 		
 		$("#speciesselect").on('changed.bs.select', function(event) {
 			emptyBtnList( "#speciesSubGroupselect" );
@@ -47,16 +48,12 @@ function getParametersAsJson(grid) {
 			emptyBtnList( "#depthBtn" );
 			emptyBtnList( "#periodBtn" );
 
-			var speciesSubGroupObj = $('#speciesSubGroupBtn .selectpicker option:selected');
-			var speciesSubGroup = $(speciesSubGroupObj).val();
+			var speciesSubGroupList = $('#speciesSubGroupBtn .selectpicker option:selected');
+
 			var speciesName = $('#speciesBtn .selectpicker option:selected').val();
 
 			//TODO: create Aggregated union for depth and period
-			var group = $( speciesSubGroupObj ).parent()[0].id;
-			console.log("group:"+group);
-			if ( group === "speciesSubGroupLength" ) updateDepthAndTime( speciesName, "length", speciesSubGroup ); 
-			else if ( group === "speciesSubGroupAge" ) updateDepthAndTime( speciesName, "age", speciesSubGroup ); 
-			else if ( group === "speciesSubGroupOther" ) updateDepthAndTime( speciesName, "other", speciesSubGroup ); 
+			updateDepthAndTime( speciesName, speciesSubGroupList );
 		});		
     };
     xmlhttp.open("GET", url, true);
@@ -97,26 +94,53 @@ function updateSpeciesSubgroup( speciesName ) {
 	$( '#speciesSubGroupselect' ).selectpicker('refresh');
 }
 
-function updateDepthAndTime( speciesName, lengthAgeOther, speciesSubGroup ) {
+function updateDepthAndTime( speciesName, speciesSubGroupList ) {
+
 	emptyBtnList( "#depthBtn" );
 	emptyBtnList( "#periodBtn" );
 	
-    var subgroup = barMarParameters[ speciesName ];
-	var metadataRef = subgroup[ lengthAgeOther ][speciesSubGroup].metadataRef;
-	var depthList = subgroup[ lengthAgeOther ][speciesSubGroup].depths;
-	var periodList = subgroup[ lengthAgeOther ][speciesSubGroup].periods;
-	
-    for (var i=0; depthList != null && i< depthList.length; i++) {
-        dropDownAdd( "#depth", depthList[i], i );
-    }
+	var subgroup = barMarParameters[ speciesName ];
+	var lengthAgeOther = "";
 
-    for (var i=0; periodList != null && i< periodList.length; i++) {
-        dropDownAdd("#period", periodList[i], i);
-    }
+	var unionMetadataRef = [];
+	var intersectDepthList = [];
+	var intersectPeriodList = [];
+	for( var i=0; i < speciesSubGroupList.length; i++) {
+		var aSpeciesSubGroup = $(speciesSubGroupList[i]).val();
+		
+		var optGroup = $(speciesSubGroupList[i]).parent()[0].id;
+		if ( optGroup === "speciesSubGroupLength" ) lengthAgeOther = "length";
+		else if ( optGroup === "speciesSubGroupAge" ) lengthAgeOther = "age"; 
+		else if ( optGroup === "speciesSubGroupOther" ) lengthAgeOther = "other";
+		
+		var metaRef = subgroup[ lengthAgeOther ][aSpeciesSubGroup].metadataRef;
+		var depthList = subgroup[ lengthAgeOther ][aSpeciesSubGroup].depths;
+		var periodList = subgroup[ lengthAgeOther ][aSpeciesSubGroup].periods;
+		
+		console.log("depthList:"+depthList);
+		if ( metaRef != null && $.inArray(metaRef, unionMetadataRef) == -1 )
+			unionMetadataRef.push( metaRef );
+		for ( var j=0; depthList != null && j < depthList.length; j++ ) {
+			if ( $.inArray(depthList[i], intersectDepthList) == -1 ) 
+				intersectDepthList.push( depthList[i] );
+		}
+		for ( var j=0; periodList != null && j < periodList.length; j++ ) {
+			if ( $.inArray(periodList[i], intersectPeriodList) == -1 ) 
+				intersectPeriodList.push( periodList[i] );
+		}
+	}
+	
+	for (var i=0; depthList != null && i< depthList.length; i++) {
+		dropDownAdd( "#depth", depthList[i], i );
+	}
+
+	for (var i=0; periodList != null && i< periodList.length; i++) {
+		dropDownAdd("#period", periodList[i], i);
+	}
 	setSelectedValue( "Aggregated all data", "depthselect" );
 	setSelectedValue( "Aggregated all", "periodselect" );
 	$( '#depthselect' ).selectpicker('refresh');
 	$( '#periodselect' ).selectpicker('refresh');
 
-	$("#metadata").html( '<p>' + barMarParameters[ metadataRef ].metadata + '</p>');
+	$("#metadata").html( '<p>' + barMarParameters[ metaRef ].metadata + '</p>');
 }
