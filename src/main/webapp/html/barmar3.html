@@ -189,12 +189,10 @@
 
 
 
-    <script>    
-    	setSelectedValue("punktvisning");
-    
+    <script>        
         $("#punktvisning").button('toggle');
         
-        getParametersAsJson( "BarMar" );
+        readParametersClosure()( "BarMar" );;
 
         var PUNKTVISNING = "punktvisning";
         var AREALVISNING = "arealvisning";
