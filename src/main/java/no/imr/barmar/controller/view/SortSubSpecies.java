@@ -8,6 +8,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import no.imr.barmar.controller.view.pojo.Parameter;
+import no.imr.barmar.controller.view.pojo.ParameterGroup;
+
 @Component
 public class SortSubSpecies {
 	

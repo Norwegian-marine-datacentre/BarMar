@@ -69,6 +69,12 @@ public class BarMarPojo {
     public List<String> getTime() {
         return time;
     }
+    public String getTime(int i) {
+		if ( time.size() > i) {
+			return time.get(i);
+		}
+		return "";
+    }    
     public void setTime(List<String> time) {
         if ( time == null ) {
             this.time = new ArrayList<String>(0);
@@ -78,6 +84,12 @@ public class BarMarPojo {
     }
     public List<String> getDepth() {
         return depth;
+    }
+    public String getDepth(int i) {
+		if ( depth.size() > i) {
+			return depth.get(i);
+		}
+		return "";
     }
     public void setDepth(List<String> depth) {
         if ( depth == null ) {

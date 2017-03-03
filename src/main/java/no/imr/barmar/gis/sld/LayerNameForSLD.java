@@ -18,7 +18,7 @@ public class LayerNameForSLD {
     	Boolean isNorMar = pojo.getGrid().equals( UrlConsts.NORMAR );
     	
     	if ( areadisplay && !isNorMar ) {
-    		layerName = UrlConsts.BARMAR_AREAVALUE;
+    		layerName = UrlConsts.BARMAR_AREAVALUE_AGGREGATED; //UrlConsts.BARMAR_AREAVALUE;
     	} else if( !areadisplay && !isNorMar ) {
     		layerName = UrlConsts.BARMAR_POINTVALUE;
     	} else if ( areadisplay && isNorMar ) {

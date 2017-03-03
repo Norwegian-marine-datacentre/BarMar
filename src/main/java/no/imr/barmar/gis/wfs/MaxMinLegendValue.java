@@ -22,6 +22,11 @@ public class MaxMinLegendValue {
 	@Autowired
 	private GetWFSList gwfs;
 	
+	public MaxMinLegendValue( GetWFSList gwfs ) {
+		this.gwfs = gwfs;
+	}
+	public MaxMinLegendValue() {}
+	
 	/**
 	 * Get max and min value from wfs postgis:temperature - NorMar or BarMar
 	 * @param queryPojo

@@ -12,6 +12,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import no.imr.barmar.controller.view.pojo.Metadata;
+import no.imr.barmar.controller.view.pojo.Parameter;
+import no.imr.barmar.controller.view.pojo.ParameterGroup;
+
 @Controller
 public class BarMarControllerFromDb {
 

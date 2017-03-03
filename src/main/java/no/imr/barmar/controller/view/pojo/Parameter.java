@@ -1,4 +1,4 @@
-package no.imr.barmar.controller.view;
+package no.imr.barmar.controller.view.pojo;
 
 import java.util.ArrayList;
 import java.util.List;

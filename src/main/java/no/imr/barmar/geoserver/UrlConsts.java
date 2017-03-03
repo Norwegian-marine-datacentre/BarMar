@@ -4,9 +4,9 @@ public class UrlConsts {
 	
 	// Change url to change test environment - also change in comboboxNorMar.js 
 	// And use your local ip address when testing - e.g. http://10.1.9.221/geodata/nordicSeaMarineAtlas.html
-//	public final static String MAIN_URL = "http://maps.imr.no/geoserver/wms?";
+	public final static String MAIN_URL = "http://maps.imr.no/geoserver/wms?";
 //	public final static String MAIN_URL = "http://geb-test.nodc.no/geoserver/wms?";
-	public final static String MAIN_URL = "http://10.1.9.138:8080/geoserver/wms?";
+//	public final static String MAIN_URL = "http://10.1.9.138:8080/geoserver/wms?";
 	
 	
 	public final static String SERVICE = "service=WFS";
@@ -34,6 +34,8 @@ public class UrlConsts {
     
     public final static String NORMAR_AREAVALUE_AGGREGATED = "postgis:areavalueAggregate"; //NORMAR_AREAVALUE; //"test:areavalueNormar2"; 
     public final static String NORMAR_POINTVALUE_AGGREGATED = "postgis:pointvalueAggregate"; //NORMAR_POINTVALUE; //"test:pointvalueNormar2";
+    
+    public final static String BARMAR_AREAVALUE_AGGREGATED = "postgis:barmarAreavalueAggregate"; //BarMar_AREAVALUE; //"test:..."; 
     
     public final static String NORMAR_AREAVALUE = "postgis:areavalueNormar"; //"postgis:areavalueNormarOneParam";  //NORMAR_AREAVALUE_AGGREGATED;
     public final static String NORMAR_POINTVALUE = "postgis:pointvalueNormar"; //"postgis:pointvalueNormarOneParam";    //NORMAR_POINTVALUE_AGGREGATED;

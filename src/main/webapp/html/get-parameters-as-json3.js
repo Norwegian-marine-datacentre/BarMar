@@ -1,17 +1,11 @@
 function readParametersClosure() {
-	var SELECT_VALUE = "Select Value";
 
-	var addLI = function( optionTxt ) {
-		return '<option class="A" id="' + optionTxt + '">' + optionTxt + '</option>';
+	var addLI = function( optionTxt, optionTxtId ) { //id is used by setSelectedValue, value is used by readBarMar() (unable to read id)
+		return '<option value="' + optionTxtId + '" id="' + optionTxtId + '">' + optionTxt + '</option>';
 	}
 
-	var dropDownAdd = function( buttonId, optionTxt, index ) {
-		if ( index === 0 ) {
-			$( buttonId ).append( addLI(optionTxt) );
-			$(buttonId+'Btn').attr('disabled', false);
-		} else {
-			$( buttonId ).append( addLI(optionTxt) );
-		}
+	var dropDownAdd = function( buttonId, optionTxt, index, optionTxtId ) {
+		$( buttonId ).append( addLI(optionTxt, optionTxtId) );
 	};
 
 	var emptyBtnList = function( buttonId ) {
@@ -20,7 +14,7 @@ function readParametersClosure() {
 
 	var setSelectedValue = function( optionTxt, selectpickerGroup) {
 
-		$( "#"+optionTxt ).attr('selected','selected');
+		$( "#"+selectpickerGroup + " #"+optionTxt ).attr('selected','selected');
 		$( "#"+selectpickerGroup ).selectpicker("refresh");
 	}
 
@@ -35,7 +29,8 @@ function readParametersClosure() {
 			setSelectedValue( "Cod", "speciesselect" );
 			
 			updateSpeciesSubgroup( "Cod" );
-			setSelectedValue( "Cod_survey_trawl_ecosystem_0-4cm", "speciesSubGroupselect" );
+			//setSelectedValue( "Cod_survey_trawl_ecosystem_0-4cm", "speciesSubGroupselect" );
+			setSelectedValue( "214", "speciesSubGroupselect" );
 			var speciesSubGroupList = $('#speciesSubGroupBtn .selectpicker option:selected');
 			updateDepthAndTime( "Cod", speciesSubGroupList );
 			setSelectedValue("punktvisning");
@@ -67,7 +62,7 @@ function readParametersClosure() {
 
 		var speciesList = barMarParameters['species'];
 		for (var i=0; i< speciesList.length; i++) {
-			dropDownAdd( "#species", speciesList[i], i);
+			dropDownAdd( "#species", speciesList[i], i, speciesList[i]);
 		}
 		$( '#speciesselect' ).selectpicker('refresh');
 	}
@@ -84,13 +79,14 @@ function readParametersClosure() {
 		var speciesSubgroupAge = Object.keys( subspecies['age'] );
 		var speciesSubgroupOther = Object.keys( subspecies['other'] );
 		for (var i=0; speciesSubgroupLength != null && i < speciesSubgroupLength.length; i++) {
-			dropDownAdd("#speciesSubGroupLength", speciesSubgroupLength[i], i);
+			var asdf = subspecies['length'][speciesSubgroupLength[i]];
+			dropDownAdd("#speciesSubGroupLength", speciesSubgroupLength[i], i, subspecies['length'][speciesSubgroupLength[i]].id );
 		}
 		for (var i=0; speciesSubgroupAge != null && i < speciesSubgroupAge.length; i++) {
-			dropDownAdd("#speciesSubGroupAge", speciesSubgroupAge[i], i);
+			dropDownAdd("#speciesSubGroupAge", speciesSubgroupAge[i], i, subspecies['age'][speciesSubgroupAge[i]].id );
 		}
 		for (var i=0; speciesSubgroupOther != null && i < speciesSubgroupOther.length; i++) {
-			dropDownAdd("#speciesSubGroupOther", speciesSubgroupOther[i], i);
+			dropDownAdd("#speciesSubGroupOther", speciesSubgroupOther[i], i, subspecies['other'][speciesSubgroupOther[i]].id);
 		}
 		$( '#speciesSubGroupselect' ).selectpicker('refresh');
 	}
@@ -107,7 +103,8 @@ function readParametersClosure() {
 		var intersectDepthList = [];
 		var intersectPeriodList = [];
 		for( var i=0; i < speciesSubGroupList.length; i++) {
-			var aSpeciesSubGroup = $(speciesSubGroupList[i]).val();
+			var optionElement = $( speciesSubGroupList[i] )[0];
+			var aSpeciesSubGroup = $( optionElement ).text();
 			
 			var optGroup = $(speciesSubGroupList[i]).parent()[0].id;
 			if ( optGroup === "speciesSubGroupLength" ) lengthAgeOther = "length";
@@ -133,16 +130,21 @@ function readParametersClosure() {
 		}
 		
 		for (var i=0; i < intersectDepthList.length; i++) {
-			dropDownAdd( "#depth", intersectDepthList[i], i );
+			var depthId = intersectDepthList[i]
+			var depthDisplayName = displayPeriodClosure()(depthId);
+			dropDownAdd( "#depth", depthDisplayName, i, depthId );
 		}
-
-		for (var i=0; i < intersectPeriodList.length; i++) {
-			dropDownAdd("#period", intersectPeriodList[i], i);
-		}
-		setSelectedValue( "Aggregated all data", "depthselect" );
-		setSelectedValue( "Aggregated all", "periodselect" );
 		$( '#depthselect' ).selectpicker('refresh');
+		
+		for (var i=0; i < intersectPeriodList.length; i++) {
+			var periodId = intersectPeriodList[i]
+			var periodDisplayName = displayDepth(periodId);			
+			dropDownAdd("#period", periodDisplayName, i, periodId );
+		}
 		$( '#periodselect' ).selectpicker('refresh');
+
+		setSelectedValue( "F", "depthselect" );
+		setSelectedValue( "F", "periodselect" );
 
 		if ( metaRef != undefined )
 			$("#metadata").html( '<p>' + barMarParameters[ metaRef ].metadata + '</p>');

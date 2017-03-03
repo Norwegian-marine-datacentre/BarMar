@@ -23,7 +23,7 @@ public class BarMarControllerTest {
 	}
 	//Url to test:
 	// http://localhost:8081/BarMar/barmar.json?grid=BarMar&species=Cod&subSpecies[]=Cod_survey_trawl_ecosystem_0-4cm
-	@Test
+//	@Test
 	public void multipleParametersTest() throws Exception {
 		String grid = "BarMar";
 		String species = "Cod";

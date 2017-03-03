@@ -25,7 +25,13 @@ public class SLDFile {
     
     @Autowired(required=true)
     protected SLDpojoSelectionRule singleOrAggregateSelectionRule;
-    		
+    	
+    public SLDFile(LayerNameForSLD sldName, SLDpojoSelectionRule singleOrAggregateSelectionRule) {
+    	this.sldName = sldName;
+    	this.singleOrAggregateSelectionRule = singleOrAggregateSelectionRule;
+    }
+    public SLDFile(){}
+    
     /**
      * 
      * @param queryFishEx - assume object is null safe

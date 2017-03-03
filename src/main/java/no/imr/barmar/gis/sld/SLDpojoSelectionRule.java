@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * 
+ * @author trondwe
  * @author endrem
  */
 @Component
@@ -40,48 +41,46 @@ public class SLDpojoSelectionRule {
 	
 	public String getSelectionRule(BarMarPojo queryFishEx) {
 		String selectionRule = "";
-        if ( queryFishEx.getParameter().size() > 1 ) {
-        	selectionRule = getAggregateParameterSelectionRule( queryFishEx );
-        } else {
-        	selectionRule = getSingleParameterSelectionRule( queryFishEx );
-        }
+		selectionRule = getAggregateParameterSelectionRule( queryFishEx );
+//        if ( queryFishEx.getParameter().size() > 1 ) {
+//        	selectionRule = getAggregateParameterSelectionRule( queryFishEx );
+//        } else {
+//        	selectionRule = getSingleParameterSelectionRule( queryFishEx );
+//        }
         setPropertyEqualOp(); 
         return selectionRule;
 	}
 
-    protected String getSingleParameterSelectionRule( BarMarPojo queryPojo) {
-
-        String sRule = "";
-        sRule += "<ogc:And>";
-        sRule += addSldRule( "gridname", queryPojo.getGrid() );
-        sRule += addSldRule( "parametername", queryPojo.getParameter(0) );
-        sRule += addAggregateSldRule( "depthlayername", queryPojo.getDepth() );
-//        sRule += addSldRule( "periodname", queryPojo.getTime() );
-        sRule += addAggregateSldRule( "periodname", queryPojo.getTime());    
-
-        return sRule;
-    }
+//    protected String getSingleParameterSelectionRule( BarMarPojo queryPojo) {
+//
+//        String sRule = "";
+//        sRule += "<ogc:And>";
+//        sRule += addSldRule( "gridname", queryPojo.getGrid() );
+//        sRule += addSldRule( "parametername", queryPojo.getParameter(0) );
+//        sRule += addAggregateSldRule( "depthlayername", queryPojo.getDepth() );
+////        sRule += addSldRule( "periodname", queryPojo.getTime() );
+//        sRule += addAggregateSldRule( "periodname", queryPojo.getTime());    
+//
+//        return sRule;
+//    }
     
     protected String getAggregateParameterSelectionRule( BarMarPojo queryPojo) {
 
         String sRule = "";
         sRule += "<ogc:And>";
         sRule += addSldRule( "gridname", queryPojo.getGrid() );
-        
-        sRule += addAggregateSldRule("parametername", queryPojo.getParameter());
-//        List<String> paramNames = queryPojo.getParameter();
-//        if ( paramNames.size() > 1) {
-//        	sRule += "<ogc:Or>";
-//        }
-//        for ( String parameter : paramNames ) {
-//        	sRule += addSldRule( "parametername", parameter );
-//        }
-//        if ( paramNames.size() > 1) {
-//        	sRule +="</ogc:Or>";
-//        }
-        sRule += addAggregateSldRule( "depthlayername", queryPojo.getDepth() );
-//        sRule += addSldRule( "periodname", queryPojo.getTime() );
-        sRule += addAggregateSldRule( "periodname", queryPojo.getTime());        
+        if ( queryPojo.getParameter().size() > 1 )
+        	sRule += addAggregateSldRule( "parametername", queryPojo.getParameter());
+        else 
+        	sRule += addSldRule( "parametername", queryPojo.getParameter(0) );
+        if ( queryPojo.getDepth().size() > 1 ) 
+        	sRule += addAggregateSldRule( "depthlayername", queryPojo.getDepth() );
+        else 
+        	sRule += addSldRule( "depthlayername", queryPojo.getDepth(0) );
+        if ( queryPojo.getTime().size() > 1)
+        	sRule += addAggregateSldRule( "periodname", queryPojo.getTime());
+        else 
+        	sRule += addSldRule( "periodname", queryPojo.getTime(0));        
 
         return sRule;
     } 

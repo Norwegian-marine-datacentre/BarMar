@@ -11,18 +11,26 @@ import javax.sql.DataSource;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
+
+import no.imr.barmar.controller.view.pojo.Metadata;
+import no.imr.barmar.controller.view.pojo.Parameter;
+import no.imr.barmar.pojo.BarMarPojo;
 
 @Component
 public class ParameterDao {
 	
 	private JdbcTemplate jdbcTemplate;
+	private NamedParameterJdbcTemplate jdbcTempleateList;
 	
 	private PeriodAndDepthHelper pAndD = new PeriodAndDepthHelper();
 	
 	@Resource(name="dataSource")
 	public void setDataSource(DataSource dataSource) {
 	    this.jdbcTemplate = new JdbcTemplate(dataSource);
+	    this.jdbcTempleateList = new NamedParameterJdbcTemplate(dataSource);
 	}
 	
 	/**
@@ -101,7 +109,7 @@ public class ParameterDao {
 				new RowMapper<String>() {
 			public String mapRow(ResultSet rs, int rowNum) throws SQLException {
 
-				return pAndD.getDepth( rs.getString("depth") );
+				return rs.getString("depth");
 			}
 		}, p.getId());
 		p.setDepths(depths);    	
@@ -115,9 +123,52 @@ public class ParameterDao {
 				  "ORDER BY p.name, tc.name;",
 				new RowMapper<String>() {
 			public String mapRow(ResultSet rs, int rowNum) throws SQLException {
-				return pAndD.getPeriod( rs.getString("periodname") );
+				return rs.getString("periodname");
 			}
 		}, p.getId());
 		p.setPeriods( periods );
+    }
+    
+    public void getMaxMinTemperature( BarMarPojo pojo) {
+    	MapSqlParameterSource map = new MapSqlParameterSource();
+    	map.addValue("grid", pojo.getGrid());
+    	map.addValue("names", pojo.getParameter().toArray(new String[pojo.getParameter().size()]));
+    	map.addValue("depths", pojo.getDepth().toArray(new String[pojo.getDepth().size()]));
+    	map.addValue("periods", pojo.getTime().toArray(new String[pojo.getTime().size()]));
+    	
+    	Map<String, Object> sqlParam = new HashMap<String, Object>();
+    	sqlParam.put( "grid", pojo.getGrid() );
+    	sqlParam.put( "names", pojo.getParameter() );
+    	sqlParam.put( "depths", pojo.getDepth() );
+    	sqlParam.put( "periods", pojo.getTime() );
+    	System.out.println("param name list name:"+pojo.getParameter(0));
+    	System.out.println("param name list depth:"+pojo.getDepth(0));
+    	System.out.println("param name list period:"+pojo.getTime(0));
+    	
+    	String query = "SELECT * FROM ( SELECT max(p.maxval), min(p.minval) " +  
+    	           "FROM grid g " +
+    	           "INNER JOIN parameter_statistics p " + 
+    	           "ON g.id=p.id_grid AND g.name=:grid " +
+    		   "INNER JOIN parameter par " +
+    	           "ON par.id=p.id_parameter AND par.name in (:names) " +
+    	           "INNER JOIN vcell vc " +
+    	           "ON vc.id = p.id_vcell and vc.name in (:depths) " +
+    	           "INNER JOIN tcell tc " +
+    	           "ON tc.id= p.id_tcell and tc.name in (:periods) ) as gridname";
+    	 
+		List<BarMarPojo> tmpPojos = jdbcTempleateList.query(query, sqlParam, new RowMapper<BarMarPojo>() {
+			public BarMarPojo mapRow(ResultSet rs, int rowNum) throws SQLException {
+				BarMarPojo tmpPojo = new BarMarPojo();
+				tmpPojo.setMaxLegend( rs.getFloat("max") );
+				tmpPojo.setMinLegend( rs.getFloat("min") );
+				return tmpPojo;
+			}
+		});
+		BarMarPojo tmpPojo = tmpPojos.get(0);
+		if ( tmpPojo != null ) {
+			pojo.setMaxLegend( tmpPojo.getMaxLegend() );
+			pojo.setMinLegend( tmpPojo.getMinLegend() );
+		}
+		System.out.println("maxMin:"+pojo.getMaxLegend());
     }
 }

@@ -5,6 +5,9 @@ import java.util.List;
 
 import org.junit.Test;
 
+import no.imr.barmar.controller.view.pojo.Parameter;
+import no.imr.barmar.controller.view.pojo.ParameterGroup;
+
 
 /**
  * 

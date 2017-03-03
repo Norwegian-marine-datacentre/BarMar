@@ -1,13 +1,11 @@
-var felayer;
-
 //PROD
-//var MAPS_IMR_NO = "http://maps.imr.no/geoserver/wms?";
+var MAPS_IMR_NO = "http://maps.imr.no/geoserver/wms?";
 
 //TEST: on local machine - use your ip address instead of localhost 
 //var MAPS_IMR_NO = "http://geb-test.nodc.no/geoserver/wms?";
 
 //DEV:
-var MAPS_IMR_NO = "http://10.1.9.138:8080/geoserver/wms?";
+//var MAPS_IMR_NO = "http://10.1.9.138:8080/geoserver/wms?";
 
 var NORMAR_GRID = 11;
 
@@ -17,7 +15,7 @@ var BASE_URL = location.href.substring(0,location.href.lastIndexOf('/')) + "/";
 
 var comboboxGrid = ""; 
 var comboboxSpecies = "";
-var comboboxParameter = ""; 
+//var comboboxParameter = "";
 var comboboxPeriod = ""; 
 var comboboxDepth = ""; //jQuery("#depthlayer :selected").val(),
 var displayType = "";
@@ -29,7 +27,7 @@ function drawmap(mapp) {
 
 	var onSuccessFunction = function (message) {
 	    addLayerToMap(layername, message, mapp);
-	    addPdfGenerationToStack(displayName, comboboxSpecies, comboboxParameter, comboboxPeriod, comboboxDepth, displayType);
+	    addPdfGenerationToStack(displayName, comboboxSpecies, paramNames.toString(), comboboxPeriod, comboboxDepth, displayType);
 	    initializeStack();
 	}
 	
@@ -40,38 +38,45 @@ function drawmap(mapp) {
 }
 
 function addLayerToMap(layername, message, mapp) {
-    src = MAPS_IMR_NO + "service=WMS&version=1.1.1&request=GetLegendGraphic&layer="+
-	layername+"&width=22&height=24&format=image/png&SLD="+BASE_URL + "getsld?file=" + message;
+
+    var params = "'" + parameterIds.toString().replace(/,/g,' ') + "'";
+    var depths = "'" + comboboxDepth.toString().replace(/,/g,' ') + "'";
+    var periods = "'" + comboboxPeriod.toString().replace(/,/g,' ') + "'";
     
-    felayer = new ol.layer.Tile({
+    var postgisLayer = new ol.layer.Tile({
         source: new ol.source.TileWMS({
             url: MAPS_IMR_NO,
             params: {
                 'LAYERS': layername,
                 'TRANSPARENT': 'true',
-                sld: BASE_URL + "getsld?file=" + message,  
+                sld: BASE_URL + "getsld?file=" + message, 
+                viewparams:"id_grid:'BarMar';parameter_id:"+params+
+            	";depthlayername:"+depths+
+            	";periodname:"+periods+
+            	";valueMin:"+0+
+            	";valueMax:"+9007199254740992 
             }
         }),
         'name': displayName
     });
-    mapp.addLayer(felayer);
     
-    felayer.getSource().on('imageloadstart', function() {
+    mapp.addLayer(postgisLayer);
+    
+    postgisLayer.getSource().on('imageloadstart', function() {
         $("#progress").removeAttr("style");
         $("#progress").css("display", "inline");
       });
 
-    felayer.getSource().on('imageloadend', function() {
+    postgisLayer.getSource().on('imageloadend', function() {
         $("#progress").removeAttr("style");
         $("#progress").css("display", "none");
       });
-    felayer.getSource().on('imageloaderror', function() {
+    postgisLayer.getSource().on('imageloaderror', function() {
         $("#progress").removeAttr("style");
         $("#progress").css("display", "none");
         alert("feil ved lasting av postgis lag");
       });
     
-    /** dns redirect to crius.nodc.no/geoserver/wms */
     var src = MAPS_IMR_NO + "service=WMS&version=1.1.1&request=GetLegendGraphic&layer="+
     	layername+"&width=22&height=24&format=image/png&SLD="+BASE_URL + "getsld?file=" + message;
     jQuery("#legend").append('<p id='+displayName+'>'+displayName+'<br/><img src='+src+' /></p>');
@@ -93,11 +98,12 @@ function getHTTPObject() {
 
 function createSLD(onSuccessFunction, onErrorFunction) {
     
+	readBarMar();
     jQuery.ajax({
         url:"createBarMarsld",
         data:{
             grid : comboboxGrid,
-            parameter: comboboxParameter,
+            parameter: paramNames,
             time: comboboxPeriod,
             depth: comboboxDepth,
             displaytype: displayType
@@ -112,8 +118,51 @@ function createSLD(onSuccessFunction, onErrorFunction) {
     });    
 }
 
+var paramNames = [];
+var parameterIds = "";
+function readBarMar() {
+	comboboxGrid = "BarMar"; //$("#grid").parents(".dropdown").find('.btn').val();
+	comboboxSpecies = $("#speciesselect").val();
+	
+	var parameterNames = $("#speciesSubGroupselect option:selected");
+	for ( i=0; i < parameterNames.length; i++ ) {
+		paramNames[i] = $(parameterNames[i]).text();  
+	}
+	 
+	$('#speciesSubGroupselect option:selected').each(function(i, selected){
+		if ( i > 0 ) parameterIds += " "+$(selected).attr("id"); 
+		else parameterIds = $(selected).attr("id");
+	});
+
+	$('#depthselect option:selected').each(function(i, selected){
+		if ( i > 0 ) comboboxDepth += " "+$(selected).text(); 
+		else comboboxDepth = $(selected).text()
+	});
+	$('#periodselect option:selected').each(function(i, selected){
+		if ( i > 0 ) comboboxPeriod += " "+$(selected).text(); 
+		else comboboxPeriod = $(selected).text();
+	});
+	//comboboxPeriod = $("#depthselect").val();
+	//comboboxDepth = $("#periodselect").val();
+	
+	var visning = $("#visning").val();
+	if ( visning === 'punktvisning') {
+		displayType = PUNKTVISNING;
+		layername = LAYER_POINTVALUE;
+	} else {
+		displayType = AREALVISNING;
+		layername = LAYER_AREAVALUE;
+	}
+	displayName = createDisplayName(paramNames.toString(), comboboxPeriod, comboboxDepth, displayType);
+	
+	if ( comboboxPeriod.indexOf("Aggregated") != -1 ) comboboxPeriod = "F";
+	if ( comboboxDepth.indexOf("Aggregated") != -1 ) comboboxDepth = "F";
+}
+
 function createPDF(mapp) {
     
+	readBarMar();
+	
     var onSuccessFunction = function (message) {
         var showLayers = showVisibleLayers(mapp);
         

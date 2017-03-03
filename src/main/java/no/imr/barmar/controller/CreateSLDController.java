@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import no.imr.barmar.controller.view.ParameterDao;
 import no.imr.barmar.gis.sld.SLDFile;
 import no.imr.barmar.gis.wfs.GetWFSList;
 import no.imr.barmar.gis.wfs.MaxMinLegendValue;
@@ -31,13 +32,16 @@ public class CreateSLDController {
 	private final static String PUNKTVISNING = "punktvisning";
 	
     @Autowired( required = true )
-    private GetWFSList gwfs;
+    protected GetWFSList gwfs;
     
     @Autowired
-    private MaxMinLegendValue maxMinHelper;
+    protected MaxMinLegendValue maxMinHelper;
     
     @Autowired( required = true )
-    private SLDFile sldFile;
+    protected SLDFile sldFile;
+    
+	@Autowired( required = true )
+	protected ParameterDao dao;
     	
 	@RequestMapping("/createsld")
     public void createsld(
@@ -61,7 +65,7 @@ public class CreateSLDController {
         String sld = sldFile.getSLDFile( queryFishEx, areadisplay );
         String filename = "sld_".concat(String.valueOf(Math.random() * 10000 % 1000)).concat(".sld");
         writeSldFileToTmpdir( sld, filename );
-        writeFilenameToResponse( resp, filename );		
+        writeFilenameToResponse( resp, filename );	
 	}
 	
 	@RequestMapping("/createBarMarsld")
@@ -76,7 +80,8 @@ public class CreateSLDController {
         boolean areadisplay = isAreadisplay( displaytype );
         
         BarMarPojo queryFishEx = new BarMarPojo( grid, Arrays.asList(parameters), Arrays.asList(depth), Arrays.asList(time) );
-        maxMinHelper.setMaxMinLegendValuesFromWFS( queryFishEx, null );
+        dao.getMaxMinTemperature(queryFishEx);
+//        maxMinHelper.setMaxMinLegendValuesFromWFS( queryFishEx, null );
         
         writeSldToResponse(queryFishEx, areadisplay, resp);
 	}
