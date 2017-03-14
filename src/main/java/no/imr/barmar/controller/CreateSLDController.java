@@ -5,9 +5,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
-import java.util.List;
-
-import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -17,7 +16,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import no.imr.barmar.controller.view.ParameterDao;
 import no.imr.barmar.gis.sld.SLDFile;
-import no.imr.barmar.gis.wfs.GetWFSList;
 import no.imr.barmar.gis.wfs.MaxMinLegendValue;
 import no.imr.barmar.pojo.BarMarPojo;
 
@@ -30,9 +28,6 @@ import no.imr.barmar.pojo.BarMarPojo;
 public class CreateSLDController {
 
 	private final static String PUNKTVISNING = "punktvisning";
-	
-    @Autowired( required = true )
-    protected GetWFSList gwfs;
     
     @Autowired
     protected MaxMinLegendValue maxMinHelper;
@@ -42,65 +37,44 @@ public class CreateSLDController {
     
 	@Autowired( required = true )
 	protected ParameterDao dao;
-    	
-	@RequestMapping("/createsld")
-    public void createsld(
-    		@RequestParam("grid") String grid,
-    		@RequestParam("parameter") String parameter,
-    		@RequestParam("time") String time,
-    		@RequestParam("depth") String depth,
-    		@RequestParam("displaytype") String displaytype,  
-            HttpServletResponse resp) throws Exception {
-		
 
-        boolean areadisplay = isAreadisplay( displaytype );
-        
-        BarMarPojo queryFishEx = new BarMarPojo( grid, Arrays.asList(parameter), Arrays.asList(depth), Arrays.asList(time) );
-        maxMinHelper.setMaxMinLegendValuesFromWFS( queryFishEx, null );
-        
-        writeSldToResponse(queryFishEx, areadisplay, resp);
-    }	
-	
-	private void writeSldToResponse(BarMarPojo queryFishEx, boolean areadisplay, HttpServletResponse resp) throws Exception {
+	/**
+	 * Writes SLD to file and stores it in temp directory
+	 * 
+	 * @param queryFishEx
+	 * @param areadisplay
+	 * @return filename of temp file
+	 * @throws Exception
+	 */
+	private String writeSldToResponse(BarMarPojo queryFishEx, boolean areadisplay) throws Exception {
         String sld = sldFile.getSLDFile( queryFishEx, areadisplay );
         String filename = "sld_".concat(String.valueOf(Math.random() * 10000 % 1000)).concat(".sld");
         writeSldFileToTmpdir( sld, filename );
-        writeFilenameToResponse( resp, filename );	
+        return filename;
 	}
 	
 	@RequestMapping("/createBarMarsld")
-    public void createBarMarsld(
+    public @ResponseBody Map<String, Object> createBarMarsld(
     		@RequestParam("grid") String grid,
     		@RequestParam("parameter[]") String[] parameters,
-    		@RequestParam("time") String time,
-    		@RequestParam("depth") String depth,
-    		@RequestParam("displaytype") String displaytype,  
-            HttpServletResponse resp) throws Exception {
+    		@RequestParam("time") String time, //todo: time[]
+    		@RequestParam("depth") String depth, //todo: depth[]
+    		@RequestParam("displaytype") String displaytype) throws Exception {
 
         boolean areadisplay = isAreadisplay( displaytype );
         
         BarMarPojo queryFishEx = new BarMarPojo( grid, Arrays.asList(parameters), Arrays.asList(depth), Arrays.asList(time) );
         dao.getMaxMinTemperature(queryFishEx);
-//        maxMinHelper.setMaxMinLegendValuesFromWFS( queryFishEx, null );
         
-        writeSldToResponse(queryFishEx, areadisplay, resp);
+        String filename = writeSldToResponse(queryFishEx, areadisplay);
+        
+        Map<String, Object> maxMinLegendValues = new HashMap<String, Object>();
+        maxMinLegendValues.put("min", queryFishEx.getMinLegend());
+        maxMinLegendValues.put("max", queryFishEx.getMaxLegend());
+        maxMinLegendValues.put("filename", filename);
+        
+        return maxMinLegendValues;
 	}
-
-	
-    public void createNorMarsld(String grid, List<String> parameter,
-    		List<String> time, List<String> depth, String displaytype,  
-            HttpServletResponse resp) throws Exception {
-
-        boolean areadisplay = isAreadisplay( displaytype );
-        
-        BarMarPojo queryFishEx = new BarMarPojo( grid, parameter, depth, time );
-        maxMinHelper.setMaxMinLegendValuesFromWFS(queryFishEx);
-        
-        String sld = sldFile.getSLDFile( queryFishEx, areadisplay);
-        String filename = "sld_".concat(String.valueOf(Math.random() * 10000 % 1000)).concat(".sld");
-        writeSldFileToTmpdir( sld, filename );
-        writeFilenameToResponse( resp, filename );
-    }		
 	
 	private boolean isAreadisplay( String displaytype ) {
         if (displaytype.contains(PUNKTVISNING)) {
@@ -115,12 +89,5 @@ public class CreateSLDController {
         OutputStream fos = new FileOutputStream(output);
         fos.write(sld.getBytes());
         fos.close();		
-	}
-	
-	private void writeFilenameToResponse( HttpServletResponse resp, String filename ) throws IOException {
-        resp.setContentType("text/plain");
-        OutputStream out = resp.getOutputStream();
-        out.write(filename.getBytes());
-        out.close();
 	}
 }

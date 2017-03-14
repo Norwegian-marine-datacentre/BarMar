@@ -1,8 +1,8 @@
 //PROD
-var MAPS_IMR_NO = "http://maps.imr.no/geoserver/wms?";
+//var MAPS_IMR_NO = "http://maps.imr.no/geoserver/wms?";
 
 //TEST: on local machine - use your ip address instead of localhost 
-//var MAPS_IMR_NO = "http://geb-test.nodc.no/geoserver/wms?";
+var MAPS_IMR_NO = "http://geb-test.nodc.no/geoserver/wms?";
 
 //DEV:
 //var MAPS_IMR_NO = "http://10.1.9.138:8080/geoserver/wms?";
@@ -49,36 +49,39 @@ function addLayerToMap(layername, message, mapp) {
             params: {
                 'LAYERS': layername,
                 'TRANSPARENT': 'true',
-                sld: BASE_URL + "getsld?file=" + message, 
+                sld: BASE_URL + "getsld?file=" + message.filename, 
                 viewparams:"id_grid:'BarMar';parameter_id:"+params+
             	";depthlayername:"+depths+
             	";periodname:"+periods+
-            	";valueMin:"+0+
-            	";valueMax:"+9007199254740992 
+            	";valueMin:"+ message.min +
+            	";valueMax:"+ message.max 
             }
         }),
         'name': displayName
-    });
-    
-    mapp.addLayer(postgisLayer);
-    
-    postgisLayer.getSource().on('imageloadstart', function() {
-        $("#progress").removeAttr("style");
-        $("#progress").css("display", "inline");
-      });
+    });    
 
-    postgisLayer.getSource().on('imageloadend', function() {
+    var layerSrc = postgisLayer.getSource(); 
+//    layerSrc.on('tileloadstart', function() { //sld creation takes too long
+//    	console.log('imageloadstart event fired');
+//        $("#progress").removeAttr("style");
+//        $("#progress").css("display", "inline");
+//      });
+    layerSrc.on('tileloadend', function() {
+    	console.log('imageloaded event fired');
         $("#progress").removeAttr("style");
         $("#progress").css("display", "none");
       });
-    postgisLayer.getSource().on('imageloaderror', function() {
+    layerSrc.on('tileloaderror', function() {
         $("#progress").removeAttr("style");
         $("#progress").css("display", "none");
         alert("feil ved lasting av postgis lag");
       });
+
+    
+    mapp.addLayer(postgisLayer);
     
     var src = MAPS_IMR_NO + "service=WMS&version=1.1.1&request=GetLegendGraphic&layer="+
-    	layername+"&width=22&height=24&format=image/png&SLD="+BASE_URL + "getsld?file=" + message;
+    	layername+"&width=22&height=24&format=image/png&SLD="+BASE_URL + "getsld?file=" + message.filename;
     jQuery("#legend").append('<p id='+displayName+'>'+displayName+'<br/><img src='+src+' /></p>');
 }
 
@@ -139,11 +142,9 @@ function readBarMar() {
 		else comboboxDepth = $(selected).text()
 	});
 	$('#periodselect option:selected').each(function(i, selected){
-		if ( i > 0 ) comboboxPeriod += " "+$(selected).text(); 
-		else comboboxPeriod = $(selected).text();
+		if ( i > 0 ) comboboxPeriod += " "+$(selected).attr('id'); 
+		else comboboxPeriod = $(selected).attr('id');
 	});
-	//comboboxPeriod = $("#depthselect").val();
-	//comboboxDepth = $("#periodselect").val();
 	
 	var visning = $("#visning").val();
 	if ( visning === 'punktvisning') {
@@ -169,7 +170,7 @@ function createPDF(mapp) {
         var projection = mapp.getView().getProjection().getCode();
         console.log("srs:"+projection);
         var pdfUrl = "createpdfreport?bbox="+mapp.getView().calculateExtent(map.getSize())+
-            "&sld="+BASE_URL + "getsld?file=" + message +
+            "&sld="+BASE_URL + "getsld?file=" + message.filename +
             "&srs="+projection+
             "&layer="+layername+
             "&layerson="+showLayers+
@@ -226,6 +227,19 @@ function showVisibleLayers(mapp) {
 		}
 	}
 	return strLayers;
+}
+
+function createDisplayName(param, period, depth, displayType) {
+	
+	var adisplayName = param;
+    if ( period.indexOf( 'Aggregated' ) > -1 ) {
+        adisplayName+= "_All";
+    } 
+    if ( depth.indexOf( 'Aggregated' ) > -1 ) {
+        adisplayName+= "_All";
+    }
+    adisplayName += "_" + displayType;
+    return adisplayName;
 }
 
 

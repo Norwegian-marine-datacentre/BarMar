@@ -69,11 +69,20 @@ function readParametersClosure() {
 
 	function updateSpeciesSubgroup( speciesName ) {
 		
+		if ( speciesName === 'Salinity' || speciesName === 'Temperature' ) {
+			$(depthBtn).show(1500)
+		} else $(depthBtn).hide(1500);
+		
+		
 		var subspecies = barMarParameters[ speciesName ];
 		
 		emptyBtnList( "#speciesSubGroupBtn" );
 		emptyBtnList( "#depthBtn" );
-		emptyBtnList( "#periodBtn" );	
+		emptyBtnList( "#periodBtn" );
+		if ( speciesName === 'Salinity' || speciesName === 'Temperature' ) {
+			$( $("#depthBtn")[0] ).fadeTo('slow',.6);
+		}
+		$( $("#periodBtn")[0] ).fadeTo('slow',.6);
 		
 		var speciesSubgroupLength = Object.keys( subspecies['length'] );
 		var speciesSubgroupAge = Object.keys( subspecies['age'] );
@@ -95,6 +104,10 @@ function readParametersClosure() {
 
 		emptyBtnList( "#depthBtn" );
 		emptyBtnList( "#periodBtn" );
+		if ( speciesName === 'Salinity' || speciesName === 'Temperature' ) {
+			$( $("#depthBtn")[0] ).fadeTo('slow',1);
+		}
+		$( $("#periodBtn")[0] ).fadeTo('slow',1);
 		
 		var subgroup = barMarParameters[ speciesName ];
 		var lengthAgeOther = "";
@@ -131,14 +144,14 @@ function readParametersClosure() {
 		
 		for (var i=0; i < intersectDepthList.length; i++) {
 			var depthId = intersectDepthList[i]
-			var depthDisplayName = displayPeriodClosure()(depthId);
+			var depthDisplayName = displayDepth(depthId);
 			dropDownAdd( "#depth", depthDisplayName, i, depthId );
 		}
 		$( '#depthselect' ).selectpicker('refresh');
 		
 		for (var i=0; i < intersectPeriodList.length; i++) {
 			var periodId = intersectPeriodList[i]
-			var periodDisplayName = displayDepth(periodId);			
+			var periodDisplayName = displayPeriodClosure()(periodId);			
 			dropDownAdd("#period", periodDisplayName, i, periodId );
 		}
 		$( '#periodselect' ).selectpicker('refresh');

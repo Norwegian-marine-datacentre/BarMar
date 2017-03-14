@@ -25,8 +25,6 @@ public class ParameterDao {
 	private JdbcTemplate jdbcTemplate;
 	private NamedParameterJdbcTemplate jdbcTempleateList;
 	
-	private PeriodAndDepthHelper pAndD = new PeriodAndDepthHelper();
-	
 	@Resource(name="dataSource")
 	public void setDataSource(DataSource dataSource) {
 	    this.jdbcTemplate = new JdbcTemplate(dataSource);
@@ -145,30 +143,26 @@ public class ParameterDao {
     	System.out.println("param name list depth:"+pojo.getDepth(0));
     	System.out.println("param name list period:"+pojo.getTime(0));
     	
-    	String query = "SELECT * FROM ( SELECT max(p.maxval), min(p.minval) " +  
-    	           "FROM grid g " +
-    	           "INNER JOIN parameter_statistics p " + 
-    	           "ON g.id=p.id_grid AND g.name=:grid " +
-    		   "INNER JOIN parameter par " +
-    	           "ON par.id=p.id_parameter AND par.name in (:names) " +
-    	           "INNER JOIN vcell vc " +
-    	           "ON vc.id = p.id_vcell and vc.name in (:depths) " +
-    	           "INNER JOIN tcell tc " +
-    	           "ON tc.id= p.id_tcell and tc.name in (:periods) ) as gridname";
+    	String query = "SELECT avg(v.value) as average_value " +
+    			"FROM grid g, hcell h, value v, parameter p, valuexvcell vxv, valuextcell vxt, tcell tc, vcell vc " +  
+    	        "WHERE h.id_grid = g.id AND v.id_hcell = h.id AND v.id_parameter = p.id AND vxt.id_value = v.id AND vxt.id_tcell = tc.id AND vxv.id_value = v.id AND vxv.id_vcell = vc.id " +
+    	        "AND g.name=:grid AND p.name in (:names) AND vc.name in (:depths) AND tc.name in (:periods) " +
+    	        "GROUP BY h.geoshape";
     	 
-		List<BarMarPojo> tmpPojos = jdbcTempleateList.query(query, sqlParam, new RowMapper<BarMarPojo>() {
-			public BarMarPojo mapRow(ResultSet rs, int rowNum) throws SQLException {
-				BarMarPojo tmpPojo = new BarMarPojo();
-				tmpPojo.setMaxLegend( rs.getFloat("max") );
-				tmpPojo.setMinLegend( rs.getFloat("min") );
-				return tmpPojo;
+		List<Float> avgValues = jdbcTempleateList.query(query, sqlParam, new RowMapper<Float>() {
+			public Float mapRow(ResultSet rs, int rowNum) throws SQLException {
+				return rs.getFloat("average_value");
 			}
 		});
-		BarMarPojo tmpPojo = tmpPojos.get(0);
-		if ( tmpPojo != null ) {
-			pojo.setMaxLegend( tmpPojo.getMaxLegend() );
-			pojo.setMinLegend( tmpPojo.getMinLegend() );
+		float max = 0;
+		float min = 0;
+		for ( Float aAvg : avgValues ) {
+			if ( aAvg > max ) max = aAvg;
+			if ( aAvg < min ) min = aAvg;
 		}
+		pojo.setMaxLegend( max );
+		pojo.setMinLegend( min );
+		
 		System.out.println("maxMin:"+pojo.getMaxLegend());
     }
 }

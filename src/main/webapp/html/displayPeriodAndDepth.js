@@ -13,7 +13,7 @@ function displayPeriodClosure() {
 	}
 	
 	function findMonth( monthNum ) {
-		if(monthNum.equals("01")) return "January";
+		if     ( monthNum === "01" ) return "January";
 		else if( monthNum === "02" ) return "February";
 		else if( monthNum === ("03") ) return "March";
 		else if( monthNum === ("04") ) return "April";

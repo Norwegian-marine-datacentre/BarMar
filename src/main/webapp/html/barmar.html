@@ -145,7 +145,7 @@
 				</div>
 			</div>
 
-			<div style="float:left" id="depthBtn">
+			<div style="float:left; display:none" id="depthBtn">
 				<label style="background-color:white;">Depth</label>	
 				<div>
 					<select class="selectpicker dcc input-small" id="depthselect" data-width="95px" multiple >
@@ -176,6 +176,22 @@
 			</div>
 
 			<div style="float:left">
+				<label style="background-color:white;">Aggregation Options</label>	
+				<div>
+					<select class="selectpicker dcc" id="aggregation" data-width="120px">
+						<optgroup label="logarithm">
+							<option class="A" id="logarithm">Logaritmic scale</option>
+						</optgroup>
+						<optgroup label="aggregation">
+							<option class="B" id="avg">Average value of each cell</option>
+							<option class="B" id="max">Max value of each cell</option>
+							<option class="B" id="min">Min value of each cell</option>
+						</optgroup>
+					</select>
+				</div>
+			</div>
+			
+			<div style="float:left">
 			  <label for="visning" style="background-color:white">&nbsp;</label>
 			  <div>
 				  <button type="button" class="btn btn-default" id="createMap">Create Map</button>
@@ -195,12 +211,15 @@
         var AREALVISNING = "arealvisning";
         //var LAYER_POINTVALUE = "postgis:pointvalue";
         //var LAYER_AREAVALUE = "postgis:areavalue";
-        var LAYER_POINTVALUE = "postgis:barmarAreavalueAggregate";
-        var LAYER_AREAVALUE = LAYER_POINTVALUE;
+        var LAYER_POINTVALUE = "postgis:barmarPointvalueAggregate";
+        var LAYER_AREAVALUE = "postgis:barmarAreavalueAggregate";
     
         var v = $("#createMap");
         console.log("createMap:"+$("#createMap").text());
         $("#createMap").click(function() {
+        	console.log('imageloadstart event fired');
+            $("#progress").removeAttr("style");
+            $("#progress").css("display", "inline");
             drawmap(map);
         });
 
@@ -242,22 +261,7 @@
         $('ul.layerstack').prepend(
                 '<li data-layerid="' + layers[0].get('name') + '"><input type="checkbox" checked="checked"> ' + layers[0].get('name') + '</li>'
         );
-        
-        function createDisplayName(param, period, depth, displayType) {
-        	
-        	var adisplayName ="";
-        	for ( var i=0; i < param.length; i++ ) {
-            	adisplayName += param[0];
-        	}
-            if ( period.indexOf( 'Aggregated' ) > -1 ) {
-                adisplayName+= "_All";
-            } 
-            if ( depth.indexOf( 'Aggregated' ) > -1 ) {
-                adisplayName+= "_All";
-            }
-            adisplayName += "_" + displayType;
-            return adisplayName;
-        }
+
     </script> 
     </body>
 </html>

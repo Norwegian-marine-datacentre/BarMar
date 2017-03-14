@@ -1,5 +1,7 @@
 package no.imr.barmar.controller;
 
+import java.util.Map;
+
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletResponse;
 
@@ -15,8 +17,7 @@ public class CreateSLDControllerTest {
 	private CreateSLDController createSld = new CreateSLDController();
 	
 	public CreateSLDControllerTest() {
-		createSld.gwfs = new GetWFSList( new GetWFSParameterList(), new SLDpojoSelectionRule() );
-		createSld.maxMinHelper = new MaxMinLegendValue( createSld.gwfs );
+		createSld.maxMinHelper = new MaxMinLegendValue(  );
 		createSld.sldFile = new SLDFile( new LayerNameForSLD(), new SLDpojoSelectionRule() );		
 	}
 
@@ -29,10 +30,9 @@ public class CreateSLDControllerTest {
 		String time = "time:F";
 		String depth = "depth:F";
 		String displaytype = "displaytype:punktvisning";
-		MockHttpServletResponse resp = new MockHttpServletResponse();
 
 		
-		createSld.createBarMarsld(grid, parameters, time, depth, displaytype, resp);
+		Map<String, Object> sld = createSld.createBarMarsld(grid, parameters, time, depth, displaytype);
 
 	}
 }
