@@ -3,22 +3,12 @@ package no.imr.barmar.controller;
 import java.util.Map;
 
 import org.junit.Test;
-import org.springframework.mock.web.MockHttpServletResponse;
-
-import no.imr.barmar.gis.sld.LayerNameForSLD;
-import no.imr.barmar.gis.sld.SLDFile;
-import no.imr.barmar.gis.sld.SLDpojoSelectionRule;
-import no.imr.barmar.gis.wfs.GetWFSList;
-import no.imr.barmar.gis.wfs.GetWFSParameterList;
-import no.imr.barmar.gis.wfs.MaxMinLegendValue;
 
 public class CreateSLDControllerTest {
 	
 	private CreateSLDController createSld = new CreateSLDController();
 	
 	public CreateSLDControllerTest() {
-		createSld.maxMinHelper = new MaxMinLegendValue(  );
-		createSld.sldFile = new SLDFile( new LayerNameForSLD(), new SLDpojoSelectionRule() );		
 	}
 
 	

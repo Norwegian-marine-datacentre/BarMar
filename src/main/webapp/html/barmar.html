@@ -198,6 +198,13 @@
 			  </div>
 			  <form id="hidden_pdf" method="post" onsubmit="ShowLoading()"></form>     
 			</div>
+
+			<div style="float:left">
+			  <label for="download" style="background-color:white">&nbsp;</label>
+			  <div>
+				  <button type="button" class="btn btn-default" id="downloadMap">download data</button>
+			  </div>
+			</div>			
 		</div>
 	</div>
 </div>
@@ -214,8 +221,9 @@
         var LAYER_POINTVALUE = "postgis:barmarPointvalueAggregate";
         var LAYER_AREAVALUE = "postgis:barmarAreavalueAggregate";
     
-        var v = $("#createMap");
-        console.log("createMap:"+$("#createMap").text());
+        $("#downloadMap").click(function() {
+        	downloadMap();
+        });
         $("#createMap").click(function() {
         	console.log('imageloadstart event fired');
             $("#progress").removeAttr("style");

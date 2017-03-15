@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import no.imr.barmar.controller.view.ParameterDao;
 import no.imr.barmar.gis.sld.SLDFile;
-import no.imr.barmar.gis.wfs.MaxMinLegendValue;
 import no.imr.barmar.pojo.BarMarPojo;
 
 /**
@@ -28,9 +27,6 @@ import no.imr.barmar.pojo.BarMarPojo;
 public class CreateSLDController {
 
 	private final static String PUNKTVISNING = "punktvisning";
-    
-    @Autowired
-    protected MaxMinLegendValue maxMinHelper;
     
     @Autowired( required = true )
     protected SLDFile sldFile;
