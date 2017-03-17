@@ -1,5 +1,7 @@
 package no.imr.barmar.controller.view;
 
+import org.junit.Test;
+
 public class BarMarControllerTest {
 
 	
@@ -17,5 +19,12 @@ public class BarMarControllerTest {
 
 	}
 	
-		
+	@Test
+	public void downloadRecordsTest() throws Exception{
+		String[] params = {"cod"};
+		String[] depth = {"F"};
+		String[] period = {"F"};
+				
+		new BarMarControllerFromDb().downloadRecords("BarMar", params, depth, period, null);
+	}
 }

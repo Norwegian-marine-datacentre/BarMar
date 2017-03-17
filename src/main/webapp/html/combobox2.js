@@ -99,6 +99,28 @@ function getHTTPObject() {
     return false;
 }
 
+function downloadMap() {
+	readBarMar();
+    jQuery.ajax({
+        url:"downloadData",
+        data:{
+            grid : comboboxGrid,
+            parameter: paramNames,
+            time: periodNames,
+            depth: depthNames
+        },
+        method: "post",
+        success: function(message){
+            //alert(message);
+        	var blob = new Blob([message], {type: "text/plain;charset=utf-8"});
+        	saveAs(blob, comboboxGrid+"_"+paramNames+"_"+periodNames+"_"+depthNames+".csv");
+        },
+        error: function(req, status, errThrown) {
+            onErrorFunction(req, status, errThrown);
+        }
+    });
+}
+
 function createSLD(onSuccessFunction, onErrorFunction) {
     
 	readBarMar();
@@ -122,6 +144,8 @@ function createSLD(onSuccessFunction, onErrorFunction) {
 }
 
 var paramNames = [];
+var depthNames = [];
+var periodNames = [];
 var parameterIds = "";
 function readBarMar() {
 	comboboxGrid = "BarMar"; //$("#grid").parents(".dropdown").find('.btn').val();
@@ -131,16 +155,27 @@ function readBarMar() {
 	for ( i=0; i < parameterNames.length; i++ ) {
 		paramNames[i] = $(parameterNames[i]).text();  
 	}
-	 
+	var depthNamesJquery = $("#depthselect option:selected");
+	for ( i=0; i < depthNamesJquery.length; i++ ) {
+		depthNames[i] = $(depthNamesJquery[i]).attr("id");  
+	}
+	var periodNamesJquery = $("#periodselect option:selected");
+	for ( i=0; i < periodNamesJquery.length; i++ ) {
+		periodNames[i] = $(periodNamesJquery[i]).attr("id");  
+	}
+	
+
 	$('#speciesSubGroupselect option:selected').each(function(i, selected){
 		if ( i > 0 ) parameterIds += " "+$(selected).attr("id"); 
 		else parameterIds = $(selected).attr("id");
 	});
 
+	//TOD: remove me
 	$('#depthselect option:selected').each(function(i, selected){
 		if ( i > 0 ) comboboxDepth += " "+$(selected).text(); 
 		else comboboxDepth = $(selected).text()
 	});
+	//TOD: remove me
 	$('#periodselect option:selected').each(function(i, selected){
 		if ( i > 0 ) comboboxPeriod += " "+$(selected).attr('id'); 
 		else comboboxPeriod = $(selected).attr('id');
