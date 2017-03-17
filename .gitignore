@@ -9,6 +9,7 @@ maven-eclipse.xml
 
 #folders
 target/*
+src/main/tomcatconf/*
 .externalToolBuilders/*
 .settings/*
 .metadata/*
@@ -17,5 +18,4 @@ tests/*
 build/*
 bin/*
 externals/*
-src/main/tomcatconf/*
 ${war-src}/*
