@@ -17,4 +17,5 @@ tests/*
 build/*
 bin/*
 externals/*
+src/main/tomcatconf/*
 ${war-src}/*
