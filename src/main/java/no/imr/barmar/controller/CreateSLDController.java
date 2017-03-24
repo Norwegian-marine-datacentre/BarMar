@@ -58,27 +58,16 @@ public class CreateSLDController {
     		@RequestParam("displaytype") String displaytype,
     		@RequestParam("aggregationFunc") String aggregationFunc) throws Exception {
 
-        boolean areadisplay = isAreadisplay( displaytype );
-        
         BarMarPojo queryFishEx = new BarMarPojo( grid, Arrays.asList(parameters), Arrays.asList(depth), Arrays.asList(time) );
         dao.getMaxMinTemperature(queryFishEx, aggregationFunc);
-        
+
+        boolean areadisplay = !displaytype.contains(PUNKTVISNING);
         String filename = writeSldToResponse(queryFishEx, areadisplay);
         
         Map<String, Object> maxMinLegendValues = new HashMap<String, Object>();
-        maxMinLegendValues.put("min", queryFishEx.getMinLegend());
-        maxMinLegendValues.put("max", queryFishEx.getMaxLegend());
         maxMinLegendValues.put("filename", filename);
         
         return maxMinLegendValues;
-	}
-	
-	private boolean isAreadisplay( String displaytype ) {
-        if (displaytype.contains(PUNKTVISNING)) {
-            return false;
-        } else {
-            return true;
-        }		
 	}
 	
 	private void writeSldFileToTmpdir( String sld, String filename ) throws IOException {
