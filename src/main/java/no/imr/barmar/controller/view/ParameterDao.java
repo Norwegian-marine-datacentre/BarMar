@@ -127,7 +127,7 @@ public class ParameterDao {
 		p.setPeriods( periods );
     }
     
-    public void getMaxMinTemperature( BarMarPojo pojo) {
+    public void getMaxMinTemperature( BarMarPojo pojo, String aggregationFunc) {
     	MapSqlParameterSource map = new MapSqlParameterSource();
     	map.addValue("grid", pojo.getGrid());
     	map.addValue("names", pojo.getParameter().toArray(new String[pojo.getParameter().size()]));
@@ -140,11 +140,18 @@ public class ParameterDao {
     	sqlParam.put( "depths", pojo.getDepth() );
     	sqlParam.put( "periods", pojo.getTime() );
     	
-    	String query = "SELECT avg(v.value) as average_value " +
+    	String selectMean = "SELECT avg(v.value) as average_value "; 
+    	String selectFullRange = "SELECT v.value as average_value ";
+    	String RestOfQuery = 
     			"FROM grid g, hcell h, value v, parameter p, valuexvcell vxv, valuextcell vxt, tcell tc, vcell vc " +  
     	        "WHERE h.id_grid = g.id AND v.id_hcell = h.id AND v.id_parameter = p.id AND vxt.id_value = v.id AND vxt.id_tcell = tc.id AND vxv.id_value = v.id AND vxv.id_vcell = vc.id " +
-    	        "AND g.name=:grid AND p.name in (:names) AND vc.name in (:depths) AND tc.name in (:periods) " +
-    	        "GROUP BY h.geoshape";
+    	        "AND g.name=:grid AND p.name in (:names) AND vc.name in (:depths) AND tc.name in (:periods) ";
+        String selectMeanGroupBy = "GROUP BY h.geoshape";
+    	
+    	String query = "";
+    	if ( aggregationFunc.equals("avg")) {
+    		query = selectMean + RestOfQuery + selectMeanGroupBy;
+    	} else query = selectFullRange + RestOfQuery;
     	 
 		List<Float> avgValues = jdbcTempleateList.query(query, sqlParam, new RowMapper<Float>() {
 			public Float mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -157,7 +164,7 @@ public class ParameterDao {
 			if ( aAvg > max ) max = aAvg;
 			if ( aAvg < min ) min = aAvg;
 		}
-		pojo.setMaxLegend( max );
+		pojo.setMaxLegend( max +1 ); //max of legend in db is integer so add 1 to get inclusive boundery
 		pojo.setMinLegend( min );
     }
     
@@ -200,7 +207,7 @@ public class ParameterDao {
 				return pojo;
 			}
 		});
-		System.out.println("resultset:"+downloadPojos.size());
+
 		return downloadPojos;
     }
 }

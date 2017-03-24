@@ -14,8 +14,8 @@
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.3.12/proj4.js"></script>
     
     <script type="text/javascript" src="layer-list.js"></script>
-    <script type="text/javascript" src="combobox2.js"></script>
-    <script type="text/javascript" src="get-parameters-as-json3.js"></script>
+    <script type="text/javascript" src="combobox.js"></script>
+    <script type="text/javascript" src="get-parameters-as-json.js"></script>
 	<script type="text/javascript" src="displayPeriodAndDepth.js"></script>
     <script type="text/javascript" src="ol-map-config.js"></script>
     
@@ -171,8 +171,8 @@
 				<label style="background-color:white;">View</label>	
 				<div>
 					<select class="selectpicker dcc" id="visning" data-width="120px">
-						<option class="A" id="punktvisning">punktvisning</option>
-						<option class="A" id="arealvisning">arealvisning</option>
+						<option class="A" id="punktvisning">Point View</option>
+						<option class="A" id="arealvisning">Area View</option>
 					</select>
 				</div>
 			</div>
@@ -181,13 +181,13 @@
 				<label style="background-color:white;">Aggregation Options</label>	
 				<div>
 					<select class="selectpicker dcc" id="aggregation" data-width="120px">
-						<optgroup label="logarithm">
-							<option class="A" id="logarithm">Logaritmic scale</option>
-						</optgroup>
 						<optgroup label="aggregation">
 							<option class="B" id="avg">Average value of each cell</option>
 							<option class="B" id="max">Max value of each cell</option>
 							<option class="B" id="min">Min value of each cell</option>
+						</optgroup>					
+						<optgroup label="logarithm">
+							<option class="A" id="logarithm">Logaritmic scale</option>
 						</optgroup>
 					</select>
 				</div>
@@ -213,15 +213,10 @@
 
 
 
-    <script>        
+    <script>       
+    	proj4.defs("EPSG:3575","+proj=laea +lat_0=90 +lon_0=10 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs");    
+    
         readParametersClosure()( "BarMar" );
-
-        var PUNKTVISNING = "punktvisning";
-        var AREALVISNING = "arealvisning";
-        //var LAYER_POINTVALUE = "postgis:pointvalue";
-        //var LAYER_AREAVALUE = "postgis:areavalue";
-        var LAYER_POINTVALUE = "postgis:barmarPointvalueAggregate";
-        var LAYER_AREAVALUE = "postgis:barmarAreavalueAggregate";
     
         $("#downloadMap").click(function() {
         	downloadMap();
@@ -242,12 +237,13 @@
                 source: new ol.source.TileWMS({
                     url: 'http://maps.imr.no/geoserver/wms',
                     params: {
-                        'LAYERS': 'landareal_europa',
+                        //'LAYERS': 'landareal_europa',
+                        'LAYERS': 'dybderelieffpolar_v01_wms',
                         'VERSION': '1.1.1',
                         'TRANSPARENT': 'true'
                     }
                 }),
-                'name': 'Europa'
+                'name' : 'Dybderelieffpolar' //'name': 'Europa'
             })
         ];
 
@@ -262,9 +258,9 @@
             layers: layers,
             target: 'map',
             view: new ol.View({
-                projection: 'EPSG:32633',
-                center: [1088474,8089849],
-                zoom:3
+                projection: 'EPSG:3575', //'EPSG:32633',
+                center: [2000000,-2000000], //[1088474,8089849],
+                zoom:5
             })
         });
                   

@@ -137,8 +137,12 @@ function readParametersClosure() {
 				intersectDepthList = depthList;
 				intersectPeriodList = periodList;
 			} else { //allow only elements which are an intersection of periods when more than one subspecies
-				intersectDepthList = intersectDepthList.filter(n => depthList.indexOf(n) != -1);
-				intersectPeriodList = intersectPeriodList.filter(n => periodList.indexOf(n) != -1);
+				intersectDepthList = intersectDepthList.filter(function (n) { //n => depthList.indexOf(n) != -1 
+					return depthList.indexOf(n) != -1; 
+				});
+				intersectPeriodList = intersectPeriodList.filter(function (n) {
+					return periodList.indexOf(n) != -1;
+				});
 			}
 		}
 		

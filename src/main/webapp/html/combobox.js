@@ -43,18 +43,22 @@ function addLayerToMap(layername, message, mapp) {
     var depths = "'" + comboboxDepth.toString().replace(/,/g,' ') + "'";
     var periods = "'" + comboboxPeriod.toString().replace(/,/g,' ') + "'";
     
+    var layername = "barmarPointvalueAggregate";
+    if ( $("#visning option:selected").attr('id') === 'arealvisning' ) {
+    	layername = "barmarAreavalueAggregate";
+    }
+    
     var postgisLayer = new ol.layer.Tile({
         source: new ol.source.TileWMS({
             url: MAPS_IMR_NO,
             params: {
-                'LAYERS': layername,
+                'LAYERS': layername, 
                 'TRANSPARENT': 'true',
                 sld: BASE_URL + "getsld?file=" + message.filename, 
-                viewparams:"id_grid:'BarMar';parameter_id:"+params+
+                viewparams:"agridname:'BarMar';parameter_ids:"+params+
             	";depthlayername:"+depths+
             	";periodname:"+periods+
-            	";valueMin:"+ message.min +
-            	";valueMax:"+ message.max 
+            	";aggregationfunc:'"+ $('#aggregation option:selected').attr('id') +"'"
             }
         }),
         'name': displayName
@@ -74,14 +78,14 @@ function addLayerToMap(layername, message, mapp) {
     layerSrc.on('tileloaderror', function() {
         $("#progress").removeAttr("style");
         $("#progress").css("display", "none");
-        alert("feil ved lasting av postgis lag");
+        console.log("feil ved lasting av postgis lag");
       });
 
     
     mapp.addLayer(postgisLayer);
     
-    var src = MAPS_IMR_NO + "service=WMS&version=1.1.1&request=GetLegendGraphic&layer="+
-    	layername+"&width=22&height=24&format=image/png&SLD="+BASE_URL + "getsld?file=" + message.filename;
+    var src = MAPS_IMR_NO + "service=WMS&version=1.1.1&request=GetLegendGraphic&layer="+layername+
+    	"&width=22&height=24&format=image/png&SLD="+BASE_URL + "getsld?file=" + message.filename;
     jQuery("#legend").append('<p id='+displayName+'>'+displayName+'<br/><img src='+src+' /></p>');
 }
 
@@ -131,7 +135,8 @@ function createSLD(onSuccessFunction, onErrorFunction) {
             parameter: paramNames,
             time: comboboxPeriod,
             depth: comboboxDepth,
-            displaytype: displayType
+            displaytype: displayType,
+            aggregationFunc: $('#aggregation option:selected').attr('id')
         },
         method: "post",
         success: function(message){
@@ -180,15 +185,8 @@ function readBarMar() {
 		if ( i > 0 ) comboboxPeriod += " "+$(selected).attr('id'); 
 		else comboboxPeriod = $(selected).attr('id');
 	});
-	
-	var visning = $("#visning").val();
-	if ( visning === 'punktvisning') {
-		displayType = PUNKTVISNING;
-		layername = LAYER_POINTVALUE;
-	} else {
-		displayType = AREALVISNING;
-		layername = LAYER_AREAVALUE;
-	}
+
+	displayType = $('#visning option:selected').attr('id');
 	displayName = createDisplayName(paramNames.toString(), comboboxPeriod, comboboxDepth, displayType);
 	
 	if ( comboboxPeriod.indexOf("Aggregated") != -1 ) comboboxPeriod = "F";
@@ -231,13 +229,13 @@ function createPDF(mapp) {
             error: function(req, status, errThrown) {
                 $("#progress").removeAttr("style");
                 $("#progress").css("display", "none");
-                alert("feil ved lasting av postgis lag");
+                console.log("feil ved lasting av postgis lag:"+errThrown);
             }
         });    
     }
     
     var onErrorFunction = function(req, status, errThrown) {
-        alert("ie error req:"+req+" status:"+status+" errThrown:"+errThrown);
+        console.log("ie error req:"+req+" status:"+status+" errThrown:"+errThrown);
     }
     
     createSLD(onSuccessFunction, onErrorFunction);
@@ -274,6 +272,7 @@ function createDisplayName(param, period, depth, displayType) {
         adisplayName+= "_All";
     }
     adisplayName += "_" + displayType;
+    adisplayName +=  "_ " + $('#aggregation option:selected').attr('id');
     return adisplayName;
 }
 

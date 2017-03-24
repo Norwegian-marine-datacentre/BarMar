@@ -22,7 +22,7 @@ public class CreateSLDControllerTest {
 		String displaytype = "displaytype:punktvisning";
 
 		
-		Map<String, Object> sld = createSld.createBarMarsld(grid, parameters, time, depth, displaytype);
+		Map<String, Object> sld = createSld.createBarMarsld(grid, parameters, time, depth, displaytype, "avg");
 
 	}
 }

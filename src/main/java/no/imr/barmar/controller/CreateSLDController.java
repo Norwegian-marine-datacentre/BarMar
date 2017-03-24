@@ -55,12 +55,13 @@ public class CreateSLDController {
     		@RequestParam("parameter[]") String[] parameters,
     		@RequestParam("time") String time, //todo: time[]
     		@RequestParam("depth") String depth, //todo: depth[]
-    		@RequestParam("displaytype") String displaytype) throws Exception {
+    		@RequestParam("displaytype") String displaytype,
+    		@RequestParam("aggregationFunc") String aggregationFunc) throws Exception {
 
         boolean areadisplay = isAreadisplay( displaytype );
         
         BarMarPojo queryFishEx = new BarMarPojo( grid, Arrays.asList(parameters), Arrays.asList(depth), Arrays.asList(time) );
-        dao.getMaxMinTemperature(queryFishEx);
+        dao.getMaxMinTemperature(queryFishEx, aggregationFunc);
         
         String filename = writeSldToResponse(queryFishEx, areadisplay);
         
