@@ -30,15 +30,8 @@ public class UrlConsts {
     public final static String BARMAR_AREAVALUE = "postgis:barmarAreavalueAggregate";//"postgis:areavalue";
     public final static String BARMAR_POINTVALUE = "postgis:barmarPointvalueAggregate"; //"postgis:pointvalue";
     
-
-    
-    public final static String NORMAR_AREAVALUE_AGGREGATED = "postgis:areavalueAggregate"; //NORMAR_AREAVALUE; //"test:areavalueNormar2"; 
-    public final static String NORMAR_POINTVALUE_AGGREGATED = "postgis:pointvalueAggregate"; //NORMAR_POINTVALUE; //"test:pointvalueNormar2";
-    
-    public final static String BARMAR_AREAVALUE_AGGREGATED = "postgis:barmarAreavalueAggregate"; //BarMar_AREAVALUE; //"test:..."; 
-    
-    public final static String NORMAR_AREAVALUE = "postgis:areavalueNormar"; //"postgis:areavalueNormarOneParam";  //NORMAR_AREAVALUE_AGGREGATED;
-    public final static String NORMAR_POINTVALUE = "postgis:pointvalueNormar"; //"postgis:pointvalueNormarOneParam";    //NORMAR_POINTVALUE_AGGREGATED;
+    public final static String NORMAR_AREAVALUE = "postgis:normarAreavalueAggregate";//"postgis:areavalueNormar"; //"postgis:areavalueNormarOneParam";  //NORMAR_AREAVALUE_AGGREGATED;
+    public final static String NORMAR_POINTVALUE = "postgis:normarPointvalueAggregate";//"postgis:pointvalueNormar"; //"postgis:pointvalueNormarOneParam";    //NORMAR_POINTVALUE_AGGREGATED;
     
     public final static String NORMAR = "NorMar";
     

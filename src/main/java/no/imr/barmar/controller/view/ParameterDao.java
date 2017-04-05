@@ -9,6 +9,8 @@ import java.util.Map;
 import javax.annotation.Resource;
 import javax.sql.DataSource;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import no.imr.barmar.controller.view.pojo.Metadata;
 import no.imr.barmar.controller.view.pojo.Parameter;
+import no.imr.barmar.geoserver.UrlConsts;
 import no.imr.barmar.pojo.BarMarPojo;
 
 @Component
@@ -25,10 +28,36 @@ public class ParameterDao {
 	private JdbcTemplate jdbcTemplate;
 	private NamedParameterJdbcTemplate jdbcTempleateList;
 	
-	@Resource(name="dataSource")
-	public void setDataSource(DataSource dataSource) {
-	    this.jdbcTemplate = new JdbcTemplate(dataSource);
-	    this.jdbcTempleateList = new NamedParameterJdbcTemplate(dataSource);
+	private JdbcTemplate barmarJdbcTemplate;
+	private NamedParameterJdbcTemplate barmarJdbcTempleateList;
+	
+	private JdbcTemplate normarJdbcTemplate;
+	private NamedParameterJdbcTemplate normarJdbcTempleateList;
+	
+	@Resource(name="barmarDataSource")
+	public void setBarmarDataSource(DataSource dataSource) {
+	    this.barmarJdbcTemplate = new JdbcTemplate(dataSource);
+	    this.barmarJdbcTempleateList = new NamedParameterJdbcTemplate(dataSource);
+	}
+	
+	@Resource(name="normarDataSource") 
+	public void setNormarDataSource(DataSource dataSource) {
+	    this.normarJdbcTemplate = new JdbcTemplate(dataSource);
+	    this.normarJdbcTempleateList = new NamedParameterJdbcTemplate(dataSource);
+	}
+	
+	public void setDataSource( String gridName ) {
+    	if ( gridName.equals(UrlConsts.NORMAR) ) {
+    		jdbcTemplate = normarJdbcTemplate;
+    		jdbcTempleateList = normarJdbcTempleateList;    	
+    	} else {
+    		jdbcTemplate = barmarJdbcTemplate;
+    		jdbcTempleateList = barmarJdbcTempleateList;	
+    	}
+	}
+	
+	public JdbcTemplate getJdbcTemplate() {
+		return this.jdbcTemplate;
 	}
 	
 	/**
@@ -36,7 +65,7 @@ public class ParameterDao {
 	 * 
 	 * @return list of grids
 	 */
-	public List<String> getAllGridNames() {
+	private List<String> getAllGridNames() {
 		return jdbcTemplate.query("select id, name from grid;", 
 				new RowMapper<String>() {
 			public String mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -44,7 +73,7 @@ public class ParameterDao {
 			}
 		});
 	}
-	
+
 	/**
 	 * Query runs in about 1300ms
 	 * 
@@ -55,7 +84,6 @@ public class ParameterDao {
 	 */
     public List<Parameter> getAllParametersAndMetadata(String gridName, final Map<String, Metadata> metadataList) {
 		    	
-
 		return jdbcTemplate.query(
 				"SELECT p.id, p.name AS parametername, m.dataset_name AS datasetname, m.geographic_coverage AS geographiccoverage, "+
 						"m.summary AS description, m.originator AS datasetoriginator, m.contact AS datasetcontact, m.lastupdated AS datasetlastupdated "+
@@ -128,11 +156,6 @@ public class ParameterDao {
     }
     
     public void getMaxMinTemperature( BarMarPojo pojo, String aggregationFunc) {
-    	MapSqlParameterSource map = new MapSqlParameterSource();
-    	map.addValue("grid", pojo.getGrid());
-    	map.addValue("names", pojo.getParameter().toArray(new String[pojo.getParameter().size()]));
-    	map.addValue("depths", pojo.getDepth().toArray(new String[pojo.getDepth().size()]));
-    	map.addValue("periods", pojo.getTime().toArray(new String[pojo.getTime().size()]));
     	
     	Map<String, Object> sqlParam = new HashMap<String, Object>();
     	sqlParam.put( "grid", pojo.getGrid() );
@@ -141,6 +164,9 @@ public class ParameterDao {
     	sqlParam.put( "periods", pojo.getTime() );
     	
     	String selectMean = "SELECT avg(v.value) as average_value "; 
+    	String std_dev_coefficient =
+    			//complicated expression to avoid God killing kittens
+    			"SELECT (CASE stddev_samp(v.value) OVER (PARTITION BY h.name) WHEN 0 THEN 0 ELSE (stddev_samp(v.value) OVER (PARTITION BY h.name) ) / ( avg(v.value) OVER (PARTITION BY h.name) ) END) as average_value ";
     	String selectFullRange = "SELECT v.value as average_value ";
     	String RestOfQuery = 
     			"FROM grid g, hcell h, value v, parameter p, valuexvcell vxv, valuextcell vxt, tcell tc, vcell vc " +  
@@ -149,10 +175,14 @@ public class ParameterDao {
         String selectMeanGroupBy = "GROUP BY h.geoshape";
     	
     	String query = "";
-    	if ( aggregationFunc.equals("avg")) {
+    	if ( aggregationFunc.equals("avg") ) {
     		query = selectMean + RestOfQuery + selectMeanGroupBy;
-    	} else query = selectFullRange + RestOfQuery;
-    	 
+    	} else if ( aggregationFunc.equals("relative_std_dev") ) {
+    		query = std_dev_coefficient + RestOfQuery;
+    	} else {
+    		query = selectFullRange + RestOfQuery;
+    	}
+
 		List<Float> avgValues = jdbcTempleateList.query(query, sqlParam, new RowMapper<Float>() {
 			public Float mapRow(ResultSet rs, int rowNum) throws SQLException {
 				return rs.getFloat("average_value");
@@ -187,9 +217,6 @@ public class ParameterDao {
     	        "WHERE h.id_grid = g.id AND v.id_hcell = h.id AND v.id_parameter = p.id AND vxt.id_value = v.id AND vxt.id_tcell = tc.id AND vxv.id_value = v.id AND vxv.id_vcell = vc.id " +
     	        "AND g.name=:grid AND p.name in (:names) AND vc.name in (:depths) AND tc.name in (:periods) " +
     	        "order BY h.name, v.value";
-    	 
-    	System.out.println("query:"+query);
-    	System.out.println("sqlParam:"+sqlParam.toString());
     	
 		List<DownloadPojo> downloadPojos = jdbcTempleateList.query(query, sqlParam, new RowMapper<DownloadPojo>() {
 			public DownloadPojo mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -207,7 +234,6 @@ public class ParameterDao {
 				return pojo;
 			}
 		});
-
 		return downloadPojos;
     }
 }

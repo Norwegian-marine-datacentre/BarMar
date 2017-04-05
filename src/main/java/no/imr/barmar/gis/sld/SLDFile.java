@@ -39,7 +39,7 @@ public class SLDFile {
      * @param parameterNames
      * @return
      */
-    public String getSLDFile( BarMarPojo queryFishEx, Boolean areadisplay ) {
+    public String getSLDFile( BarMarPojo queryFishEx, Boolean areadisplay, String hueColor ) {
     		
     	
         // List<Color> theColors = HSVtoRGB.makeColorScale(180.0f, Integer.parseInt("10"));
@@ -51,14 +51,14 @@ public class SLDFile {
         String layername = sldName.getLayerName(queryFishEx, areadisplay );
         sSLDFile += "<Name>"+layername+"</Name>";
 
-        sSLDFile += getUserStyle(areadisplay, queryFishEx );
+        sSLDFile += getUserStyle(areadisplay, queryFishEx, hueColor );
         sSLDFile += "</NamedLayer>";
         sSLDFile += "</StyledLayerDescriptor>";
         
         return sSLDFile;
     }
 
-    protected String getUserStyle(Boolean areadisplay, BarMarPojo queryFishEx ) {
+    protected String getUserStyle(Boolean areadisplay, BarMarPojo queryFishEx, String hueColor ) {
 
         String sUserStyle = "<UserStyle>";
         sUserStyle += "<FeatureTypeStyle>";
@@ -82,7 +82,7 @@ public class SLDFile {
             		queryFishEx.setMinLegend( 0.1f );
         		}
             }
-            sUserStyle += getSteppedSizeRulePoints( 3, 2, 10, queryFishEx );
+            sUserStyle += getSteppedSizeRulePoints( 3, 2, 10, queryFishEx, hueColor );
         }
         sUserStyle += "</FeatureTypeStyle>";
         sUserStyle += "</UserStyle>";
@@ -94,40 +94,44 @@ public class SLDFile {
      * IS PROPORTIONAL TO THE VALUE AT THE POINT
      * @return
      */
-    protected String getSizeRulePointDisplay( BarMarPojo queryFishEx) {
+//    protected String getSizeRulePointDisplay( BarMarPojo queryFishEx, String hueColor ) {
+//
+//        String sRule = "<Rule>";
+//        sRule += "<ogc:Filter>";
+//        sRule += singleOrAggregateSelectionRule.getSelectionRule( queryFishEx );
+//
+//        sRule += "<ogc:PropertyIsNotEqualTo>";
+//        sRule += "<ogc:PropertyName>value</ogc:PropertyName>";
+//        sRule += "<ogc:Literal>0</ogc:Literal>";
+//        sRule += "</ogc:PropertyIsNotEqualTo>";
+//        sRule += "</ogc:And>";
+//        sRule += "</ogc:Filter>";
+//        sRule += "<PointSymbolizer>";
+//        sRule += "<Graphic>";
+//        sRule += "<Mark>";
+//        sRule += "<WellKnownName>circle</WellKnownName>";
+//        sRule += "<Fill>";
+//        if (hueColor != null) {
+//        	sRule += "<CssParameter name=\"fill\">" + hueColor + "</CssParameter>"; 
+//        } else {
+//        sRule += "<CssParameter name=\"fill\">#FF0000</CssParameter>"; //RED
+//        }
+//        sRule += "</Fill>";
+//        sRule += "</Mark>";
+//        sRule += "<Size>";
+//        sRule += "<ogc:Div>";
+//        sRule += "<ogc:PropertyName>value</ogc:PropertyName>";
+//        sRule += "<ogc:Literal>1</ogc:Literal>";
+//        sRule += "</ogc:Div>";
+//        sRule += "</Size>";
+//        sRule += "</Graphic>";
+//        sRule += "</PointSymbolizer>";
+//        sRule += "</Rule>";
+//
+//        return sRule;
+//    }
 
-        String sRule = "<Rule>";
-        sRule += "<ogc:Filter>";
-        sRule += singleOrAggregateSelectionRule.getSelectionRule( queryFishEx );
-
-        sRule += "<ogc:PropertyIsNotEqualTo>";
-        sRule += "<ogc:PropertyName>value</ogc:PropertyName>";
-        sRule += "<ogc:Literal>0</ogc:Literal>";
-        sRule += "</ogc:PropertyIsNotEqualTo>";
-        sRule += "</ogc:And>";
-        sRule += "</ogc:Filter>";
-        sRule += "<PointSymbolizer>";
-        sRule += "<Graphic>";
-        sRule += "<Mark>";
-        sRule += "<WellKnownName>circle</WellKnownName>";
-        sRule += "<Fill>";
-        sRule += "<CssParameter name=\"fill\">#FF0000</CssParameter>"; //RED
-        sRule += "</Fill>";
-        sRule += "</Mark>";
-        sRule += "<Size>";
-        sRule += "<ogc:Div>";
-        sRule += "<ogc:PropertyName>value</ogc:PropertyName>";
-        sRule += "<ogc:Literal>1</ogc:Literal>";
-        sRule += "</ogc:Div>";
-        sRule += "</Size>";
-        sRule += "</Graphic>";
-        sRule += "</PointSymbolizer>";
-        sRule += "</Rule>";
-
-        return sRule;
-    }
-
-    protected String getSteppedSizeRulePoints(Integer minsymbolsize, Integer stepsymbolsize, Integer nstep, BarMarPojo queryFishEx ) {
+    protected String getSteppedSizeRulePoints(Integer minsymbolsize, Integer stepsymbolsize, Integer nstep, BarMarPojo queryFishEx, String hueColor  ) {
         String stepRules = "";
         List<List<Float>> valueranges = makeValueRanges(queryFishEx.getMinLegend(), queryFishEx.getMaxLegend(), nstep);
         Integer intervalsymbolsize = 0;
@@ -137,12 +141,12 @@ public class SLDFile {
             intervalsymbolsize = minsymbolsize + stepsymbolsize * istep;
             stepRules += getStepSizeRulePoint(
             		valuerange.get(0).toString(), valuerange.get(1).toString(), 
-        			intervalsymbolsize.toString(), queryFishEx );
+        			intervalsymbolsize.toString(), queryFishEx, hueColor  );
         }
         return stepRules;
     }
 
-    protected String getStepSizeRulePoint( String minLocal, String maxLocal, String symbolsize, BarMarPojo queryFishEx) {
+    protected String getStepSizeRulePoint( String minLocal, String maxLocal, String symbolsize, BarMarPojo queryFishEx, String hueColor ) {
         String sRule = "<Rule>";
         sRule += "<Title>" + minLocal + "-" + maxLocal + "</Title>";
         sRule += "<ogc:Filter>";
@@ -164,7 +168,11 @@ public class SLDFile {
         sRule += "<Mark>";
         sRule += "<WellKnownName>circle</WellKnownName>";
         sRule += "<Fill>";
+        if (hueColor != null) {
+        	sRule += "<CssParameter name=\"fill\">" + hueColor + "</CssParameter>"; 
+        } else {
         sRule += "<CssParameter name=\"fill\">#FF0000</CssParameter>"; //RED
+        }        
         sRule += "</Fill>";
         sRule += "</Mark>";
         sRule += "<Size>" + symbolsize + "</Size>";

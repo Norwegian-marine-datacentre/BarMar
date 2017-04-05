@@ -28,10 +28,21 @@ import no.imr.barmar.pojo.BarMarPojo;
 public class BarMarControllerFromDb {
 
 	@Autowired( required = true )
-	protected SortSubSpecies sortSubSpecies;
+	public SortSubSpecies sortSubSpecies;
 	
-	@Autowired( required = true )
-	protected ParameterDao dao;
+	@Autowired
+	private ParameterDao dao = null;
+	
+	public ParameterDao getParameterDao(String gridName) {
+		if ( dao.getJdbcTemplate() == null ) {
+			dao.setDataSource( gridName );
+		} 
+		return dao;
+	}
+	
+	public void setParameterDao( ParameterDao dao) {
+		this.dao = dao;
+	}
 	
 	Map<String, Object> barMarParameteres = null;
 
@@ -52,7 +63,7 @@ public class BarMarControllerFromDb {
     		barMarParameteres = new HashMap<String, Object>(900); //900 current num of parameters
     		
     		Map<String, Metadata> metadataList = new HashMap<String, Metadata>();
-	        List<Parameter> params = dao.getAllParametersAndMetadata( grid, metadataList );
+	        List<Parameter> params = getParameterDao(grid).getAllParametersAndMetadata( grid, metadataList );
 	        for ( String metadataRef : metadataList.keySet() ) {
 	        	barMarParameteres.put( metadataRef, metadataList.get(metadataRef) );
 	        }
@@ -62,18 +73,20 @@ public class BarMarControllerFromDb {
         	for ( Parameter param : params ) {
         		String name = param.getName();
         		int end = name.indexOf( "_" );
-	            String firstUnderscore = param.getName().substring(0, end);
-	            if ( !speciesStr.contains( firstUnderscore ) ) {
-	            	speciesStr.add(firstUnderscore);
-	            }
-            	List<Parameter> subspecies = (List<Parameter>) speciesMap.get(firstUnderscore);
-            	if ( subspecies == null ) {
-            		subspecies = new ArrayList<Parameter>();
-            		subspecies.add(param);
-            		speciesMap.put(firstUnderscore, subspecies);
-            	} else {
-            		subspecies.add( param );
-            	}
+        		if ( end > 0 ) {
+		            String firstUnderscore = param.getName().substring(0, end);
+		            if ( !speciesStr.contains( firstUnderscore ) ) {
+		            	speciesStr.add(firstUnderscore);
+		            }
+	            	List<Parameter> subspecies = (List<Parameter>) speciesMap.get(firstUnderscore);
+	            	if ( subspecies == null ) {
+	            		subspecies = new ArrayList<Parameter>();
+	            		subspecies.add(param);
+	            		speciesMap.put(firstUnderscore, subspecies);
+	            	} else {
+	            		subspecies.add( param );
+	            	}
+        		}
             }
         	for ( String speciesName : speciesStr) {
 
@@ -86,7 +99,7 @@ public class BarMarControllerFromDb {
     }
     
     
-    @RequestMapping("/downloadData")
+//    @RequestMapping("/downloadData")
     public void downloadRecords(
     		@RequestParam("grid") String grid,
     		@RequestParam("parameter[]") String[] parameters,
@@ -99,7 +112,7 @@ public class BarMarControllerFromDb {
     	pojo.setParameter(Arrays.asList(parameters));
     	pojo.setTime( Arrays.asList(time));
     	pojo.setDepth( Arrays.asList(depth));
-    	List<DownloadPojo> records = dao.downloadLayerRecords(pojo);
+    	List<DownloadPojo> records = getParameterDao(grid).downloadLayerRecords(pojo);
 
     	CsvMapper mapper = new CsvMapper();
     	CsvSchema schema = mapper.schemaFor(DownloadPojo.class).withColumnSeparator(';').withHeader();

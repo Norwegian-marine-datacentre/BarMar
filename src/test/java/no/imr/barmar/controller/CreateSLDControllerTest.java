@@ -17,8 +17,8 @@ public class CreateSLDControllerTest {
 
 		String grid = "grid:BarMar";
 		String[] parameters = {"Cod_survey_trawl_ecosystem_0-4cm","Cod_survey_trawl_ecosystem_5-9cm"};
-		String time = "time:F";
-		String depth = "depth:F";
+		String[] time = {"M200408","M200409"};
+		String[] depth = {"F"};
 		String displaytype = "displaytype:punktvisning";
 
 		

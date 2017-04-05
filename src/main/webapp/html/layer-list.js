@@ -27,8 +27,9 @@ function initializeStack() {
 
 var pdfHash = {};
 /** Display icon with pdf generation */
-function addPdfGenerationToStack(layerName, comboboxSpecies, comboboxParameter, comboboxPeriod, comboboxDepth, displayType) {
-    pdfHash[layerName] = {'species': comboboxSpecies, 'subSpecies':comboboxParameter, 'period': comboboxPeriod, 'depth':comboboxDepth, 'displayType':displayType};
+function addPdfGenerationToStack(displayName, parameterIds, paramNames, periodNames, depthNames, displayType, aggregationfunc) {
+	//'paramNames' : paramNames, .. , 'displayType':displayType
+    pdfHash[displayName] = {'parameterIds': parameterIds, 'periodNames': periodNames, 'depthNames':depthNames, 'aggregationfunc':aggregationfunc};
 }
 
 /**
@@ -134,32 +135,11 @@ $(document).ready(function() {
             jQuery("#legend p[id='"+layerid+"'").fadeTo(500, 1);
     });
     
-    var carat = " <span class=\"caret\"></span>";
     $('ul.layerstack').on('click', 'a', function() {
         var layer = $(this).attr('id');
         var pdfGen = pdfHash[layer];
 
-        $("#speciesBtn").val(pdfGen.species);
-        $("#speciesBtn").html(pdfGen.species + carat);
-        $("#speciesSubGroupBtn").val(pdfGen.subSpecies);
-        $("#speciesSubGroupBtn").html(pdfGen.subSpecies + carat);
-        if ( pdfGen.depth === "" ) {
-            $("#depthBtn").val( "Select Value" );
-            $("#depthBtn").html( "Select Value" + carat);            
-        } else {
-            $("#depthBtn").val( pdfGen.depth );
-            $("#depthBtn").html( pdfGen.depth + carat);            
-        }
-        if ( pdfGen.period === "" ) {
-            $("#periodBtn").val( "Select Value" );
-            $("#periodBtn").html("Select Value" + carat);
-        } else {
-            $("#periodBtn").val( pdfGen.period );
-            $("#periodBtn").html( pdfGen.period + carat);
-        }
-        $("#displayTypeBtn").val(pdfGen.displayType);
-        $("#displayTypeBtn").html(pdfGen.displayType + carat);        
-        
-        $("#createPDF").click();
+        console.log("this.map:"+this.map);
+        barmarCreatePDF(pdfGen)
     });
 });

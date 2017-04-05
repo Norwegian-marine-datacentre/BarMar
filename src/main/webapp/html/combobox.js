@@ -7,46 +7,39 @@ var MAPS_IMR_NO = "http://geb-test.nodc.no/geoserver/wms?";
 //DEV:
 //var MAPS_IMR_NO = "http://10.1.9.138:8080/geoserver/wms?";
 
-var NORMAR_GRID = 11;
-
 var BASE_URL = location.href.substring(0,location.href.lastIndexOf('/')) + "/";
 
 //var BASE_URL = "http://10.1.9.230:9090/"; 
 
 var comboboxGrid = ""; 
-var comboboxSpecies = "";
-//var comboboxParameter = "";
-var comboboxPeriod = ""; 
-var comboboxDepth = ""; //jQuery("#depthlayer :selected").val(),
+
 var displayType = "";
 var layername = "";
 var displayName = "";
 
 function drawmap(mapp) {
 	jQuery.support.cors = true;
+	
 
 	var onSuccessFunction = function (message) {
 	    addLayerToMap(layername, message, mapp);
-	    addPdfGenerationToStack(displayName, comboboxSpecies, paramNames.toString(), comboboxPeriod, comboboxDepth, displayType);
+	    var aggregationfunc = $('#aggregation option:selected').attr('id')
+	    addPdfGenerationToStack(displayName, parameterIds, paramNames, periodNames, depthNames, displayType, aggregationfunc);
 	    initializeStack();
 	}
 	
 	var onErrorFunction = function(req, status, errThrown) {
 	    alert("ie error req:"+req+" status:"+status+" errThrown:"+errThrown);
 	}
+	readBarMar();
 	createSLD(onSuccessFunction, onErrorFunction);
 }
 
 function addLayerToMap(layername, message, mapp) {
 
     var params = "'" + parameterIds.toString().replace(/,/g,' ') + "'";
-    var depths = "'" + comboboxDepth.toString().replace(/,/g,' ') + "'";
-    var periods = "'" + comboboxPeriod.toString().replace(/,/g,' ') + "'";
-    
-    var layername = "barmarPointvalueAggregate";
-    if ( $("#visning option:selected").attr('id') === 'arealvisning' ) {
-    	layername = "barmarAreavalueAggregate";
-    }
+    var depths = "'" + depthNames.toString().replace(/,/g,' ') + "'"; 
+    var periods = "'" + periodNames.toString().replace(/,/g,' ') + "'"; 
     
     var postgisLayer = new ol.layer.Tile({
         source: new ol.source.TileWMS({
@@ -55,7 +48,7 @@ function addLayerToMap(layername, message, mapp) {
                 'LAYERS': layername, 
                 'TRANSPARENT': 'true',
                 sld: BASE_URL + "getsld?file=" + message.filename, 
-                viewparams:"agridname:'BarMar';parameter_ids:"+params+
+                viewparams:"agridname:'"+comboboxGrid+"';parameter_ids:"+params+
             	";depthlayername:"+depths+
             	";periodname:"+periods+
             	";aggregationfunc:'"+ $('#aggregation option:selected').attr('id') +"'"
@@ -89,20 +82,6 @@ function addLayerToMap(layername, message, mapp) {
     jQuery("#legend").append('<p id='+displayName+'>'+displayName+'<br/><img src='+src+' /></p>');
 }
 
-function getHTTPObject() {
-    if (typeof XMLHttpRequest != 'undefined') {
-        return new XMLHttpRequest();
-    }
-    try {
-        return new ActiveXObject("Msxml2.XMLHTTP");
-    } catch (e) {
-        try {
-            return new ActiveXObject("Microsoft.XMLHTTP");
-        } catch (e) {}
-    }
-    return false;
-}
-
 function downloadMap() {
 	readBarMar();
     jQuery.ajax({
@@ -115,7 +94,6 @@ function downloadMap() {
         },
         method: "post",
         success: function(message){
-            //alert(message);
         	var blob = new Blob([message], {type: "text/plain;charset=utf-8"});
         	saveAs(blob, comboboxGrid+"_"+paramNames+"_"+periodNames+"_"+depthNames+".csv");
         },
@@ -127,14 +105,13 @@ function downloadMap() {
 
 function createSLD(onSuccessFunction, onErrorFunction) {
     
-	readBarMar();
     jQuery.ajax({
         url:"createBarMarsld",
         data:{
             grid : comboboxGrid,
             parameter: paramNames,
-            time: comboboxPeriod,
-            depth: comboboxDepth,
+            time: periodNames,
+            depth: depthNames,
             displaytype: displayType,
             aggregationFunc: $('#aggregation option:selected').attr('id')
         },
@@ -153,8 +130,21 @@ var depthNames = [];
 var periodNames = [];
 var parameterIds = "";
 function readBarMar() {
-	comboboxGrid = "BarMar"; //$("#grid").parents(".dropdown").find('.btn').val();
-	comboboxSpecies = $("#speciesselect").val();
+	//comboboxGrid = "BarMar"; //$("#grid").parents(".dropdown").find('.btn').val();
+	if (window.location.href.indexOf("normar") > -1 ) {
+		comboboxGrid = "NorMar";
+	    layername = "normarPointvalueAggregate";
+	    if ( displayType === 'arealvisning' ) {
+	    	layername = "normarAreavalueAggregate";
+	    }
+	} else {
+		comboboxGrid = "BarMar";
+	    layername = "barmarPointvalueAggregate";
+	    if ( displayType === 'arealvisning' ) {
+	    	layername = "barmarAreavalueAggregate";
+	    }
+	}
+	
 	
 	var parameterNames = $("#speciesSubGroupselect option:selected");
 	for ( i=0; i < parameterNames.length; i++ ) {
@@ -175,41 +165,32 @@ function readBarMar() {
 		else parameterIds = $(selected).attr("id");
 	});
 
-	//TOD: remove me
-	$('#depthselect option:selected').each(function(i, selected){
-		if ( i > 0 ) comboboxDepth += " "+$(selected).text(); 
-		else comboboxDepth = $(selected).text()
-	});
-	//TOD: remove me
-	$('#periodselect option:selected').each(function(i, selected){
-		if ( i > 0 ) comboboxPeriod += " "+$(selected).attr('id'); 
-		else comboboxPeriod = $(selected).attr('id');
-	});
-
 	displayType = $('#visning option:selected').attr('id');
-	displayName = createDisplayName(paramNames.toString(), comboboxPeriod, comboboxDepth, displayType);
+	displayName = createDisplayName(paramNames.toString(), periodNames.toString(), depthNames.toString(), displayType);
 	
-	if ( comboboxPeriod.indexOf("Aggregated") != -1 ) comboboxPeriod = "F";
-	if ( comboboxDepth.indexOf("Aggregated") != -1 ) comboboxDepth = "F";
+
 }
 
-function createPDF(mapp) {
-    
-	readBarMar();
+function createPDF(mapp, queryObj ) {
+
 	
     var onSuccessFunction = function (message) {
-        var showLayers = showVisibleLayers(mapp);
         
         var projection = mapp.getView().getProjection().getCode();
+        projection = "EPSG:3575";
         console.log("srs:"+projection);
-        var pdfUrl = "createpdfreport?bbox="+mapp.getView().calculateExtent(map.getSize())+
+        var pdfUrl = "createpdfreport?bbox="+this.map.getView().calculateExtent(this.map.getSize())+
             "&sld="+BASE_URL + "getsld?file=" + message.filename +
             "&srs="+projection+
             "&layer="+layername+
-            "&layerson="+showLayers+
             "&width="+mapp.getSize()[0]+ //width
             "&height="+mapp.getSize()[1]+ //height
-            "&displayLayerName="+displayName;         
+            "&displayLayerName="+displayName+
+            "&viewparams=agridname:"+"'BarMar'"+
+            	";parameter_ids:'"+queryObj.parameterIds+
+            	"';depthlayername:'"+queryObj.depthNames+
+            	"';periodname:'"+queryObj.periodNames+
+            	"';aggregationfunc:'"+queryObj.aggregationfunc+"'";
         
         $("#progress").removeAttr("style");
         $("#progress").css("display", "inline");
@@ -246,33 +227,17 @@ function ShowLoading() {
     $("#progress").css("display", "inline");
 }
 
-function showVisibleLayers(mapp) {
-	var tmpLayers = mapp.getLayers();
-	var strLayers = "";
-	for(var i=0; i<tmpLayers.length; i++) {
-		var aLayer = tmpLayers[i];
-		if ( aLayer.getVisibility() == true && !(aLayer instanceof OpenLayers.Layer.Vector) 
-				&& aLayer.name != "BarMarGrid" 
-					&& aLayer.name != "Europakart" ) {
-			var tmpUrl = aLayer.getFullRequestString({});
-			tmpUrl = escape(tmpUrl);
-			strLayers += tmpUrl + "-";
-		}
-	}
-	return strLayers;
-}
-
 function createDisplayName(param, period, depth, displayType) {
 	
+    var depths = depthNames.toString().replace(/,/g,'_'); 
+    var periods = periodNames.toString().replace(/,/g,'_');
+    var aggregationOption = $('#aggregation option:selected').attr('id');
+    
 	var adisplayName = param;
-    if ( period.indexOf( 'Aggregated' ) > -1 ) {
-        adisplayName+= "_All";
-    } 
-    if ( depth.indexOf( 'Aggregated' ) > -1 ) {
-        adisplayName+= "_All";
-    }
+	adisplayName += "_" + depths;
+	adisplayName += "_" + periods;
     adisplayName += "_" + displayType;
-    adisplayName +=  "_ " + $('#aggregation option:selected').attr('id');
+    adisplayName +=  "_" + aggregationOption
     return adisplayName;
 }
 

@@ -55,13 +55,6 @@ public class CreatePDFReportController {
 	private BufferedImage theSSFLogoImage = null;
 	private JasperReport reportWithParameter = null;
 	
-	private Integer width = null;
-	private Integer height = null;
-	private String bbox = null;
-	private String sld = null;
-	private String layer = null;
-	private String layerson = null;
-	
 	private final String logoHI = "html/imr/images/HIhoved_bla_bm-eng_CMYK2.jpg";
 	private final String logoSSF = "html/imr/images/SSF_logo.jpg";
 	private final String jasperReportUrl = "html/imr/images/barMar.jrxml";
@@ -75,30 +68,36 @@ public class CreatePDFReportController {
     private String tempImageFilePath = "";
     
 	@RequestMapping("/createpdfreport")
-    public @ResponseBody PDF_FilenameResponse createpdfreport( HttpServletRequest request,
+    public @ResponseBody PDF_FilenameResponse createpdfreport( 
+    		@RequestParam("width") Integer width,
+    		@RequestParam("height") Integer height,
+			@RequestParam("bbox") String bbox,
+			@RequestParam("sld") String sld,
+			@RequestParam("layer") String layer,
+			@RequestParam("viewparams") String viewparams,
+			HttpServletRequest request,
             HttpServletResponse response) throws IOException, JRException {
 
-		readRequestVars( request );
-    	String url = createBaseLayerUrl();
-    	String secondLayer = createFishExchangeLayer();
-        String legendUrl = createFishExchangeLegend();
+    	String url = createBaseLayerUrl( width, height, bbox);
+    	String secondLayer = createFishExchangeLayer( width, height, bbox, layer, sld, viewparams );
+        String legendUrl = createFishExchangeLegend( layer, sld);
+        
+        System.out.println("baselayer:"+url);
+        System.out.println("secondLayer:"+secondLayer);
+        System.out.println("legendUrl:"+legendUrl);
         
         BufferedImage baseLayer = ImageIO.read( new URL(url) );
         logger.debug("pdf overlay:"+secondLayer);
+        System.out.println("pdf overlay:"+baseLayer);
         BufferedImage second = ImageIO.read( new URL(secondLayer) );
         logger.debug("pdf overlay image:"+second);
+        System.out.println("pdf overlay:"+second);
         BufferedImage legendImg = ImageIO.read( new URL(legendUrl) );
 
         BufferedImage theMapImage = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
         Graphics2D g2d = (Graphics2D) theMapImage.getGraphics();
         g2d.drawImage(baseLayer, 0, 0, null);
         g2d.drawImage(second, 0, 0, null);
-        
-        List<String> otherUrls = parseOtherUrls();  
-        for ( String otherUrl : otherUrls ) {
-        	BufferedImage someOtherUrl = ImageIO.read(new URL(otherUrl));
-        	g2d.drawImage(someOtherUrl, 0, 0, null);
-        }
         
         response.setContentType("application/pdf");
         response.setHeader("Content-Transfer-Encoding", "Binary");
@@ -170,27 +169,6 @@ public class CreatePDFReportController {
         resp.flushBuffer();        
     }
 	
-	private void readRequestVars( HttpServletRequest request ) {
-		if ( request.getParameter("width") != null ) {
-			width = Integer.valueOf( request.getParameter("width") );
-		} else width = null;
-		if ( request.getParameter("height") != null ) {
-			height = Integer.valueOf( request.getParameter("height") );
-		} else height =  null;
-		if ( request.getParameter("bbox") != null ) {
-			bbox = request.getParameter("bbox");
-		} else bbox =  null;		
-		if ( request.getParameter("sld") != null ) {
-			sld = request.getParameter("sld");
-		} else sld =  null;
-		if ( request.getParameter("layer") != null ) {
-			layer = request.getParameter("layer");
-		} else layer =  null;		
-		if ( request.getParameter("layerson") != null ) {
-			layerson = request.getParameter("layerson");
-		} else layerson =  null;
-	}
-	
 	private void setupJasperReportWithTemplate() throws IOException, JRException {
 		if (  reportWithParameter == null ) {
 			Resource jasperReport = resourceLoader.getResource( jasperReportUrl );
@@ -209,30 +187,30 @@ public class CreatePDFReportController {
         return ImageIO.read( imageInputStream );
 	}
     
-	private String createBaseLayerUrl() {
+	private String createBaseLayerUrl(Integer width, Integer height, String bbox) {
 
 		String url = "http://wms.geonorge.no/skwms1/wms.europa?" + 
 			"VERSION=1.1.1" + 
 			"&SERVICE=WMS" + 
 			"&REQUEST=GetMap" + 
-			"&SRS=EPSG:32633" + 
+			"&SRS=EPSG:3575" + 
 			"&STYLES=" + 
 			"&TRANSPARENT=true" + 
 			"&FORMAT=image/png" + 
 			"&LAYERS=Land,Vmap0Land,Vmap0Kystkontur,Vmap0Hoydepunkt,Vmap0Elver,Vmap0Hoydekontur,Vmap0MyrSump,Vmap0Innsjo,Vmap0Sletteland,Vmap0Dyrketmark,Vmap0Skog,Vmap0Bebyggelse,Vmap0AdministrativeGrenser,Vmap0Isbre" + 
 			"&WIDTH=" + width +
 			"&HEIGHT=" + height + 
-			"&BBOX=" + bbox + "&ticket=";
+			"&BBOX=" + bbox;
 		return url;
 	}
     
-    private String createFishExchangeLayer() {
+    private String createFishExchangeLayer(Integer width, Integer height, String bbox, String layer, String sld, String viewparams) {
     	//String fishEx = "http://atlas2.nodc.no:8080/geoserver/wms?";
     	String fishEx = UrlConsts.MAIN_URL; 
     	fishEx = fishEx.concat("REQUEST=GetMap");
     	fishEx = fishEx.concat("&SERVICE=WMS");
     	fishEx = fishEx.concat("&FORMAT=image/png");
-    	fishEx = fishEx.concat("&CRS=EPSG:32633");
+    	fishEx = fishEx.concat("&CRS=EPSG:3575");
         //fishEx = fishEx.concat("&srs=" + request.getParameter("srs"));
     	fishEx = fishEx.concat("&transparent=true");
         fishEx = fishEx.concat("&version=1.3.0");
@@ -241,27 +219,17 @@ public class CreatePDFReportController {
         fishEx = fishEx.concat("&SLD=" + sld);
         fishEx = fishEx.concat("&bbox=" + bbox);
         fishEx = fishEx.concat("&layers=").concat(layer);
+        fishEx = fishEx.concat("&viewparams=").concat(viewparams);
+        //fishEx = fishEx.concat("&viewparams=").concat("agridname:'BarMar';parameter_ids:'214';depthlayername:'F';periodname:'F';aggregationfunc:'avg'");
         
         return fishEx;
     }
     
-    private String createFishExchangeLegend() {
+    private String createFishExchangeLegend( String layer, String sld ) {
 //        String legendUrl = "http://maps.imr.no/geoserver/wms?service=WMS&version=1.1.1&request=GetLegendGraphic&layer=test:pointvalue&width=22&height=24&format=image/png";
 //        String legendUrl = UrlConsts.MAIN_URL_WMS + UrlConsts.TYPE + "layer=test:pointvalue" + UrlConsts.TYPE2;
         String legendUrl = UrlConsts.MAIN_URL + UrlConsts.TYPE + "layer=" + layer + UrlConsts.TYPE2;
         legendUrl = legendUrl.concat("&SLD=" + sld);
         return legendUrl;
-    }
-    
-    private List<String> parseOtherUrls() throws UnsupportedEncodingException {
-    	String allUrls = layerson;
-    	String decodedUrl = URLDecoder.decode(allUrls, "utf-8");
-    	StringTokenizer tok = new StringTokenizer(decodedUrl, "-");
-    	List<String> urls = new LinkedList<String>();
-    	while(tok.hasMoreTokens()) {
-    		String aTok = tok.nextToken();
-    		urls.add( aTok + "&width=" + width + "&height=" + height + "&bbox=" + bbox );
-    	}
-    	return urls;
     }
 }

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>BarMar</title>
+        <title>NorMar</title>
         <meta charset="utf-8" />
 
 <link rel="stylesheet" href="http://openlayers.org/en/v3.15.1/css/ol.css" type="text/css">        
@@ -107,7 +107,7 @@
 <div id="selectPanel" style="position:absolute;bottom:15px;left:8px;">
 	<button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseDetail" aria-expanded="true" 
 		aria-controls="collapseDetail" >
-		BarMar
+		NorMar
 	</button>
 
 		<div class="collapse in" id="collapseDetail" aria-expanded="true">
@@ -216,14 +216,14 @@
     <script>       
     	proj4.defs("EPSG:3575","+proj=laea +lat_0=90 +lon_0=10 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs");    
     
-        readParametersClosure()( "BarMar" );
+        readParametersClosure()( "NorMar" );
         $("#downloadMap").click(function() {
         	downloadMap();
         });
         $("#createMap").click(function() {
             $("#progress").removeAttr("style");
             $("#progress").css("display", "inline");
-            drawmap(map, "BarMar" );
+            drawmap(map);
         });
         function barmarCreatePDF( pdfGen ) {
 

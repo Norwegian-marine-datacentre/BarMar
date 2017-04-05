@@ -26,13 +26,21 @@ function readParametersClosure() {
 		xmlhttp.onload = function() {
 			barMarParameters = JSON.parse(xmlhttp.responseText);
 			updateSpeciesList();
-			setSelectedValue( "Cod", "speciesselect" );
+			if ( location.href.indexOf("barmar") > -1) { 
+				setSelectedValue( "Cod", "speciesselect" );
+				updateSpeciesSubgroup( "Cod" );
+				//setSelectedValue( "Cod_survey_trawl_ecosystem_0-4cm", "speciesSubGroupselect" );
+				setSelectedValue( "214", "speciesSubGroupselect" );
+				var speciesSubGroupList = $('#speciesSubGroupBtn .selectpicker option:selected');
+				updateDepthAndTime( "Cod", speciesSubGroupList );
+			} else if (location.href.indexOf("normar") > -1) {
+				setSelectedValue( "BlueWhiting", "speciesselect" );
+				updateSpeciesSubgroup( "BlueWhiting" );
+				setSelectedValue( "34", "speciesSubGroupselect" );
+				var speciesSubGroupList = $('#speciesSubGroupBtn .selectpicker option:selected');
+				updateDepthAndTime( "BlueWhiting", speciesSubGroupList );
+			}
 			
-			updateSpeciesSubgroup( "Cod" );
-			//setSelectedValue( "Cod_survey_trawl_ecosystem_0-4cm", "speciesSubGroupselect" );
-			setSelectedValue( "214", "speciesSubGroupselect" );
-			var speciesSubGroupList = $('#speciesSubGroupBtn .selectpicker option:selected');
-			updateDepthAndTime( "Cod", speciesSubGroupList );
 			setSelectedValue("punktvisning");
 			
 			$("#speciesselect").on('changed.bs.select', function(event) {
@@ -57,7 +65,7 @@ function readParametersClosure() {
 			
 		return barMarParameters;    
 	};
-
+	
 	function updateSpeciesList() {
 
 		var speciesList = barMarParameters['species'];
@@ -69,12 +77,12 @@ function readParametersClosure() {
 
 	function updateSpeciesSubgroup( speciesName ) {
 		
+		var subspecies = barMarParameters[ speciesName ];
+		if ( subspecies === undefined ) return;
+		
 		if ( speciesName === 'Salinity' || speciesName === 'Temperature' ) {
 			$(depthBtn).show(1500)
 		} else $(depthBtn).hide(1500);
-		
-		
-		var subspecies = barMarParameters[ speciesName ];
 		
 		emptyBtnList( "#speciesSubGroupBtn" );
 		emptyBtnList( "#depthBtn" );
@@ -128,7 +136,6 @@ function readParametersClosure() {
 			var depthList = subgroup[ lengthAgeOther ][aSpeciesSubGroup].depths;
 			var periodList = subgroup[ lengthAgeOther ][aSpeciesSubGroup].periods;
 			
-			console.log("period:"+periodList+" id:"+subgroup[ lengthAgeOther ][aSpeciesSubGroup].id);
 			if ( metaRef != null && $.inArray(metaRef, unionMetadataRef) == -1 )
 				unionMetadataRef.push( metaRef );
 			
