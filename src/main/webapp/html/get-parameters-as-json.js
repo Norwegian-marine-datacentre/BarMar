@@ -29,7 +29,6 @@ function readParametersClosure() {
 			if ( location.href.indexOf("barmar") > -1) { 
 				setSelectedValue( "Cod", "speciesselect" );
 				updateSpeciesSubgroup( "Cod" );
-				//setSelectedValue( "Cod_survey_trawl_ecosystem_0-4cm", "speciesSubGroupselect" );
 				setSelectedValue( "214", "speciesSubGroupselect" );
 				var speciesSubGroupList = $('#speciesSubGroupBtn .selectpicker option:selected');
 				updateDepthAndTime( "Cod", speciesSubGroupList );

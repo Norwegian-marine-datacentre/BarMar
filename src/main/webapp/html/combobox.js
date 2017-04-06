@@ -17,9 +17,12 @@ var displayType = "";
 var layername = "";
 var displayName = "";
 
+var onErrorFunction = function(req, status, errThrown) {
+	$("div#divLoading").removeClass('show');
+    console.log("Error loading postgis layer - error req:"+req+" status:"+status+" errThrown:"+errThrown);
+}
 function drawmap(mapp) {
 	jQuery.support.cors = true;
-	
 
 	var onSuccessFunction = function (message) {
 	    addLayerToMap(layername, message, mapp);
@@ -27,12 +30,8 @@ function drawmap(mapp) {
 	    addPdfGenerationToStack(displayName, parameterIds, paramNames, periodNames, depthNames, displayType, aggregationfunc);
 	    initializeStack();
 	}
-	
-	var onErrorFunction = function(req, status, errThrown) {
-	    alert("ie error req:"+req+" status:"+status+" errThrown:"+errThrown);
-	}
 	readBarMar();
-	createSLD(onSuccessFunction, onErrorFunction);
+	createSLD(onSuccessFunction);
 }
 
 function addLayerToMap(layername, message, mapp) {
@@ -58,19 +57,11 @@ function addLayerToMap(layername, message, mapp) {
     });    
 
     var layerSrc = postgisLayer.getSource(); 
-//    layerSrc.on('tileloadstart', function() { //sld creation takes too long
-//    	console.log('imageloadstart event fired');
-//        $("#progress").removeAttr("style");
-//        $("#progress").css("display", "inline");
-//      });
     layerSrc.on('tileloadend', function() {
-    	console.log('imageloaded event fired');
-        $("#progress").removeAttr("style");
-        $("#progress").css("display", "none");
+    	$('div#divLoading').removeClass('show');
       });
     layerSrc.on('tileloaderror', function() {
-        $("#progress").removeAttr("style");
-        $("#progress").css("display", "none");
+    	$('div#divLoading').removeClass('show');
         console.log("feil ved lasting av postgis lag");
       });
 
@@ -94,6 +85,7 @@ function downloadMap() {
         },
         method: "post",
         success: function(message){
+        	$("div#divLoading").removeClass('show');
         	var blob = new Blob([message], {type: "text/plain;charset=utf-8"});
         	saveAs(blob, comboboxGrid+"_"+paramNames+"_"+periodNames+"_"+depthNames+".csv");
         },
@@ -103,8 +95,7 @@ function downloadMap() {
     });
 }
 
-function createSLD(onSuccessFunction, onErrorFunction) {
-    
+function createSLD(onSuccessFunction) {
     jQuery.ajax({
         url:"createBarMarsld",
         data:{
@@ -191,9 +182,7 @@ function createPDF(mapp, queryObj ) {
             	"';depthlayername:'"+queryObj.depthNames+
             	"';periodname:'"+queryObj.periodNames+
             	"';aggregationfunc:'"+queryObj.aggregationfunc+"'";
-        
-        $("#progress").removeAttr("style");
-        $("#progress").css("display", "inline");
+
         jQuery.ajax({
             url: pdfUrl,
             method: "post",
@@ -204,27 +193,14 @@ function createPDF(mapp, queryObj ) {
                 formDocument.click();
                 formDocument.remove();
 
-                $("#progress").removeAttr("style");
-                $("#progress").css("display", "none");
+                $("div#divLoading").removeClass('show');
             },
             error: function(req, status, errThrown) {
-                $("#progress").removeAttr("style");
-                $("#progress").css("display", "none");
-                console.log("feil ved lasting av postgis lag:"+errThrown);
+            	onErrorFunction(req, status, errThrown);
             }
         });    
     }
-    
-    var onErrorFunction = function(req, status, errThrown) {
-        console.log("ie error req:"+req+" status:"+status+" errThrown:"+errThrown);
-    }
-    
-    createSLD(onSuccessFunction, onErrorFunction);
-}
-
-function ShowLoading() {
-    $("#progress").removeAttr("style");
-    $("#progress").css("display", "inline");
+    createSLD(onSuccessFunction);
 }
 
 function createDisplayName(param, period, depth, displayType) {

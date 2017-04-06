@@ -62,7 +62,7 @@
     </div>
 </div>
 
-<div style="display: none;" id="progress"><img src="imr/images/avatar-black.gif" /></div>
+<div  id="divLoading" ></div>
 
   <div class="panel-group" id="accordionMeta" style="position: absolute;bottom: 1em;right: 0.5em;border-width:1px;">
     <div class="panel panel-default">
@@ -200,7 +200,7 @@
 			  <div>
 				  <button type="button" class="btn btn-default" id="createMap">Create Map</button>
 			  </div>
-			  <form id="hidden_pdf" method="post" onsubmit="ShowLoading()"></form>     
+			  <form id="hidden_pdf" method="post"></form>     
 			</div>
 
 			<div style="float:left">
@@ -218,16 +218,15 @@
     
         readParametersClosure()( "BarMar" );
         $("#downloadMap").click(function() {
+        	$("div#divLoading").addClass('show');
         	downloadMap();
         });
         $("#createMap").click(function() {
-            $("#progress").removeAttr("style");
-            $("#progress").css("display", "inline");
+        	$("div#divLoading").addClass('show');
             drawmap(map, "BarMar" );
         });
         function barmarCreatePDF( pdfGen ) {
-
-            console.log("this.map:"+this.map);
+        	$('div#divLoading').addClass('show');
             createPDF(this.map, pdfGen)
         }
 
