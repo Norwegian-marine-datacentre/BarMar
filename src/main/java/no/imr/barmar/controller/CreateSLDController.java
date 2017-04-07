@@ -42,8 +42,8 @@ public class CreateSLDController {
 	 * @return filename of temp file
 	 * @throws Exception
 	 */
-	private String writeSldToResponse(BarMarPojo queryFishEx, boolean areadisplay, String hueColor) throws Exception {
-        String sld = sldFile.getSLDFile( queryFishEx, areadisplay, hueColor );
+	private String writeSldToResponse(BarMarPojo queryFishEx, boolean areadisplay, String hueColor, boolean logarithmicScale) throws Exception {
+        String sld = sldFile.getSLDFile( queryFishEx, areadisplay, hueColor, logarithmicScale );
         String filename = "sld_".concat(String.valueOf(Math.random() * 10000 % 1000)).concat(".sld");
         writeSldFileToTmpdir( sld, filename );
         return filename;
@@ -56,7 +56,8 @@ public class CreateSLDController {
     		@RequestParam("time[]") String[] time, 
     		@RequestParam("depth[]") String[] depth, 
     		@RequestParam("displaytype") String displaytype,
-    		@RequestParam("aggregationFunc") String aggregationFunc) throws Exception {
+    		@RequestParam("aggregationfunc") String aggregationFunc,
+    		@RequestParam("logscale") String logscale) throws Exception {
 
         BarMarPojo queryFishEx = new BarMarPojo( grid, Arrays.asList(parameters), Arrays.asList(depth), Arrays.asList(time) );
         dao.getMaxMinTemperature(queryFishEx, aggregationFunc);
@@ -66,7 +67,8 @@ public class CreateSLDController {
         if ( aggregationFunc.equals( "relative_std_dev" )) {
         	stdDevCoefficientColor = "#B2EC5D"; //Inchworm green 
         }
-        String filename = writeSldToResponse(queryFishEx, areadisplay, stdDevCoefficientColor);
+        boolean logarithmicScale = logscale.equals("ln");
+        String filename = writeSldToResponse(queryFishEx, areadisplay, stdDevCoefficientColor, logarithmicScale);
         
         Map<String, Object> maxMinLegendValues = new HashMap<String, Object>();
         maxMinLegendValues.put("filename", filename);

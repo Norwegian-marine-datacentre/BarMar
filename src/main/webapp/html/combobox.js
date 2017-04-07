@@ -26,9 +26,8 @@ function drawmap(mapp) {
 
 	var onSuccessFunction = function (message) {
 	    addLayerToMap(layername, message, mapp);
-	    var aggregationfunc = $('#aggregation option:selected').attr('id')
-	    addPdfGenerationToStack(displayName, parameterIds, paramNames, periodNames, depthNames, displayType, aggregationfunc);
-	    initializeStack();
+	    addPdfGenerationToStack(displayName, parameterIds, paramNames, periodNames, depthNames, aggregationfunc, logscale, displayType);
+	    updateLayerStack( displayName, mapp )
 	}
 	readBarMar();
 	createSLD(onSuccessFunction);
@@ -50,7 +49,7 @@ function addLayerToMap(layername, message, mapp) {
                 viewparams:"agridname:'"+comboboxGrid+"';parameter_ids:"+params+
             	";depthlayername:"+depths+
             	";periodname:"+periods+
-            	";aggregationfunc:'"+ $('#aggregation option:selected').attr('id') +"'"
+            	";aggregationfunc:'"+ aggregationfunc +"'"
             }
         }),
         'name': displayName
@@ -59,13 +58,11 @@ function addLayerToMap(layername, message, mapp) {
     var layerSrc = postgisLayer.getSource(); 
     layerSrc.on('tileloadend', function() {
     	$('div#divLoading').removeClass('show');
-      });
+    });
     layerSrc.on('tileloaderror', function() {
     	$('div#divLoading').removeClass('show');
         console.log("feil ved lasting av postgis lag");
-      });
-
-    
+    });
     mapp.addLayer(postgisLayer);
     
     var src = MAPS_IMR_NO + "service=WMS&version=1.1.1&request=GetLegendGraphic&layer="+layername+
@@ -104,7 +101,8 @@ function createSLD(onSuccessFunction) {
             time: periodNames,
             depth: depthNames,
             displaytype: displayType,
-            aggregationFunc: $('#aggregation option:selected').attr('id')
+            aggregationfunc: aggregationfunc,
+            logscale: logscale
         },
         method: "post",
         success: function(message){
@@ -120,6 +118,8 @@ var paramNames = [];
 var depthNames = [];
 var periodNames = [];
 var parameterIds = "";
+var aggregationfunc = "";
+var logscale = "";
 function readBarMar() {
 	//comboboxGrid = "BarMar"; //$("#grid").parents(".dropdown").find('.btn').val();
 	if (window.location.href.indexOf("normar") > -1 ) {
@@ -149,7 +149,6 @@ function readBarMar() {
 	for ( i=0; i < periodNamesJquery.length; i++ ) {
 		periodNames[i] = $(periodNamesJquery[i]).attr("id");  
 	}
-	
 
 	$('#speciesSubGroupselect option:selected').each(function(i, selected){
 		if ( i > 0 ) parameterIds += " "+$(selected).attr("id"); 
@@ -157,6 +156,9 @@ function readBarMar() {
 	});
 
 	displayType = $('#visning option:selected').attr('id');
+    aggregationfunc = $('#aggregation option:selected').attr('id');
+    logscale = $('#logarithm option:selected').attr('id');
+    if (logscale == undefined ) logscale = "noLnScale";
 	displayName = createDisplayName(paramNames.toString(), periodNames.toString(), depthNames.toString(), displayType);
 	
 
@@ -164,12 +166,10 @@ function readBarMar() {
 
 function createPDF(mapp, queryObj ) {
 
-	
     var onSuccessFunction = function (message) {
         
         var projection = mapp.getView().getProjection().getCode();
         projection = "EPSG:3575";
-        console.log("srs:"+projection);
         var pdfUrl = "createpdfreport?bbox="+this.map.getView().calculateExtent(this.map.getSize())+
             "&sld="+BASE_URL + "getsld?file=" + message.filename +
             "&srs="+projection+
@@ -177,8 +177,8 @@ function createPDF(mapp, queryObj ) {
             "&width="+mapp.getSize()[0]+ //width
             "&height="+mapp.getSize()[1]+ //height
             "&displayLayerName="+displayName+
-            "&viewparams=agridname:"+"'BarMar'"+
-            	";parameter_ids:'"+queryObj.parameterIds+
+            "&viewparams=agridname:'"+comboboxGrid+
+            	"';parameter_ids:'"+queryObj.parameterIds+
             	"';depthlayername:'"+queryObj.depthNames+
             	"';periodname:'"+queryObj.periodNames+
             	"';aggregationfunc:'"+queryObj.aggregationfunc+"'";
@@ -200,6 +200,15 @@ function createPDF(mapp, queryObj ) {
             }
         });    
     }
+    
+    parameterIds = queryObj.parameterIds;
+    paramNames = queryObj.paramNames;
+    depthNames = queryObj.depthNames;
+    periodNames = queryObj.periodNames;
+    aggregationfunc = queryObj.aggregationfunc;
+    logscale = queryObj.logscale;
+    displayType = queryObj.displayType; 
+    
     createSLD(onSuccessFunction);
 }
 
@@ -213,7 +222,8 @@ function createDisplayName(param, period, depth, displayType) {
 	adisplayName += "_" + depths;
 	adisplayName += "_" + periods;
     adisplayName += "_" + displayType;
-    adisplayName +=  "_" + aggregationOption
+    adisplayName +=  "_" + aggregationOption;
+    adisplayName +=  "_" + logscale;
     return adisplayName;
 }
 

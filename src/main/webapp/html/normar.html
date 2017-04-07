@@ -62,7 +62,7 @@
     </div>
 </div>
 
-<div style="display: none;" id="progress"><img src="imr/images/avatar-black.gif" /></div>
+<div  id="divLoading" ></div>
 
   <div class="panel-group" id="accordionMeta" style="position: absolute;bottom: 1em;right: 0.5em;border-width:1px;">
     <div class="panel panel-default">
@@ -138,11 +138,11 @@
 				<label style="background-color:white;">Species Length, Age, or Other</label>	
 				<div>
 					<select class="selectpicker dcc" id="speciesSubGroupselect" data-live-search="true" data-width="css-width" multiple >
-						<optgroup label="Species length" id="speciesSubGroupLength" data-max-options="3">
+						<optgroup label="Species length" id="speciesSubGroupLength" data-max-options="5">
 						</optgroup>
-						<optgroup label="Species Age" id="speciesSubGroupAge" data-max-options="3">
+						<optgroup label="Species Age" id="speciesSubGroupAge" data-max-options="5">
 						</optgroup>
-						<optgroup label="Species Other" id="speciesSubGroupOther" data-max-options="3">
+						<optgroup label="Species Other" id="speciesSubGroupOther" data-max-options="5">
 						</optgroup>
 					</select>
 				</div>
@@ -152,7 +152,7 @@
 				<label style="background-color:white;">Depth</label>	
 				<div>
 					<select class="selectpicker dcc input-small" id="depthselect" data-width="95px" multiple >
-						<optgroup label="Depth" id="depth" data-max-options="3">
+						<optgroup label="Depth" id="depth" data-max-options="5">
 						</optgroup>
 					</select>
 				</div>
@@ -162,7 +162,7 @@
 				<label style="background-color:white;">Period</label>	
 				<div>
 					<select class="selectpicker dcc input-small" id="periodselect" data-width="105px" multiple >
-						<optgroup label="Period" id="period" data-max-options="3">
+						<optgroup label="Period" id="period" data-max-options="5">
 						</optgroup>
 					</select>
 				</div>
@@ -200,7 +200,7 @@
 			  <div>
 				  <button type="button" class="btn btn-default" id="createMap">Create Map</button>
 			  </div>
-			  <form id="hidden_pdf" method="post" onsubmit="ShowLoading()"></form>     
+			  <form id="hidden_pdf" method="post"></form>     
 			</div>
 
 			<div style="float:left">
@@ -218,16 +218,15 @@
     
         readParametersClosure()( "NorMar" );
         $("#downloadMap").click(function() {
+        	$("div#divLoading").addClass('show');
         	downloadMap();
         });
         $("#createMap").click(function() {
-            $("#progress").removeAttr("style");
-            $("#progress").css("display", "inline");
-            drawmap(map);
+        	$("div#divLoading").addClass('show');
+            drawmap(map, "NorMar" );
         });
         function barmarCreatePDF( pdfGen ) {
-
-            console.log("this.map:"+this.map);
+        	$('div#divLoading').addClass('show');
             createPDF(this.map, pdfGen)
         }
 

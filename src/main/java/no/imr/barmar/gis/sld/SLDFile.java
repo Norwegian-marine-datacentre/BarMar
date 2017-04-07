@@ -39,7 +39,7 @@ public class SLDFile {
      * @param parameterNames
      * @return
      */
-    public String getSLDFile( BarMarPojo queryFishEx, Boolean areadisplay, String hueColor ) {
+    public String getSLDFile( BarMarPojo queryFishEx, Boolean areadisplay, String hueColor, boolean logarithmicScale ) {
     		
     	
         // List<Color> theColors = HSVtoRGB.makeColorScale(180.0f, Integer.parseInt("10"));
@@ -51,14 +51,14 @@ public class SLDFile {
         String layername = sldName.getLayerName(queryFishEx, areadisplay );
         sSLDFile += "<Name>"+layername+"</Name>";
 
-        sSLDFile += getUserStyle(areadisplay, queryFishEx, hueColor );
+        sSLDFile += getUserStyle(areadisplay, queryFishEx, hueColor, logarithmicScale );
         sSLDFile += "</NamedLayer>";
         sSLDFile += "</StyledLayerDescriptor>";
         
         return sSLDFile;
     }
 
-    protected String getUserStyle(Boolean areadisplay, BarMarPojo queryFishEx, String hueColor ) {
+    protected String getUserStyle(Boolean areadisplay, BarMarPojo queryFishEx, String hueColor, boolean logarithmicScale ) {
 
         String sUserStyle = "<UserStyle>";
         sUserStyle += "<FeatureTypeStyle>";
@@ -74,7 +74,7 @@ public class SLDFile {
             // Number of steps is here set to 4 - this number may increase
             // when the SLD_BODY text is taken from a file instead
             // the buffer of the http-request is limited to a few thousand bytes
-            sUserStyle += getColorRules( 0.3f, 10, queryFishEx );
+            sUserStyle += getColorRules( 0.3f, 10, queryFishEx, logarithmicScale );
         } else { // pointdisplay
         	if ( !queryFishEx.getParameter().contains("Temperature") ) {
         		sUserStyle += getZeroRulePointDisplay( queryFishEx );
@@ -82,58 +82,16 @@ public class SLDFile {
             		queryFishEx.setMinLegend( 0.1f );
         		}
             }
-            sUserStyle += getSteppedSizeRulePoints( 3, 2, 10, queryFishEx, hueColor );
+            sUserStyle += getSteppedSizeRulePoints( 3, 2, 10, queryFishEx, hueColor, logarithmicScale );
         }
         sUserStyle += "</FeatureTypeStyle>";
         sUserStyle += "</UserStyle>";
         return sUserStyle;
     }
 
-    /**
-     * ONE RULE FOR ALL VALUES GREATER THAN ZERO THE SYMBOL SIZE
-     * IS PROPORTIONAL TO THE VALUE AT THE POINT
-     * @return
-     */
-//    protected String getSizeRulePointDisplay( BarMarPojo queryFishEx, String hueColor ) {
-//
-//        String sRule = "<Rule>";
-//        sRule += "<ogc:Filter>";
-//        sRule += singleOrAggregateSelectionRule.getSelectionRule( queryFishEx );
-//
-//        sRule += "<ogc:PropertyIsNotEqualTo>";
-//        sRule += "<ogc:PropertyName>value</ogc:PropertyName>";
-//        sRule += "<ogc:Literal>0</ogc:Literal>";
-//        sRule += "</ogc:PropertyIsNotEqualTo>";
-//        sRule += "</ogc:And>";
-//        sRule += "</ogc:Filter>";
-//        sRule += "<PointSymbolizer>";
-//        sRule += "<Graphic>";
-//        sRule += "<Mark>";
-//        sRule += "<WellKnownName>circle</WellKnownName>";
-//        sRule += "<Fill>";
-//        if (hueColor != null) {
-//        	sRule += "<CssParameter name=\"fill\">" + hueColor + "</CssParameter>"; 
-//        } else {
-//        sRule += "<CssParameter name=\"fill\">#FF0000</CssParameter>"; //RED
-//        }
-//        sRule += "</Fill>";
-//        sRule += "</Mark>";
-//        sRule += "<Size>";
-//        sRule += "<ogc:Div>";
-//        sRule += "<ogc:PropertyName>value</ogc:PropertyName>";
-//        sRule += "<ogc:Literal>1</ogc:Literal>";
-//        sRule += "</ogc:Div>";
-//        sRule += "</Size>";
-//        sRule += "</Graphic>";
-//        sRule += "</PointSymbolizer>";
-//        sRule += "</Rule>";
-//
-//        return sRule;
-//    }
-
-    protected String getSteppedSizeRulePoints(Integer minsymbolsize, Integer stepsymbolsize, Integer nstep, BarMarPojo queryFishEx, String hueColor  ) {
+    protected String getSteppedSizeRulePoints(Integer minsymbolsize, Integer stepsymbolsize, Integer nstep, BarMarPojo queryFishEx, String hueColor, boolean logarithmicScale  ) {
         String stepRules = "";
-        List<List<Float>> valueranges = makeValueRanges(queryFishEx.getMinLegend(), queryFishEx.getMaxLegend(), nstep);
+        List<List<Float>> valueranges = makeValueRanges( queryFishEx.getMinLegend(), queryFishEx.getMaxLegend(), nstep, logarithmicScale );
         Integer intervalsymbolsize = 0;
         Integer istep = -1;
         for (List<Float> valuerange : valueranges) {
@@ -234,11 +192,11 @@ public class SLDFile {
         return sRule;
     }
 
-    protected String getColorRules(float hue, Integer nstep, BarMarPojo queryFishEx ) {
-        String colorRules = "";
-//        List<String> colors = HSVtoRGB.makeHexColorScale(hue, nstep);
+    protected String getColorRules(float hue, Integer nstep, BarMarPojo queryFishEx, boolean logarithmicScale ) {
+        
+    	String colorRules = "";
         List<String> colors  = HSVtoRGB.makeHexColorScaleFromColorToColor(0.6f, 0.9f);
-        List<List<Float>> valueranges = makeValueRanges(queryFishEx.getMinLegend(), queryFishEx.getMaxLegend(), nstep);
+        List<List<Float>> valueranges = makeValueRanges(queryFishEx.getMinLegend(), queryFishEx.getMaxLegend(), nstep, logarithmicScale);
 
         int i = 0;
         for (List<Float> valuerange : valueranges) {
@@ -309,25 +267,38 @@ public class SLDFile {
         return sRule;
     }
     
-    protected List<List<Float>> makeValueRanges(Float minvalue, Float maxvalue, Integer nstep) {
+    protected List<List<Float>> makeValueRanges(Float minvalue, Float maxvalue, Integer nstep, boolean logarithmicScale) {
 
         List<List<Float>> thelist = new ArrayList<List<Float>>();
         Float step = (maxvalue - minvalue) / nstep;
-        Float value = minvalue;
-
-        for (int i = 0; i < nstep; i++) {
-        	if ( i+1 == nstep ) { //make sure last step includes maxvalue
+        if ( logarithmicScale ) {
+        	float maxLn = (float)Math.log( maxvalue );
+        	float lnStep = maxLn / nstep;
+        	float bottomRange = minvalue;
+        	for ( int i =0; i < nstep; i++) {
         		List<Float> range = new ArrayList<Float>();
-                range.add(value);
-                range.add(maxvalue);
-                thelist.add(range);
-        	} else {
-        		List<Float> range = new ArrayList<Float>();
-        		range.add(value);
-        		range.add(value + step);
+        		range.add( bottomRange );
+        		if ( i+1 == nstep ) {
+        			range.add(maxvalue);
+        		} else {
+        			bottomRange = (float)Math.exp( lnStep * (i+1) ); 
+        			range.add( bottomRange );
+        		}
         		thelist.add(range);
-        		value = value + step;
         	}
+        } else {
+		    Float value = minvalue;
+		    for (int i = 0; i < nstep; i++) {
+		    	List<Float> range = new ArrayList<Float>();
+		    	range.add(value);
+		    	if ( i+1 == nstep ) { //make sure last step includes maxvalue
+		            range.add(maxvalue);
+		    	} else {
+		    		range.add(value + step);
+		    	}
+				thelist.add(range);
+				value = value + step;
+		    }
         }
         return thelist;
     }

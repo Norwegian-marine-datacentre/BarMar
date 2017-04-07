@@ -1,35 +1,35 @@
-/**
- * Initialize the stack control with the layers in the map.
- */
-function initializeStack() {
-    var layers = map.getLayers();
-    var length = layers.getLength();
-    var layerName;
-    $('ul.layerstack').html('');
-    for (var i = 0; i < length; i++) {
-        layerName = layers.item(i).get('name');
-        if ( i > 0) { // layer at 0 is baselayer
-            $('ul.layerstack').append(
-                '<li data-layerid="' + layerName + '"><input type="checkbox" checked="checked"> ' + layerName
-                        + '<a href="#" id="'+layerName+'"><img src="imr/images/pdf.jpg" width="16" height="20"/></a></li>');
-        } else {
-            $('ul.layerstack').append(
-                    '<li data-layerid="' + layerName + '"><input type="checkbox" checked="checked"> ' + layerName + '</li>');
-        }
-    }
-
+function updateLayerStack( alayerName, map ) {
+    $('ul.layerstack').append(
+            '<li data-layerid="' + alayerName + '"><img id="close_red" src="imr/images/close_red.png"><input type="checkbox" checked="checked"> ' + alayerName
+                    + '<a href="#" id="'+alayerName+'"><img src="imr/images/pdf.jpg" width="16" height="20"/></a></li>');
     // Change style when select a layer
     $('ul.layerstack li').on('click', function() {
         $('ul.layerstack li').removeClass('selected');
         $(this).addClass('selected');
     });
+    removeLayerFromStack(alayerName, map);
+}
+
+function removeLayerFromStack( alayername, map ) {
+	$('[data-layerid="'+alayername+'"] #close_red').on('click', function() {
+		console.log("closeing layer"+alayername+" this:"+this);
+		$(this).closest('li').remove();
+		
+		for (var i=0; i < map.getLayers().getLength(); i++){
+			var aTileLayer = map.getLayers().item(i);
+			var name = aTileLayer.get('name');
+			console.log("name:"+name);
+			if ( name == alayername ) {
+				map.getLayers().removeAt( i );
+			}
+		}
+	});
 }
 
 var pdfHash = {};
 /** Display icon with pdf generation */
-function addPdfGenerationToStack(displayName, parameterIds, paramNames, periodNames, depthNames, displayType, aggregationfunc) {
-	//'paramNames' : paramNames, .. , 'displayType':displayType
-    pdfHash[displayName] = {'parameterIds': parameterIds, 'periodNames': periodNames, 'depthNames':depthNames, 'aggregationfunc':aggregationfunc};
+function addPdfGenerationToStack(displayName, parameterIds, paramNames, periodNames, depthNames, aggregationfunc, logscale) {
+    pdfHash[displayName] = {'parameterIds': parameterIds, 'paramNames':paramNames,'periodNames': periodNames, 'depthNames':depthNames, 'aggregationfunc':aggregationfunc, "logscale":logscale, "displayType":displayType};
 }
 
 /**
