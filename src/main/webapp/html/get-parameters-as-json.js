@@ -1,7 +1,7 @@
 function readParametersClosure() {
 
 	var addLI = function( optionTxt, optionTxtId ) { //id is used by setSelectedValue, value is used by readBarMar() (unable to read id)
-		return '<option value="' + optionTxtId + '" id="' + optionTxtId + '">' + optionTxt + '</option>';
+		return '<option value="' + optionTxt + '" id="' + optionTxtId + '">' + optionTxt + '</option>';
 	}
 
 	var dropDownAdd = function( buttonId, optionTxt, index, optionTxtId ) {
@@ -58,6 +58,43 @@ function readParametersClosure() {
 
 				updateDepthAndTime( speciesName, speciesSubGroupList );
 			});		
+			$("#periodselect").on('changed.bs.select', function( event, clickedIndex, newValue, oldValue ) {
+				//console.log("event:"+event+" clickedIndex:"+clickedIndex+" newValue:"+newValue+" oldValue:"+oldValue);
+				removeDefaultAggregatedAll('#periodBtn', '#period', clickedIndex);
+			} );
+			$("#depthselect").on('changed.bs.select', function( event, clickedIndex ) {
+				removeDefaultAggregatedAll('#depthBtn', '#depth', clickedIndex); 
+			});
+			function removeDefaultAggregatedAll( LIselector, OPTIONselector, clickedIndex ) {
+				var aria = $( LIselector +' [data-original-index=0] a' );
+				var displayText = $( aria ).find( ".text").html();
+				if ( clickedIndex != 0 ) {
+					$( LIselector +' [data-original-index=0]').removeClass( "selected" );
+					$( aria ).attr('aria-selected', false);
+					$(OPTIONselector + " [value='"+displayText+"']").removeAttr('selected');
+				} else {
+					var allSelected = $( LIselector +' .selected' );
+					for ( i=0; i < allSelected.length; i++ ) {
+						if ( $(allSelected[i]).attr('data-original-index') != "0" ) {
+							var theItem = allSelected[i];
+							$(allSelected[i]).removeClass( "selected" ); 
+							$(allSelected[i]).find("a").attr('aria-selected', false );
+						}
+					}
+					$( OPTIONselector + " option" ).filter(function() {
+						if ( this.selected == true && $(this).html() != displayText ) {
+							this.selected = false;
+						}
+					});
+				}
+				var titleArray = $(OPTIONselector + " option").map(function () {  
+					if ( this.selected) {
+						return $(this).html();
+					}
+				});
+				var titleArray2 = titleArray.toArray();
+				$( LIselector + ' button').attr( 'title', titleArray2.join(', ') );
+			}
 		};
 		xmlhttp.open("GET", url, true);
 		xmlhttp.send();
@@ -170,7 +207,7 @@ function readParametersClosure() {
 		setSelectedValue( "F", "periodselect" );
 
 		if ( metaRef != undefined )
-			$("#metadata").html( '<p>' + barMarParameters[ metaRef ].metadata + '</p>');
+			$("#metadata").html( '<p id="">' + barMarParameters[ metaRef ].metadata + '</p>');
 		else $("#metadata").html( '');
 	}
 }

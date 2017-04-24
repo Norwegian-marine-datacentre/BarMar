@@ -12,13 +12,12 @@ function updateLayerStack( alayerName, map ) {
 
 function removeLayerFromStack( alayername, map ) {
 	$('[data-layerid="'+alayername+'"] #close_red').on('click', function() {
-		console.log("closeing layer"+alayername+" this:"+this);
 		$(this).closest('li').remove();
+		$('#legend > #'+alayername).remove();
 		
 		for (var i=0; i < map.getLayers().getLength(); i++){
 			var aTileLayer = map.getLayers().item(i);
 			var name = aTileLayer.get('name');
-			console.log("name:"+name);
 			if ( name == alayername ) {
 				map.getLayers().removeAt( i );
 			}
@@ -124,7 +123,6 @@ $(document).ready(function() {
     });
     $('ul.layerstack').on('click', 'input[type="checkbox"]', function() {
         var layerid = $(this).parent().data('layerid');
-        console.log("layerid:"+layerid);
         var layer = findByName(layerid);
         layer.setVisible( $(this).is(':checked') );
         
@@ -139,7 +137,6 @@ $(document).ready(function() {
         var layer = $(this).attr('id');
         var pdfGen = pdfHash[layer];
 
-        console.log("this.map:"+this.map);
         barmarCreatePDF(pdfGen)
     });
 });

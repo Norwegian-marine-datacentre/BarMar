@@ -140,9 +140,9 @@
 					<select class="selectpicker dcc" id="speciesSubGroupselect" data-live-search="true" data-width="css-width" multiple >
 						<optgroup label="Species length" id="speciesSubGroupLength" data-max-options="5">
 						</optgroup>
-						<optgroup label="Species Age" id="speciesSubGroupAge" data-max-options="5">
+						<optgroup label="Species Age" id="speciesSubGroupAge" data-max-options="11">
 						</optgroup>
-						<optgroup label="Species Other" id="speciesSubGroupOther" data-max-options="5">
+						<optgroup label="Species Other" id="speciesSubGroupOther" data-max-options="11">
 						</optgroup>
 					</select>
 				</div>
@@ -233,10 +233,12 @@
         var layers = [
             new ol.layer.Tile({
                 source: new ol.source.TileWMS({
-                    url: 'http://maps.imr.no/geoserver/wms',
+                    //url: 'http://maps.imr.no/geoserver/wms',
+                    url: 'http://opencache.statkart.no/gatekeeper/gk/gk.open',
                     params: {
                         //'LAYERS': 'landareal_europa',
-                        'LAYERS': 'dybderelieffpolar_v01_wms',
+                        //'LAYERS': 'dybderelieffpolar_v01_wms',
+                        'LAYERS': 'barentswatch_grunnkart',
                         'VERSION': '1.1.1',
                         'TRANSPARENT': 'true'
                     }

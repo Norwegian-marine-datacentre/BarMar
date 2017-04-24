@@ -27,7 +27,7 @@ function drawmap(mapp) {
 	var onSuccessFunction = function (message) {
 	    addLayerToMap(layername, message, mapp);
 	    addPdfGenerationToStack(displayName, parameterIds, paramNames, periodNames, depthNames, aggregationfunc, logscale, displayType);
-	    updateLayerStack( displayName, mapp )
+	    updateLayerStack( displayName, mapp );
 	}
 	readBarMar();
 	createSLD(onSuccessFunction);
@@ -216,9 +216,10 @@ function createDisplayName(param, period, depth, displayType) {
 	
     var depths = depthNames.toString().replace(/,/g,'_'); 
     var periods = periodNames.toString().replace(/,/g,'_');
+    var params = param.toString().replace(/,/g,'_');
     var aggregationOption = $('#aggregation option:selected').attr('id');
     
-	var adisplayName = param;
+	var adisplayName = params;
 	adisplayName += "_" + depths;
 	adisplayName += "_" + periods;
     adisplayName += "_" + displayType;
