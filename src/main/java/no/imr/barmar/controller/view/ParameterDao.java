@@ -88,7 +88,7 @@ public class ParameterDao {
 				"SELECT p.id, p.name AS parametername, m.dataset_name AS datasetname, m.geographic_coverage AS geographiccoverage, "+
 						"m.summary AS description, m.originator AS datasetoriginator, m.contact AS datasetcontact, m.lastupdated AS datasetlastupdated "+
 				   "FROM grid g, parameter p, metadata m "+
-				  "WHERE m.id_grid = g.id AND m.id_parameter = p.id AND g.name=? "+
+				  "WHERE m.id_grid = g.id AND m.id_parameter = p.id AND g.name=? AND p.publish=true "+
 				  "ORDER BY g.name, p.name;",
 				new RowMapper<Parameter>() {
 					
@@ -145,7 +145,7 @@ public class ParameterDao {
 		List<String> periods = jdbcTemplate.query(
 				"SELECT tc.name AS periodname " +
 				   "FROM parameter_tcell pt, tcell tc, parameter p " +
-				  "WHERE pt.id_tcell = tc.id AND pt.id_parameter = p.id AND p.id=? AND tc.name != 'W' " +
+				  "WHERE pt.id_tcell = tc.id AND pt.id_parameter = p.id AND p.id=? AND tc.name != 'W' AND pt.publish=true " +
 				  "ORDER BY p.name, tc.name;",
 				new RowMapper<String>() {
 			public String mapRow(ResultSet rs, int rowNum) throws SQLException {

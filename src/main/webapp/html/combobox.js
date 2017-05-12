@@ -21,11 +21,11 @@ var onErrorFunction = function(req, status, errThrown) {
 	$("div#divLoading").removeClass('show');
     console.log("Error loading postgis layer - error req:"+req+" status:"+status+" errThrown:"+errThrown);
 }
-function drawmap(mapp) {
+function drawmap(mapp, bboxValue) {
 	jQuery.support.cors = true;
 
 	var onSuccessFunction = function (message) {
-	    addLayerToMap(layername, message, mapp);
+	    addLayerToMap(layername, message, mapp, bboxValue);
 	    addPdfGenerationToStack(displayName, parameterIds, paramNames, periodNames, depthNames, aggregationfunc, logscale, displayType);
 	    updateLayerStack( displayName, mapp );
 	}
@@ -33,13 +33,17 @@ function drawmap(mapp) {
 	createSLD(onSuccessFunction);
 }
 
-function addLayerToMap(layername, message, mapp) {
+function addLayerToMap(layername, message, mapp, bboxValue) {
 
     var params = "'" + parameterIds.toString().replace(/,/g,' ') + "'";
     var depths = "'" + depthNames.toString().replace(/,/g,' ') + "'"; 
     var periods = "'" + periodNames.toString().replace(/,/g,' ') + "'"; 
     
+    var bbox = this.map.getView().calculateExtent(this.map.getSize());
+    if ( bboxValue != null) 
+    	bbox = bboxValue;
     var postgisLayer = new ol.layer.Tile({
+    	extent: bboxValue,
         source: new ol.source.TileWMS({
             url: MAPS_IMR_NO,
             params: {
@@ -50,6 +54,7 @@ function addLayerToMap(layername, message, mapp) {
             	";depthlayername:"+depths+
             	";periodname:"+periods+
             	";aggregationfunc:'"+ aggregationfunc +"'"
+            	
             }
         }),
         'name': displayName
@@ -121,6 +126,15 @@ var parameterIds = "";
 var aggregationfunc = "";
 var logscale = "";
 function readBarMar() {
+	paramNames = [];
+	depthNames = ["F"]; //default
+	periodNames = [];
+	parameterIds = "";
+	aggregationfunc = "";
+	logscale = "";
+	displayType = "";
+	displayName = "";
+	
 	//comboboxGrid = "BarMar"; //$("#grid").parents(".dropdown").find('.btn').val();
 	if (window.location.href.indexOf("normar") > -1 ) {
 		comboboxGrid = "NorMar";
@@ -160,14 +174,11 @@ function readBarMar() {
     logscale = $('#logarithm option:selected').attr('id');
     if (logscale == undefined ) logscale = "noLnScale";
 	displayName = createDisplayName(paramNames.toString(), periodNames.toString(), depthNames.toString(), displayType);
-	
-
 }
 
 function createPDF(mapp, queryObj ) {
 
     var onSuccessFunction = function (message) {
-        
         var projection = mapp.getView().getProjection().getCode();
         projection = "EPSG:3575";
         var pdfUrl = "createpdfreport?bbox="+this.map.getView().calculateExtent(this.map.getSize())+

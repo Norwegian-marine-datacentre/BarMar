@@ -27,7 +27,8 @@
 	<link rel="stylesheet" type="text/css" href="bootstrap-select/css/bootstrap-select.css" />
 	<script type="text/javascript" src="bootstrap-select/js/bootstrap-select.js"></script>
 	
-	<script type="text/javascript" src="FileSaver.min.js"></script>        
+	<script type="text/javascript" src="FileSaver.min.js"></script>
+	<script type="text/javascript" src="ol-drawShape.js"></script>        
 
     <link rel="stylesheet" type="text/css" href="barmar.css" />
     
@@ -36,9 +37,9 @@
 
 <div id="map" class="map"></div>     
  
-<div class="container" style="border-style: solid;border-width:1px;width:957px">
+<div class="container" >
     <div class="row" >    
-        <table id="imrHeading">
+        <table id="imrHeading" style="border-style: solid;border-width:1px;width:957px">
             <tr>
               <td>
                  <div style="display:inline-block;">
@@ -54,12 +55,18 @@
     </div>
 </div>
 
-<div style="position: relative;left: -30px; " id="checkboxes">
-    <ul class="layerstack controls"></ul>
-    <div class="controls">
-        <button id="raise" class="btn btn-primary btn-xs"><span class="glyphicon glyphicon-arrow-up"></span></button><br/>
-        <button id="lower" class="btn btn-primary btn-xs"><span class="glyphicon glyphicon-arrow-down"></span></button>
-    </div>
+<div style="position:relative;top:-30px;" id="checkboxes">
+	<button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseLayers" aria-expanded="true" 
+			aria-controls="collapseDetail" >
+			Collapse Layer List
+	</button>
+	<div class="collapse in" id="collapseLayers" aria-expanded="true">	
+	<ul class="layerstack controls" style="background-color: #ffffff;"></ul>
+		<div class="controls">
+			<button id="raise" class="btn btn-primary btn-xs"><span class="glyphicon glyphicon-arrow-up"></span></button><br/>
+			<button id="lower" class="btn btn-primary btn-xs"><span class="glyphicon glyphicon-arrow-down"></span></button>
+		</div>
+	</div>
 </div>
 
 <div  id="divLoading" ></div>
@@ -179,9 +186,9 @@
 			</div>
 
 			<div style="float:left">
-				<label style="background-color:white;">Aggregation Options</label>	
+				<label style="background-color:white;">Aggregation Opt.</label>	
 				<div>
-					<select class="selectpicker dcc" data-width="120px" multiple>
+					<select class="selectpicker dcc" id="aggregation" data-width="120px" multiple>
 						<optgroup label="aggregation" data-max-options="1" id="aggregation" >
 							<option class="B" id="avg" selected>Average value of each cell</option>
 							<option class="B" id="max">Max value of each cell</option>
@@ -189,11 +196,25 @@
 							<option class="B" id="relative_std_dev">coefficient of variation (CV)</option>
 						</optgroup>					
 						<optgroup label="logarithm" data-max-options="1" id="logarithm">
-							<option class="A" id="ln">Logaritmic scale</option>
+							<option class="A" id="logarithm">Logaritmic scale</option>
 						</optgroup>
 					</select>
 				</div>
 			</div>
+			
+			<div style="float:left">
+				<label style="background-color:white;">Set Bounding Box</label>	
+				<div>
+					<select id="boundingboxType" class="selectpicker dcc" data-width="120px" >
+						<optgroup label="boundingboxType" data-max-options="1" id="boundingbox" >
+						    <option value="Polygon">Polygon</option>
+						    <option value="Square">Square</option>
+						    <option value="Box">Box</option>
+						    <option value="None" selected>None</option>
+						</optgroup>						
+					</select>
+				</div>
+			</div>			
 			
 			<div style="float:left">
 			  <label for="visning" style="background-color:white">&nbsp;</label>
@@ -206,7 +227,7 @@
 			<div style="float:left">
 			  <label for="download" style="background-color:white">&nbsp;</label>
 			  <div>
-				  <button type="button" class="btn btn-default" id="downloadMap">download data</button>
+				  <button type="button" class="btn btn-default" id="downloadMap" disabled="true">download data</button>
 			  </div>
 			</div>			
 		</div>
@@ -214,7 +235,9 @@
 </div>
 
     <script>       
-    	proj4.defs("EPSG:3575","+proj=laea +lat_0=90 +lon_0=10 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs");    
+    	proj4.defs("EPSG:3575","+proj=laea +lat_0=90 +lon_0=10 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs");
+		var projection = ol.proj.get('EPSG:3575');
+		projection.setExtent([-4889334.802954878, -4889334.802954878, 4889334.802954878, 4889334.802954878]);    	
     
         readParametersClosure()( "BarMar" );
         $("#downloadMap").click(function() {
@@ -223,28 +246,48 @@
         });
         $("#createMap").click(function() {
         	$("div#divLoading").addClass('show');
-            drawmap(map, "BarMar" );
+            drawmap(map, bboxValue );
         });
         function barmarCreatePDF( pdfGen ) {
         	$('div#divLoading').addClass('show');
             createPDF(this.map, pdfGen)
         }
 
+        var vectorSource = new ol.source.Vector({wrapX: false});
         var layers = [
             new ol.layer.Tile({
                 source: new ol.source.TileWMS({
-                    //url: 'http://maps.imr.no/geoserver/wms',
-                    url: 'http://opencache.statkart.no/gatekeeper/gk/gk.open',
+                    url: 'http://maps.imr.no/geoserver/wms',
+                    //url: 'http://opencache.statkart.no/gatekeeper/gk/gk.open',
                     params: {
+                    	'LAYERS': 'Arctic_background',
                         //'LAYERS': 'landareal_europa',
                         //'LAYERS': 'dybderelieffpolar_v01_wms',
-                        'LAYERS': 'barentswatch_grunnkart',
+                        //'LAYERS': 'barentswatch_grunnkart',
                         'VERSION': '1.1.1',
                         'TRANSPARENT': 'true'
                     }
                 }),
-                'name' : 'Dybderelieffpolar' //'name': 'Europa'
-            })
+                'name' : 'Polar_Depthrelief' //'name': 'Europa'
+            }), 
+			new ol.layer.Vector({
+			  source: vectorSource,
+			  style: new ol.style.Style({
+				fill: new ol.style.Fill({
+				  color: 'rgba(255, 255, 255, 0.2)'
+				}),
+				stroke: new ol.style.Stroke({
+				  color: '#ffcc33',
+				  width: 2
+				}),
+				image: new ol.style.Circle({
+				  radius: 7,
+				  fill: new ol.style.Fill({
+					color: '#ffcc33'
+				  })
+				})
+			  })
+			})
         ];
 
         var map = new ol.Map({
@@ -258,12 +301,29 @@
             layers: layers,
             target: 'map',
             view: new ol.View({
-                projection: 'EPSG:3575', //'EPSG:32633',
-                center: [2000000,-2000000], //[1088474,8089849],
-                zoom:5
+            	projection: projection,
+                center: [2000000,-2000000], 
+                zoom:2
             })
         });
-                  
+           
+        var typeSelect = document.getElementById('boundingboxType');		
+        var addInteraction = addDrawController();
+        var draw = addInteraction( vectorSource );
+        
+        var bboxValue = null;
+        typeSelect.onchange = function() {
+        	map.removeInteraction(draw);
+          	vectorSource.clear();
+          	draw = addInteraction(vectorSource);
+          	map.addInteraction(draw);
+          	
+			draw.on('drawend',function(e) {
+				alert(e.feature.getGeometry().getExtent());
+				bboxValue = e.feature.getGeometry().getExtent();
+			});
+        };
+
         $('ul.layerstack').prepend(
                 '<li data-layerid="' + layers[0].get('name') + '"><input type="checkbox" checked="checked"> ' + layers[0].get('name') + '</li>'
         );

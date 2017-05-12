@@ -204,10 +204,11 @@
                 <artifactId>maven-war-plugin</artifactId>
                 <version>2.3</version>
                 <configuration>
-                    <warName>${project.artifactId}</warName>
+                    <warName>${artifactname}</warName>
                     <warSourceDirectory>src/main/webapp</warSourceDirectory>
                     <webappDirectory>${project.build.directory}/${project.artifactId}</webappDirectory>
                     <outputDirectory>F:\apache-tomcat-7.0.53\webapps</outputDirectory>
+                    <warSourceExcludes>${mar}</warSourceExcludes>
                 </configuration>
                 <executions>
                     <execution>
@@ -229,4 +230,23 @@
 			</plugin>            
         </plugins>
     </build>
+	<profiles>
+	    <profile>
+	        <id>barmar</id>
+	        <activation>
+	            <activeByDefault>true</activeByDefault>
+	        </activation>	        
+	        <properties>
+	            <mar>**/normar.html</mar> <!-- defines mar property when the barmar profile is activated -->
+	            <artifactname>BarMar</artifactname>
+	        </properties>
+	    </profile>
+	    <profile>
+	        <id>normar</id>
+	        <properties>
+	            <mar>**/barmar.html</mar> <!-- defines mar property when the normar profile is activated -->
+	            <artifactname>NorMar</artifactname>
+	        </properties>
+	    </profile>
+	</profiles>    
 </project>
