@@ -5,7 +5,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.reloading.FileChangedReloadingStrategy;
+import org.apache.commons.configuration.reloading.ReloadingStrategy;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -18,8 +22,6 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.servlet.view.ContentNegotiatingViewResolver;
-import org.springframework.web.servlet.view.InternalResourceViewResolver;
-import org.springframework.web.servlet.view.JstlView;
 
 /**
  *
@@ -27,7 +29,16 @@ import org.springframework.web.servlet.view.JstlView;
  */
 @Configuration
 @EnableWebMvc
+@ComponentScan(basePackages = {"no.imr"})
 public class WebMvcConfig extends WebMvcConfigurerAdapter {
+	
+  @Bean
+  public org.apache.commons.configuration.Configuration configuration() throws ConfigurationException {
+      org.apache.commons.configuration.PropertiesConfiguration configuration = new org.apache.commons.configuration.PropertiesConfiguration(System.getProperty("catalina.base") + "/conf/barmar.properties");
+      ReloadingStrategy reloadingStrategy = new FileChangedReloadingStrategy();
+      configuration.setReloadingStrategy(reloadingStrategy);
+      return configuration;
+  }
 
     /**
      * Configures the content negotiation.
@@ -39,7 +50,8 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
         configurer
                 .defaultContentType(MediaType.APPLICATION_JSON)
                 .mediaType("json", MediaType.APPLICATION_JSON)
-                .mediaType("html", MediaType.TEXT_HTML);
+                .mediaType("html", MediaType.TEXT_HTML)
+    			.mediaType("jsp", MediaType.TEXT_HTML); //temporary
     }
 
     /**
@@ -73,16 +85,12 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
     public HttpMessageConverter mappingJackson2HttpMessageConverter() {
         MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
         converter.setPrettyPrint(true);
-        // converter.getObjectMapper().configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS,
-        // false);
         return converter;
     }
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/**").addResourceLocations("/html/"); //for development for tomcat embeded in maven build
-        //registry.addResourceHandler("/html/**").addResourceLocations("/html/");
-
     }
     
     @Bean
@@ -97,6 +105,5 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
         resolver.setViewResolvers(resolvers);
         resolver.setContentNegotiationManager(manager);
         return resolver;
-
     }
 }

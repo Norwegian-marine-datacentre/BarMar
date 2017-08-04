@@ -1,0 +1,50 @@
+-- Remove all parameters part of a survey which is divided into months or quarter - only use year as period 
+update parameter_tcell pt SET publish = false FROM parameter p, tcell t where p.id=pt.id_parameter and t.id=pt.id_tcell and pt.id_grid=9 and p.name like '%survey%' and 
+(substring(t.name,1,1) = 'M' or substring(t.name,1,1) = 'Q') 
+
+-- update parameter_basename
+insert into parameter_basename(name, standard_name) values ('Annual ecosystem survey in the Barents Sea', '');
+insert into parameter_basename(name, standard_name) values ('AtlanticCod_catch_Trawl-logbook', '');
+insert into parameter_basename(name, standard_name) values ('AtlanticCod_survey_trawl_autumn', '');
+insert into parameter_basename(name, standard_name) values ('AtlanticCod_survey_trawl_ecosystem', 'Barents Sea Northeast Arctic cod bottom trawl spatial distribution in autumn');
+insert into parameter_basename(name, standard_name) values ('AtlanticCod_survey_trawl_eventyr', '');
+insert into parameter_basename(name, standard_name) values ('AtlanticCod_survey_trawl_summer', '');
+insert into parameter_basename(name, standard_name) values ('AtlanticCod_survey_trawl_Svalbard', '');
+insert into parameter_basename(name, standard_name) values ('AtlanticCod_survey_trawl_winter', 'Barents Sea Northeast Arctic cod bottom trawl spatial distribution in winter');
+insert into parameter_basename(name, standard_name) values ('Blwhiting_survey_trawl_autumn', '');
+insert into parameter_basename(name, standard_name) values ('Capelin_survey_acoustic_autumn', 'Barents Sea capelin acoustic spatial distribution in autumn');
+insert into parameter_basename(name, standard_name) values ('Capelin_survey_trawl_autumn', '');
+insert into parameter_basename(name, standard_name) values ('DeepwaterRedfish_survey_trawl_ecosystem', '');
+insert into parameter_basename(name, standard_name) values ('DeepwaterRedfish_survey_trawl_summer', '');
+insert into parameter_basename(name, standard_name) values ('DeepwaterRedfish_survey_trawl_Svalbard', '');
+insert into parameter_basename(name, standard_name) values ('DeepwaterRedfish_survey_trawl_winter', '');
+insert into parameter_basename(name, standard_name) values ('GoldenRedfish_survey_trawl_ecosystem', 'Barents Sea golden redfish bottom trawl spatial distribution in autumn');
+insert into parameter_basename(name, standard_name) values ('GoldenRedfish_survey_trawl_summer', '');
+insert into parameter_basename(name, standard_name) values ('GoldenRedfish_survey_trawl_Svalbard', '');
+insert into parameter_basename(name, standard_name) values ('GoldenRedfish_survey_trawl_winter', 'Barents Sea golden redfish bottom trawl spatial distribution in winter');
+insert into parameter_basename(name, standard_name) values ('GreenlandHalibut_survey_trawl_autumn', '');
+insert into parameter_basename(name, standard_name) values ('GreenlandHalibut_survey_trawl_ecosystem', '');
+insert into parameter_basename(name, standard_name) values ('Haddock_catch_Trawl-logbook', '');
+insert into parameter_basename(name, standard_name) values ('Haddock_survey_trawl_autumn', '');
+insert into parameter_basename(name, standard_name) values ('Haddock_survey_trawl_ecosystem', 'Barents Sea Northeast Arctic haddock bottom trawl spatial distribution in autumn');
+insert into parameter_basename(name, standard_name) values ('Haddock_survey_trawl_eventyr', '');
+insert into parameter_basename(name, standard_name) values ('Haddock_survey_trawl_summer', '');
+insert into parameter_basename(name, standard_name) values ('Haddock_survey_trawl_Svalbard', '');
+insert into parameter_basename(name, standard_name) values ('Haddock_survey_trawl_winter', 'Barents Sea Northeast Arctic haddock bottom trawl spatial distribution in winter');
+insert into parameter_basename(name, standard_name) values ('Herring_survey_trawl_autumn', '');
+insert into parameter_basename(name, standard_name) values ('Mackerel_survey_trawl_autumn', '');
+insert into parameter_basename(name, standard_name) values ('Polarcod_survey_acoustic_autumn', 'Barents Sea polar cod acoustic spatial distribution in autumn');
+insert into parameter_basename(name, standard_name) values ('Polarcod_survey_trawl_autumn', '');
+insert into parameter_basename(name, standard_name) values ('Redfish_survey_trawl_autumn', '');
+insert into parameter_basename(name, standard_name) values ('RIO_cod_winter', '');
+insert into parameter_basename(name, standard_name) values ('Saithe_catch_Trawl-logbook', '');
+insert into parameter_basename(name, standard_name) values ('Saithe_survey_trawl_autumn', '');
+insert into parameter_basename(name, standard_name) values ('Salinity_Atlas_InterpolatedObservations_Bottom20_BarentsSea', '');
+insert into parameter_basename(name, standard_name) values ('Salinity_Atlas_InterpolatedObservations_StandardDepths_BarentsSea', '');
+insert into parameter_basename(name, standard_name) values ('Salinity_Atlas_NumberOfObservations_Bottom20_BarentsSea', '');
+insert into parameter_basename(name, standard_name) values ('Salinity_Atlas_NumberOfObservations_StandardDepths_BarentsSea', '');
+insert into parameter_basename(name, standard_name) values ('SST_CMIP5 AR5-IPSL-RCP4.5_jan-mar', '');
+insert into parameter_basename(name, standard_name) values ('Temperature_Atlas_InterpolatedObservations_Bottom20_BarentsSea', '');
+insert into parameter_basename(name, standard_name) values ('Temperature_Atlas_InterpolatedObservations_StandardDepths_BarentsSea', '');
+insert into parameter_basename(name, standard_name) values ('Temperature_Atlas_NumberOfObservations_Bottom20_BarentsSea', '');
+insert into parameter_basename(name, standard_name) values ('Temperature_Atlas_NumberOfObservations_StandardDepths_BarentsSea', '');

@@ -6,13 +6,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URL;
-import java.net.URLDecoder;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.StringTokenizer;
 
 import javax.imageio.ImageIO;
 import javax.servlet.ServletContext;
@@ -21,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Controller;
@@ -37,6 +33,7 @@ import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
+import no.imr.barmar.ajax.controller.BarMarControllerFromDb;
 import no.imr.barmar.geoserver.UrlConsts;
 import no.imr.barmar.pdf.pojo.PDF_FilenameResponse;
 
@@ -49,6 +46,12 @@ import no.imr.barmar.pdf.pojo.PDF_FilenameResponse;
 public class CreatePDFReportController {
     
     private static final Logger logger = LoggerFactory.getLogger(CreatePDFReportController.class);
+    
+	@Autowired
+	private UrlConsts urlConsts;
+	
+	@Autowired
+	private BarMarControllerFromDb barmarController;
 	
 	private ResourceLoader resourceLoader = null;
 	private BufferedImage theIMRLogoImage = null;
@@ -75,6 +78,7 @@ public class CreatePDFReportController {
 			@RequestParam("sld") String sld,
 			@RequestParam("layer") String layer,
 			@RequestParam("viewparams") String viewparams,
+			@RequestParam("metadataRef") String metadataRef,
 			HttpServletRequest request,
             HttpServletResponse response) throws IOException, JRException {
 
@@ -82,16 +86,14 @@ public class CreatePDFReportController {
     	String secondLayer = createFishExchangeLayer( width, height, bbox, layer, sld, viewparams );
         String legendUrl = createFishExchangeLegend( layer, sld);
         
-        System.out.println("baselayer:"+url);
-        System.out.println("secondLayer:"+secondLayer);
-        System.out.println("legendUrl:"+legendUrl);
+        logger.debug("baselayer:"+url);
+        logger.debug("secondLayer:"+secondLayer);
+        logger.debug("legendUrl:"+legendUrl);
         
         BufferedImage baseLayer = ImageIO.read( new URL(url) );
         logger.debug("pdf overlay:"+secondLayer);
-        System.out.println("pdf overlay:"+baseLayer);
         BufferedImage second = ImageIO.read( new URL(secondLayer) );
         logger.debug("pdf overlay image:"+second);
-        System.out.println("pdf overlay:"+second);
         BufferedImage legendImg = ImageIO.read( new URL(legendUrl) );
 
         BufferedImage theMapImage = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
@@ -112,7 +114,7 @@ public class CreatePDFReportController {
         
         HashMap<String,Object> parameterHash = new HashMap<String,Object>();
         parameterHash.put("ABOUT_FISHEXCHANGE", generalText);
-        parameterHash.put("META_TEXT_PARAMETER", request.getSession().getAttribute("metadata"));
+        parameterHash.put("META_TEXT_PARAMETER", barmarController.getMetadataRef(metadataRef));
         parameterHash.put("IMR_Logo_Image", theIMRLogoImage);
         parameterHash.put("SSF_Logo_Image", theSSFLogoImage);
         parameterHash.put("Map_Image", theMapImage);
@@ -206,7 +208,7 @@ public class CreatePDFReportController {
     
     private String createFishExchangeLayer(Integer width, Integer height, String bbox, String layer, String sld, String viewparams) {
     	//String fishEx = "http://atlas2.nodc.no:8080/geoserver/wms?";
-    	String fishEx = UrlConsts.MAIN_URL; 
+    	String fishEx = urlConsts.getMainUrl(); 
     	fishEx = fishEx.concat("REQUEST=GetMap");
     	fishEx = fishEx.concat("&SERVICE=WMS");
     	fishEx = fishEx.concat("&FORMAT=image/png");
@@ -228,7 +230,7 @@ public class CreatePDFReportController {
     private String createFishExchangeLegend( String layer, String sld ) {
 //        String legendUrl = "http://maps.imr.no/geoserver/wms?service=WMS&version=1.1.1&request=GetLegendGraphic&layer=test:pointvalue&width=22&height=24&format=image/png";
 //        String legendUrl = UrlConsts.MAIN_URL_WMS + UrlConsts.TYPE + "layer=test:pointvalue" + UrlConsts.TYPE2;
-        String legendUrl = UrlConsts.MAIN_URL + UrlConsts.TYPE + "layer=" + layer + UrlConsts.TYPE2;
+        String legendUrl = urlConsts.getMainUrl() + "service=WMS&version=1.1.1&request=GetLegendGraphic&" + "layer=" + layer + "&width=22&height=24&format=image/png";
         legendUrl = legendUrl.concat("&SLD=" + sld);
         return legendUrl;
     }

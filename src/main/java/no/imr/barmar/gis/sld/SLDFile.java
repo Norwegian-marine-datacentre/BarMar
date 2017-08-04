@@ -1,11 +1,18 @@
 package no.imr.barmar.gis.sld;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import ch.qos.logback.core.net.SyslogOutputStream;
+import no.imr.barmar.ajax.controller.SortSubSpecies;
 import no.imr.barmar.gis.sld.color.HSVtoRGB;
 import no.imr.barmar.pojo.BarMarPojo;
 
@@ -15,7 +22,9 @@ import no.imr.barmar.pojo.BarMarPojo;
  */
 @Component
 public class SLDFile {
-
+	
+	private static final int SCALE_ROUNDING = 1;
+	
     private String sSLDFile = null;
     
     private String lowerBoundColor = "#999999"; // gray color
@@ -62,13 +71,14 @@ public class SLDFile {
 
         String sUserStyle = "<UserStyle>";
         sUserStyle += "<FeatureTypeStyle>";
+    	String firstParameter = queryFishEx.getParameter().get(0);
+    	if ( !firstParameter.contains("Temperature") && !firstParameter.contains("Salinity") ) {
+    		sUserStyle += getZeroRulePointOrAreaDisplay( queryFishEx, areadisplay );
+    		if ( queryFishEx.getMinLegend() == 0.0f ) {
+    			queryFishEx.setMinLegend( 0.1f );
+    		}
+    	}        
         if (areadisplay) {
-        	if ( !queryFishEx.getParameter().contains("Temperature") ) {
-        		sUserStyle += getZeroRuleAreaDisplay( queryFishEx );
-        		if ( queryFishEx.getMinLegend() == 0.0f ) {
-        			queryFishEx.setMinLegend( 0.1f );
-        		}
-        	}
             // HUE is between 0 and 360 according to wikipedia,
             // BUT java.lang color MAPS this to a value between 0 and 1
             // Number of steps is here set to 4 - this number may increase
@@ -76,12 +86,6 @@ public class SLDFile {
             // the buffer of the http-request is limited to a few thousand bytes
             sUserStyle += getColorRules( 0.3f, 10, queryFishEx, logarithmicScale );
         } else { // pointdisplay
-        	if ( !queryFishEx.getParameter().contains("Temperature") ) {
-        		sUserStyle += getZeroRulePointDisplay( queryFishEx );
-            	if ( queryFishEx.getMinLegend() == 0.0f ) {
-            		queryFishEx.setMinLegend( 0.1f );
-        		}
-            }
             sUserStyle += getSteppedSizeRulePoints( 3, 2, 10, queryFishEx, hueColor, logarithmicScale );
         }
         sUserStyle += "</FeatureTypeStyle>";
@@ -91,14 +95,16 @@ public class SLDFile {
 
     protected String getSteppedSizeRulePoints(Integer minsymbolsize, Integer stepsymbolsize, Integer nstep, BarMarPojo queryFishEx, String hueColor, boolean logarithmicScale  ) {
         String stepRules = "";
-        List<List<Float>> valueranges = makeValueRanges( queryFishEx.getMinLegend(), queryFishEx.getMaxLegend(), nstep, logarithmicScale );
+        List<List<Float>> valueranges = legendRange( queryFishEx.getMinLegend(), queryFishEx.getMaxLegend(), nstep, logarithmicScale );
         Integer intervalsymbolsize = 0;
         Integer istep = -1;
+        
         for (List<Float> valuerange : valueranges) {
             istep++;
             intervalsymbolsize = minsymbolsize + stepsymbolsize * istep;
             stepRules += getStepSizeRulePoint(
-            		valuerange.get(0).toString(), valuerange.get(1).toString(), 
+            		new BigDecimal( valuerange.get(0).toString() ).setScale(SCALE_ROUNDING, RoundingMode.HALF_UP).toPlainString(),
+            		new BigDecimal( valuerange.get(1).toString() ).setScale(SCALE_ROUNDING, RoundingMode.HALF_UP).toPlainString(),
         			intervalsymbolsize.toString(), queryFishEx, hueColor  );
         }
         return stepRules;
@@ -140,7 +146,7 @@ public class SLDFile {
         return sRule;
     }
 
-    protected String getZeroRulePointDisplay( BarMarPojo queryFishEx ) {
+    protected String getZeroRulePointOrAreaDisplay( BarMarPojo queryFishEx, boolean areaDisplay ) {
         String sRule = "<Rule>";
         sRule += "<Title>0 - Zero</Title>";
         sRule += "<ogc:Filter>";
@@ -153,41 +159,26 @@ public class SLDFile {
         sRule += "</ogc:PropertyIsEqualTo>";
         sRule += "</ogc:And>";
         sRule += "</ogc:Filter>";
-        sRule += "<PointSymbolizer>";
-        sRule += "<Graphic>";
-        sRule += "<Mark>";
-        sRule += "<WellKnownName>circle</WellKnownName>";
-        sRule += "<Fill>";
-        sRule += "<CssParameter name=\"fill\">"+lowerBoundColor+"</CssParameter>"; // Grey color
-        sRule += "</Fill>";
-        sRule += "</Mark>";
-        sRule += "<Size>3</Size>";
-        sRule += "</Graphic>";
-        sRule += "</PointSymbolizer>";
-        sRule += "</Rule>";
-        return sRule;
-    }
-
-    protected String getZeroRuleAreaDisplay( BarMarPojo queryFishEx ) {
-
-        String sRule = "<Rule>";
-        sRule += "<Title>0 - Zero</Title>";
-        sRule += "<ogc:Filter>";
-
-        sRule += singleOrAggregateSelectionRule.getSelectionRule( queryFishEx );
         
-        sRule += "<ogc:PropertyIsEqualTo>";
-        sRule += "<ogc:PropertyName>value</ogc:PropertyName>";
-        sRule += "<ogc:Literal>0</ogc:Literal>";
-        sRule += "</ogc:PropertyIsEqualTo>";
-        sRule += "</ogc:And>";
-        sRule += "</ogc:Filter>";
-        sRule += "<PolygonSymbolizer>";
-        sRule += "<Fill>";
-        sRule += "<CssParameter name=\"fill\">"+lowerBoundColor+"</CssParameter>"; // Grey color
-        sRule += "</Fill>";
-        sRule += "</PolygonSymbolizer>";
-
+        if ( areaDisplay ) {
+            sRule += "<PolygonSymbolizer>";
+            sRule += "<Fill>";
+            sRule += "<CssParameter name=\"fill\">"+lowerBoundColor+"</CssParameter>"; // Grey color
+            sRule += "</Fill>";
+            sRule += "</PolygonSymbolizer>"; 
+        } else { // pointDisplay
+	        sRule += "<PointSymbolizer>";
+	        sRule += "<Graphic>";
+	        sRule += "<Mark>";
+	        sRule += "<WellKnownName>circle</WellKnownName>";
+	        sRule += "<Fill>";
+	        sRule += "<CssParameter name=\"fill\">"+lowerBoundColor+"</CssParameter>"; // Grey color
+	        sRule += "</Fill>";
+	        sRule += "</Mark>";
+	        sRule += "<Size>3</Size>";
+	        sRule += "</Graphic>";
+	        sRule += "</PointSymbolizer>";
+        }
         sRule += "</Rule>";
         return sRule;
     }
@@ -196,17 +187,19 @@ public class SLDFile {
         
     	String colorRules = "";
         List<String> colors  = HSVtoRGB.makeHexColorScaleFromColorToColor(0.6f, 0.9f);
-        List<List<Float>> valueranges = makeValueRanges(queryFishEx.getMinLegend(), queryFishEx.getMaxLegend(), nstep, logarithmicScale);
+        List<List<Float>> valueranges = legendRange(queryFishEx.getMinLegend(), queryFishEx.getMaxLegend(), nstep, logarithmicScale);
 
         int i = 0;
         for (List<Float> valuerange : valueranges) {
         	if (i + 1 == valueranges.size() ) {
                 colorRules += getColorRuleLastElement(
-                		valuerange.get(0).toString(), valuerange.get(1).toString(), 
+                		new BigDecimal( valuerange.get(0) ).setScale(SCALE_ROUNDING, RoundingMode.HALF_UP).toPlainString(), 
+                		new BigDecimal( valuerange.get(1) ).setScale(SCALE_ROUNDING, RoundingMode.HALF_UP).toPlainString(),  
                 		colors.get(i++), queryFishEx);
         	} else {
         		colorRules += getColorRule(
-        				valuerange.get(0).toString(), valuerange.get(1).toString(), 
+                		new BigDecimal( valuerange.get(0) ).setScale(SCALE_ROUNDING, RoundingMode.HALF_UP).toPlainString(), 
+                		new BigDecimal( valuerange.get(1) ).setScale(SCALE_ROUNDING, RoundingMode.HALF_UP).toPlainString(), 
         				colors.get(i++), queryFishEx);
         	}
         }
@@ -267,13 +260,13 @@ public class SLDFile {
         return sRule;
     }
     
-    protected List<List<Float>> makeValueRanges(Float minvalue, Float maxvalue, Integer nstep, boolean logarithmicScale) {
+    protected List<List<Float>> legendRange(Float minvalue, Float maxvalue, Integer nstep, boolean logarithmicScale) {
 
         List<List<Float>> thelist = new ArrayList<List<Float>>();
-        Float step = (maxvalue - minvalue) / nstep;
+
         if ( logarithmicScale ) {
         	float maxLn = (float)Math.log( maxvalue );
-        	float lnStep = maxLn / nstep;
+        	float lnStep = maxLn / nstep;       	
         	float bottomRange = minvalue;
         	for ( int i =0; i < nstep; i++) {
         		List<Float> range = new ArrayList<Float>();
@@ -283,10 +276,11 @@ public class SLDFile {
         		} else {
         			bottomRange = (float)Math.exp( lnStep * (i+1) ); 
         			range.add( bottomRange );
-        		}
+        		}        		
         		thelist.add(range);
         	}
         } else {
+            Float step = (maxvalue - minvalue) / nstep;            
 		    Float value = minvalue;
 		    for (int i = 0; i < nstep; i++) {
 		    	List<Float> range = new ArrayList<Float>();

@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import no.imr.barmar.controller.view.ParameterDao;
+import no.imr.barmar.ajax.dao.ParameterDao;
 import no.imr.barmar.gis.sld.SLDFile;
 import no.imr.barmar.pojo.BarMarPojo;
 
@@ -67,7 +67,7 @@ public class CreateSLDController {
         if ( aggregationFunc.equals( "relative_std_dev" )) {
         	stdDevCoefficientColor = "#B2EC5D"; //Inchworm green 
         }
-        boolean logarithmicScale = logscale.equals("ln");
+        boolean logarithmicScale = logscale.equals("logarithm");
         String filename = writeSldToResponse(queryFishEx, areadisplay, stdDevCoefficientColor, logarithmicScale);
         
         Map<String, Object> maxMinLegendValues = new HashMap<String, Object>();

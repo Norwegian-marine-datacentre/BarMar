@@ -1,5 +1,7 @@
 package no.imr.barmar.pojo;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,8 +24,8 @@ public class BarMarPojo {
     private List<String> time = new ArrayList<String>(1); //default one
     private List<String> depth = new ArrayList<String>(1); //default one
     
-    private float maxLegend;
-    private float minLegend;
+    private BigDecimal maxLegend;
+    private BigDecimal minLegend;
     
     public BarMarPojo( String grid, List<String> parameter, List<String> depth, List<String> time ) {
         setGrid( grid );
@@ -100,19 +102,21 @@ public class BarMarPojo {
     }
 
     public float getMaxLegend() {
-        return maxLegend;
+        return maxLegend.floatValue();
     }
 
     public void setMaxLegend(float maxLegend) {
-        this.maxLegend = maxLegend;
+        this.maxLegend = new BigDecimal(maxLegend);
+        this.maxLegend.setScale(1, RoundingMode.HALF_EVEN);
     }
 
     public float getMinLegend() {
-        return minLegend;
+        return minLegend.floatValue();
     }
 
     public void setMinLegend(float minLegend) {
-        this.minLegend = minLegend;
+        this.minLegend = new BigDecimal(minLegend);
+        this.minLegend.setScale(1, RoundingMode.HALF_EVEN);
     }
     
     @Override 

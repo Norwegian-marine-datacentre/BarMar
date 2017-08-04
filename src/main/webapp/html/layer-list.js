@@ -27,8 +27,17 @@ function removeLayerFromStack( alayername, map ) {
 
 var pdfHash = {};
 /** Display icon with pdf generation */
-function addPdfGenerationToStack(displayName, parameterIds, paramNames, periodNames, depthNames, aggregationfunc, logscale) {
-    pdfHash[displayName] = {'parameterIds': parameterIds, 'paramNames':paramNames,'periodNames': periodNames, 'depthNames':depthNames, 'aggregationfunc':aggregationfunc, "logscale":logscale, "displayType":displayType};
+function addPdfGenerationToStack(displayName, parameterIds, paramNames, periodNames, depthNames, aggregationfunc, logscale, displayType, metadataRef) {
+    pdfHash[displayName] = 
+    	{	'parameterIds': parameterIds, 
+    		'paramNames':paramNames,
+    		'periodNames': periodNames, 
+    		'depthNames':depthNames, 
+    		'aggregationfunc':aggregationfunc, 
+    		"logscale":logscale, 
+    		"displayType":displayType,
+    		"metadataRef":metadataRef,
+		};
 }
 
 /**

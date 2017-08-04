@@ -26,7 +26,8 @@ function drawmap(mapp, bboxValue) {
 
 	var onSuccessFunction = function (message) {
 	    addLayerToMap(layername, message, mapp, bboxValue);
-	    addPdfGenerationToStack(displayName, parameterIds, paramNames, periodNames, depthNames, aggregationfunc, logscale, displayType);
+	    var metadataRef = $('#metadata p').attr('id');
+	    addPdfGenerationToStack(displayName, parameterIds, paramNames, periodNames, depthNames, aggregationfunc, logscale, displayType, metadataRef);
 	    updateLayerStack( displayName, mapp );
 	}
 	readBarMar();
@@ -43,7 +44,7 @@ function addLayerToMap(layername, message, mapp, bboxValue) {
     if ( bboxValue != null) 
     	bbox = bboxValue;
     var postgisLayer = new ol.layer.Tile({
-    	extent: bboxValue,
+    	extent: bbox,
         source: new ol.source.TileWMS({
             url: MAPS_IMR_NO,
             params: {
@@ -54,7 +55,6 @@ function addLayerToMap(layername, message, mapp, bboxValue) {
             	";depthlayername:"+depths+
             	";periodname:"+periods+
             	";aggregationfunc:'"+ aggregationfunc +"'"
-            	
             }
         }),
         'name': displayName
@@ -75,7 +75,7 @@ function addLayerToMap(layername, message, mapp, bboxValue) {
     jQuery("#legend").append('<p id='+displayName+'>'+displayName+'<br/><img src='+src+' /></p>');
 }
 
-function downloadMap() {
+function downloadMap(token, header) {
 	readBarMar();
     jQuery.ajax({
         url:"downloadData",
@@ -86,6 +86,7 @@ function downloadMap() {
             depth: depthNames
         },
         method: "post",
+        //headers: {"Authorization": token},
         success: function(message){
         	$("div#divLoading").removeClass('show');
         	var blob = new Blob([message], {type: "text/plain;charset=utf-8"});
@@ -132,8 +133,8 @@ function readBarMar() {
 	parameterIds = "";
 	aggregationfunc = "";
 	logscale = "";
-	displayType = "";
 	displayName = "";
+	displayType = $('#visning option:selected').attr('id');
 	
 	//comboboxGrid = "BarMar"; //$("#grid").parents(".dropdown").find('.btn').val();
 	if (window.location.href.indexOf("normar") > -1 ) {
@@ -169,14 +170,13 @@ function readBarMar() {
 		else parameterIds = $(selected).attr("id");
 	});
 
-	displayType = $('#visning option:selected').attr('id');
-    aggregationfunc = $('#aggregation option:selected').attr('id');
+    aggregationfunc = "avg" //$('#aggregation option:selected').attr('id'); -- temporarily avg is only aggregation func
     logscale = $('#logarithm option:selected').attr('id');
     if (logscale == undefined ) logscale = "noLnScale";
 	displayName = createDisplayName(paramNames.toString(), periodNames.toString(), depthNames.toString(), displayType);
 }
 
-function createPDF(mapp, queryObj ) {
+function createPDF( mapp, queryObj ) {
 
     var onSuccessFunction = function (message) {
         var projection = mapp.getView().getProjection().getCode();
@@ -188,6 +188,7 @@ function createPDF(mapp, queryObj ) {
             "&width="+mapp.getSize()[0]+ //width
             "&height="+mapp.getSize()[1]+ //height
             "&displayLayerName="+displayName+
+            "&metadataRef="+queryObj.metadataRef+
             "&viewparams=agridname:'"+comboboxGrid+
             	"';parameter_ids:'"+queryObj.parameterIds+
             	"';depthlayername:'"+queryObj.depthNames+
@@ -202,7 +203,11 @@ function createPDF(mapp, queryObj ) {
                 jQuery('body').append(mapImageLink);
                 var formDocument = document.getElementById("downloadPrintMap");
                 formDocument.click();
-                formDocument.remove();
+                if (typeof formDocument.remove === 'function') {
+                	formDocument.remove();
+                } else {
+                	$(formDocument).remove();
+                }
 
                 $("div#divLoading").removeClass('show');
             },
@@ -225,7 +230,7 @@ function createPDF(mapp, queryObj ) {
 
 function createDisplayName(param, period, depth, displayType) {
 	
-    var depths = depthNames.toString().replace(/,/g,'_'); 
+    var depths = depthNames.toString().replace(/,|\:|\./g,'_');
     var periods = periodNames.toString().replace(/,/g,'_');
     var params = param.toString().replace(/,/g,'_');
     var aggregationOption = $('#aggregation option:selected').attr('id');
@@ -234,7 +239,7 @@ function createDisplayName(param, period, depth, displayType) {
 	adisplayName += "_" + depths;
 	adisplayName += "_" + periods;
     adisplayName += "_" + displayType;
-    adisplayName +=  "_" + aggregationOption;
+    //adisplayName +=  "_" + aggregationOption;
     adisplayName +=  "_" + logscale;
     return adisplayName;
 }

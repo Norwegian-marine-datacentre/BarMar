@@ -5,7 +5,11 @@ function displayPeriodClosure() {
 		} else if (aPeriod.indexOf("M") > -1 ) {
 			return aPeriod.substring(1, 5) + "-" + findMonth(aPeriod.substring(5));
 		} else if (aPeriod.indexOf("Q") > -1 ) {
-			return aPeriod.substring(1, 5) + "-" + findQuarter(aPeriod.substring(5));
+			if ( aPeriod.indexOf("1") > -1) return aPeriod.replace("-1", "-Spring");
+			if ( aPeriod.indexOf("2") > -1) return aPeriod.replace("-2", "-Spring");
+			if ( aPeriod.indexOf("3") > -1) return aPeriod.replace("-3", "-Autumn");
+			if ( aPeriod.indexOf("4") > -1) return aPeriod.replace("-4", "-Autumn");
+			//return aPeriod.substring(1, 5) + "-" + findQuarter(aPeriod.substring(5));
 		} else if (aPeriod.indexOf("Y") > -1 ) {
 			return aPeriod.substring(1);
 		}
@@ -35,6 +39,6 @@ function displayPeriodClosure() {
 	
 function displayDepth( aDepth ) {
 	if ( aDepth === "F" ) 
-		return "Aggregated all data";
+		return "Aggregated all";
 	return aDepth;
 }

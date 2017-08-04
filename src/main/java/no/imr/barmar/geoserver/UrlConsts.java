@@ -1,39 +1,44 @@
 package no.imr.barmar.geoserver;
 
+import org.apache.commons.configuration.Configuration;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Component
 public class UrlConsts {
+	
+    @Autowired
+    private Configuration configuration;
 	
 	// Change url to change test environment - also change in comboboxNorMar.js 
 	// And use your local ip address when testing - e.g. http://10.1.9.221/geodata/nordicSeaMarineAtlas.html
 //	public final static String MAIN_URL = "http://maps.imr.no/geoserver/wms?";
-	public final static String MAIN_URL = "http://geb-test.nodc.no/geoserver/wms?";
+	//public final static String MAIN_URL = "http://geb-test.nodc.no/geoserver/wms?";
 //	public final static String MAIN_URL = "http://10.1.9.138:8080/geoserver/wms?";
-	
-	
-	public final static String SERVICE = "service=WFS";
-	public final static String VERSION = "version=1.0.0";
-	public final static String REQUEST_TYPE = "request=GetFeature";
-	
-    public final static String BASE_URL_REQUEST = MAIN_URL + SERVICE + "&" + VERSION + "&" + REQUEST_TYPE + "&";
-    
-    public final static String TYPE = "service=WMS&version=1.1.1&request=GetLegendGraphic&";
-    public final static String TYPE2 = "&width=22&height=24&format=image/png";
-    
-    public final static String GRID_PARAMETER_TIME = "typeName=postgis:grid_parameter_time";
-    public final static String GRID_PARAMETER_DEPTH = "typeName=postgis:grid_parameter_depth";
+	private String mainUrl = "http://geb-test.nodc.no/geoserver/wms?";//configuration.getString("imr.geoserver");
+	private String normar = "NorMar";
+	private String barmarArea = "postgis:barmarAreavalueAggregate";
+	private String barmarPoint = "postgis:barmarPointvalueAggregate";
+	private String normarArea = "postgis:normarAreavalueAggregate";
+	private String normarPoint = "postgis:normarPointvalueAggregate";
 
-    public final static String GRID_PARAMETER_NAME_BARMAR = "typeName=postgis:grid_parameter_name";
-    public final static String GRID_PARAMETER_NAME_NORMAR =  "typeName=postgis:grid_parameter_name_normar";
     
-    public final static String NORMAR_LEGEND_LAYER = "typeName=postgis:temperature_maxminNormar";
-    public final static String BARMAR_LEGEND_LAYER = "typeName=postgis:temperature_maxmin";
-    
-    public final static String BARMAR_AREAVALUE = "postgis:barmarAreavalueAggregate";//"postgis:areavalue";
-    public final static String BARMAR_POINTVALUE = "postgis:barmarPointvalueAggregate"; //"postgis:pointvalue";
-    
-    public final static String NORMAR_AREAVALUE = "postgis:normarAreavalueAggregate";//"postgis:areavalueNormar"; //"postgis:areavalueNormarOneParam";  //NORMAR_AREAVALUE_AGGREGATED;
-    public final static String NORMAR_POINTVALUE = "postgis:normarPointvalueAggregate";//"postgis:pointvalueNormar"; //"postgis:pointvalueNormarOneParam";    //NORMAR_POINTVALUE_AGGREGATED;
-    
-    public final static String NORMAR = "NorMar";
-    
-    
+	public String getMainUrl() {
+		return mainUrl;
+	}    
+	public String getNorMar() {
+		return normar;
+	}
+	public String getBarMarArea() {
+		return barmarArea;
+	}
+	public String getBarMarPoint() {
+		return barmarPoint;
+	}
+	public String getNorMarArea() {
+		return normarArea;
+	}
+	public String getNorMarPoint() {
+		return normarPoint;
+	}	
 }

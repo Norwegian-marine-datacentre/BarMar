@@ -4,7 +4,7 @@
         <title>NorMar</title>
         <meta charset="utf-8" />
 
-<link rel="stylesheet" href="http://openlayers.org/en/v3.15.1/css/ol.css" type="text/css">        
+<link rel="stylesheet" href="https://openlayers.org/en/v3.15.1/css/ol.css" type="text/css">        
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
 
@@ -19,6 +19,7 @@
     <script type="text/javascript" src="get-parameters-as-json.js"></script>
 	<script type="text/javascript" src="displayPeriodAndDepth.js"></script>
     <script type="text/javascript" src="ol-map-config.js"></script>
+    <script type="text/javascript" src="google-analytics-normar.js"></script>
     
     <script type="text/javascript" src="multiselectDropdown.js"></script>
 	<!-- link rel="stylesheet" type="text/css" href="https://rawgit.com/silviomoreto/bootstrap-select/master/dist/css/bootstrap-select.css" / -->
@@ -55,18 +56,18 @@
     </div>
 </div>
 
-<div style="position: relative;top:-30px; " id="checkboxes">
+<div style="position:relative;top:-30px; " id="checkboxes">
 	<button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseLayers" aria-expanded="true" 
 			aria-controls="collapseDetail" >
 			Collapse Layer List
 	</button>
 	<div class="collapse in" id="collapseLayers" aria-expanded="true">	
 	<ul class="layerstack controls" style="background-color: #ffffff;"></ul>
-    	<div class="controls">
+		<div class="controls">
         	<button id="raise" class="btn btn-primary btn-xs"><span class="glyphicon glyphicon-arrow-up"></span></button><br/>
         	<button id="lower" class="btn btn-primary btn-xs"><span class="glyphicon glyphicon-arrow-down"></span></button>
     	</div>
-	</div>    	
+	</div>	
 </div>
 
 <div  id="divLoading" ></div>
@@ -132,7 +133,7 @@
 			</div>
 
 			<div style="float:left" id="speciesBtn">
-				<label style="background-color:white;">Species</label>	
+				<label style="background-color:white;">Ocean data</label>	
 				<div>
 				<select class="selectpicker" id="speciesselect" data-live-search="true" data-width="100px">
 					<optgroup label="Species" id="species">
@@ -142,7 +143,7 @@
 			</div>
 
 			<div style="float:left" id="speciesSubGroupBtn">
-				<label style="background-color:white;">Species Length, Age, or Other</label>	
+				<label style="background-color:white;">Species, Temperature, Salinity</label>	
 				<div>
 					<select class="selectpicker dcc" id="speciesSubGroupselect" data-live-search="true" data-width="css-width" multiple >
 						<optgroup label="Species length" id="speciesSubGroupLength" data-max-options="5">
@@ -159,7 +160,7 @@
 				<label style="background-color:white;">Depth</label>	
 				<div>
 					<select class="selectpicker dcc input-small" id="depthselect" data-width="95px" multiple >
-						<optgroup label="Depth" id="depth" data-max-options="5">
+						<optgroup label="Depth [Meter]" id="depth" data-max-options="5">
 						</optgroup>
 					</select>
 				</div>
@@ -169,7 +170,7 @@
 				<label style="background-color:white;">Period</label>	
 				<div>
 					<select class="selectpicker dcc input-small" id="periodselect" data-width="105px" multiple >
-						<optgroup label="Period" id="period" data-max-options="5">
+						<optgroup label="Average period" id="period" data-max-options="5">
 						</optgroup>
 					</select>
 				</div>
@@ -179,30 +180,30 @@
 				<label style="background-color:white;">View</label>	
 				<div>
 					<select class="selectpicker dcc" id="visning" data-width="120px">
-						<option class="A" id="punktvisning" selected>Point View</option>
-						<option class="A" id="arealvisning">Area View</option>
+						<option class="A" id="punktvisning" selected data-content="<span title='Bubble View'>Bubble View</span>">Point View</option>
+						<option class="A" id="arealvisning" data-content="<span title='Filled cells'>Filled cells</span>">Area View</option>
 					</select>
 				</div>
 			</div>
 
 			<div style="float:left">
-				<label style="background-color:white;">Aggregation Opt.</label>	
+				<label style="background-color:white;">Scale Log/Linear<!-- Aggregation Opt. --></label>	
 				<div>
-					<select class="selectpicker dcc" id="aggregation" data-width="120px" multiple>
-						<optgroup label="aggregation" data-max-options="1" id="aggregation" >
+					<select class="selectpicker dcc" id="aggregation" data-width="120px" multiple  title="Linear Scale">
+						<!-- optgroup label="aggregation" data-max-options="1" id="aggregation" >
 							<option class="B" id="avg" selected>Average value of each cell</option>
 							<option class="B" id="max">Max value of each cell</option>
 							<option class="B" id="min">Min value of each cell</option>
 							<option class="B" id="relative_std_dev">coefficient of variation (CV)</option>
-						</optgroup>					
-						<optgroup label="logarithm" data-max-options="1" id="logarithm">
+						</optgroup -->					
+						<optgroup label="toggle log/linear scale" data-max-options="1" id="logarithm">
 							<option class="A" id="logarithm">Logaritmic scale</option>
 						</optgroup>
 					</select>
 				</div>
 			</div>
 
-			<div style="float:left">
+			<!-- div style="float:left">
 				<label style="background-color:white;">Set Bounding Box</label>	
 				<div>
 					<select id="boundingboxType" class="selectpicker dcc" data-width="120px" >
@@ -214,10 +215,13 @@
 						</optgroup>						
 					</select>
 				</div>
-			</div>	
+			</div -->	
 						
 			<div style="float:left">
-			  <label for="visning" style="background-color:white">&nbsp;</label>
+			  <label for="visning" style="background-color:white">
+					<a href="#" id="mail-link" 
+			  			onclick="window.location='mailto:datahjelp@imr.no?subject=BarMar map client';" class="glyphicon glyphicon-envelope">Support</a>
+			  </label>			  
 			  <div>
 				  <button type="button" class="btn btn-default" id="createMap">Create Map</button>
 			  </div>
@@ -227,14 +231,67 @@
 			<div style="float:left">
 			  <label for="download" style="background-color:white">&nbsp;</label>
 			  <div>
-				  <button type="button" class="btn btn-default" id="downloadMap" disabled="true">download data</button>
+				  <button type="button" class="btn btn-default" id="downloadMap"  
+					data-toggle="modal" data-target="#myModal">download data</button>
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Login</h4>
+      </div>
+      		
+      <div class="modal-body">
+		<form id="loginForm" method="post" action="/BarMar/login" name="f">
+				User name: <input type='text' id="username" name='username' value="user">
+				Password: <input type='password' id="password" name='password' value="">
+				<!-- input name="submit" type="submit" value="Login" / -->
+		</form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" onclick="doSubmit();">Login</button>
+        
+      </div>
+      
+    </div>
+  </div>
+</div>
 			  </div>
 			</div>			
 		</div>
 	</div>
 </div>
 
-    <script>       
+<script type='text/javascript'>
+function doSubmit() {
+	var usr = $('#username').val()
+    var pwd = $('#password').val()
+	jQuery.ajax({
+		url: "login",
+		data:{
+			username : usr,
+			password: pwd,
+			submit: "Login"
+		},
+		method: "post",
+		headers: {'X-Requested-With': 'XMLHttpRequest'},
+		crossDomain: false,
+		success: function(message){
+			if ( message.indexOf("FAILURE") > -1 ) alert("incorrect credentials");
+			else {
+				$('#myModal').modal('hide');				
+				$("div#divLoading").addClass('show');
+				var token = $("meta[name='_csrf']").attr("content");
+				var header = $("meta[name='_csrf_header']").attr("content");
+	          	downloadMap(token, header);
+			}
+		},
+        error: function(req, status, errThrown) {
+			alert("error req:"+req+" status:"+status+" errThrown:"+errThrown);
+		}
+	});
+}
+    
 	proj4.defs("EPSG:3575","+proj=laea +lat_0=90 +lon_0=10 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs");
 	var projection = ol.proj.get('EPSG:3575');
 	projection.setExtent([-4889334.802954878, -4889334.802954878, 4889334.802954878, 4889334.802954878]);      	
@@ -246,7 +303,7 @@
         });
         $("#createMap").click(function() {
         	$("div#divLoading").addClass('show');
-            drawmap(map);
+            drawmap(map, bboxValue );
         });
         function barmarCreatePDF( pdfGen ) {
         	$('div#divLoading').addClass('show');
@@ -257,15 +314,14 @@
         var layers = [
             new ol.layer.Tile({
                 source: new ol.source.TileWMS({
-                    url: 'http://maps.imr.no/geoserver/wms',
+                	url: 'http://opencache.statkart.no/gatekeeper/gk/gk.open?',
                     params: {
-                        //'LAYERS': 'landareal_europa',
-                        'LAYERS': 'dybderelieffpolar_v01_wms',
+                    	'LAYERS': 'arcticsdi_wmts',
                         'VERSION': '1.1.1',
                         'TRANSPARENT': 'true'
                     }
                 }),
-                'name' : 'Dybderelieffpolar' //'name': 'Europa'
+                'name' : 'Background map'
             }),
 			new ol.layer.Vector({
 			  source: vectorSource,
@@ -300,26 +356,29 @@
             view: new ol.View({
             	projection: projection, 
                 center: [2000000,-2000000], 
-                zoom:5
+                zoom:2
             })
         });
         
-        var typeSelect = document.getElementById('boundingboxType');		
-        var addInteraction = addDrawController();
-        var draw = addInteraction( vectorSource );
-        
+        //drawBoundingBox(); //draw bounding box not available in first version
         var bboxValue = null;
-        typeSelect.onchange = function() {
-        	map.removeInteraction(draw);
-          	vectorSource.clear();
-          	draw = addInteraction(vectorSource);
-          	map.addInteraction(draw);
-          	
-			draw.on('drawend',function(e) {
-				alert(e.feature.getGeometry().getExtent());
-				bboxValue = e.feature.getGeometry().getExtent();
-			});
-        };       
+        function drawBoundingBox() {        
+	        var typeSelect = document.getElementById('boundingboxType');		
+	        var addInteraction = addDrawController();
+	        var draw = addInteraction( vectorSource );
+	        
+	        typeSelect.onchange = function() {
+	        	map.removeInteraction(draw);
+	          	vectorSource.clear();
+	          	draw = addInteraction(vectorSource);
+	          	map.addInteraction(draw);
+	          	
+				draw.on('drawend',function(e) {
+					alert(e.feature.getGeometry().getExtent());
+					bboxValue = e.feature.getGeometry().getExtent();
+				});
+	        };
+        }
                   
         $('ul.layerstack').prepend(
                 '<li data-layerid="' + layers[0].get('name') + '"><input type="checkbox" checked="checked"> ' + layers[0].get('name') + '</li>'
