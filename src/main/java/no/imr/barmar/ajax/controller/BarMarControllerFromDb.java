@@ -15,6 +15,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
 
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
@@ -57,6 +58,14 @@ public class BarMarControllerFromDb {
 		return metadataRef + " not found.";
 	}
 
+    @RequestMapping("/barmarDb.update")
+    public ModelAndView updateBarMarJsonFromDb( 
+            @RequestParam(value = "grid", required=false) String grid) throws IOException, Exception {
+    	
+    	barMarParameteres = null;
+    	return new ModelAndView("redirect:/BarMar/barmar.html");
+    }
+	
     /**
      * FILLS THE COMBOBOX FOR GRIDS:
      * @param grid
@@ -101,7 +110,7 @@ public class BarMarControllerFromDb {
             }
         	
         	Map<String, String> sea2DataMappingNames = null;
-        	if ( grid == "barmar" ) {
+        	if ( grid.equals( "BarMar" ) ) {
         		sea2DataMappingNames= getParameterDao(grid).getNewParameterMap();
         	} else { // for NorMar
         		sea2DataMappingNames = new HashMap<String, String>();
