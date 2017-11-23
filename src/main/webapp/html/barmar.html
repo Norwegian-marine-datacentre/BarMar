@@ -318,9 +318,10 @@ function doSubmit() {
             new ol.layer.Tile({
                 source: new ol.source.TileWMS({
                     //url: 'https://maps.imr.no/geoserver/wms',
-                    url: 'http://opencache.statkart.no/gatekeeper/gk/gk.open?',
-                    //url: 'http://opencache.statkart.no/gatekeeper/gk/gk.open',
+                    url: 'http://opencache.statkart.no/gatekeeper/gk/gk.open',
                     params: {
+                    	//'LAYERS': 'BARMAR:world_land',
+
                     	'LAYERS': 'arcticsdi_wmts',
                     	//'LAYERS': 'Arctic_background',
                         //'LAYERS': 'landareal_europa',
