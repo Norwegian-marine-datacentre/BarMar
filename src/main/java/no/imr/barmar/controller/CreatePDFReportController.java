@@ -147,11 +147,22 @@ public class CreatePDFReportController {
     @RequestMapping(value="/getPDF", method = RequestMethod.GET)
     public void getMapImage(@RequestParam("printFilename") String filename, HttpServletResponse resp) throws Exception {
         
+    	if (filename == null || filename.equals("")) return;
+    	
         if ( tempImageFilePath.equals("")) { //Get temporary file path
             File findDir = File.createTempFile("temp-file-name", ".tmp"); 
             String path = findDir.getAbsolutePath();
             String tempFilePath = path.substring(0,path.lastIndexOf(File.separator));
             tempImageFilePath = tempFilePath;
+        }
+        String[] filesInDir = new File(tempImageFilePath).list();
+        boolean found = false;
+        for ( int i=0;( i < filesInDir.length && !found) ; i++) { // make sure files is local to directory
+            found = ( filesInDir[i].equals(filename));
+        }
+        if ( !found ) {
+        	logger.error("file not found in directory:"+filename+" tempFilePath:"+tempImageFilePath);
+        	return;
         }
         
         File tempMapFile = new File(tempImageFilePath + File.separator + filename);

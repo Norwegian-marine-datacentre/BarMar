@@ -29,9 +29,21 @@ public class GetSLDController  {
 	@RequestMapping("/getsld")
     public void getsld(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String filename = (String) request.getParameter("file");
+        if ( filename == null ) { // if .. someone is not interested in sld files
+            return;
+        }
+        String directory = System.getProperty("java.io.tmpdir");
+        String[] filesInDir = new File(directory).list();
         String tmpSldFilepath = System.getProperty("java.io.tmpdir").concat(System.getProperty("file.separator")).concat(filename);
-        File output = new File( tmpSldFilepath );
-        writeSldToResponse( output, response );
+        boolean found = false;
+        for ( int i=0;( i < filesInDir.length && !found) ; i++) { // make sure files is local to directory
+            found= ( filesInDir[i].equals(filename));
+        }
+        if (found) {
+            File output = new File( tmpSldFilepath );
+            writeSldToResponse( output, response );
+        }
+        return;
     }
 	
 	private void writeSldToResponse( File sldOutput, HttpServletResponse response ) throws IOException {
