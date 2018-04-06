@@ -35,6 +35,9 @@ public class BarMarControllerFromDb {
 	
 	@Autowired
 	private ParameterDao dao = null;
+
+	private Map<String, Object> barMarParameteres = null;
+	private Map<String, Metadata> metadataList = null;
 	
 	public ParameterDao getParameterDao(String gridName) {
 		if ( dao.getJdbcTemplate() == null ) {
@@ -46,9 +49,6 @@ public class BarMarControllerFromDb {
 	public void setParameterDao( ParameterDao dao) {
 		this.dao = dao;
 	}
-	
-	private Map<String, Object> barMarParameteres = null;
-	private Map<String, Metadata> metadataList = null;
 	
 	public String getMetadataRef( String metadataRef ) {
 		Metadata metadata =  metadataList.get( metadataRef );
@@ -141,10 +141,7 @@ public class BarMarControllerFromDb {
         		ParameterGroup pg = sortSubSpecies.groupSubSpeciesIntoLengthAgeOther( paramsForSea2Data );
         		barMarParameteres.put(speciesName, pg);
         	}
-        	barMarParameteres.put( "species", sea2DataSpeciesStr/*speciesStr*/ );
-        	
-        	
-
+        	barMarParameteres.put( "species", sea2DataSpeciesStr /*speciesStr*/ );
     	}
         return barMarParameteres;
     }
@@ -174,6 +171,5 @@ public class BarMarControllerFromDb {
         out.println(csv);
         out.flush();
         out.close();
-    }
-    		
+    }		
 }

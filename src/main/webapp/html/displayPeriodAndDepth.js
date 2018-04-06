@@ -5,11 +5,12 @@ function displayPeriodClosure() {
 		} else if (aPeriod.indexOf("M") > -1 ) {
 			return aPeriod.substring(1, 5) + "-" + findMonth(aPeriod.substring(5));
 		} else if (aPeriod.indexOf("Q") > -1 ) {
-			if ( aPeriod.indexOf("1") > -1) return aPeriod.replace("-1", "-Spring");
-			if ( aPeriod.indexOf("2") > -1) return aPeriod.replace("-2", "-Spring");
-			if ( aPeriod.indexOf("3") > -1) return aPeriod.replace("-3", "-Autumn");
-			if ( aPeriod.indexOf("4") > -1) return aPeriod.replace("-4", "-Autumn");
+			if ( aPeriod.indexOf("-1") > -1) aPeriod = aPeriod.replace("-1", "-Winter");
+			if ( aPeriod.indexOf("-2") > -1) aPeriod = aPeriod.replace("-2", "-2");
+			if ( aPeriod.indexOf("-3") > -1) aPeriod = aPeriod.replace("-3", "-Summer");
+			if ( aPeriod.indexOf("-4") > -1) aPeriod = aPeriod.replace("-4", "-4");
 			//return aPeriod.substring(1, 5) + "-" + findQuarter(aPeriod.substring(5));
+			return aPeriod.replace("Q", "")
 		} else if (aPeriod.indexOf("Y") > -1 ) {
 			return aPeriod.substring(1);
 		}

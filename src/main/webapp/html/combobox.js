@@ -1,8 +1,8 @@
 //PROD
-//var MAPS_IMR_NO = "http://maps.imr.no/geoserver/wms?";
+var MAPS_IMR_NO = "http://maps.imr.no/geoserver/wms?";
 
 //TEST: on local machine - use your ip address instead of localhost 
-var MAPS_IMR_NO = "http://geb-test.nodc.no/geoserver/wms?";
+//var MAPS_IMR_NO = "http://geb-test.nodc.no/geoserver/wms?";
 
 //DEV:
 //var MAPS_IMR_NO = "http://10.1.9.138:8080/geoserver/wms?";
@@ -31,7 +31,17 @@ function drawmap(mapp, bboxValue) {
 	    updateLayerStack( displayName, mapp );
 	}
 	readBarMar();
-	createSLD(onSuccessFunction);
+	
+	layerAlreadyExists = false;
+	$('.layerstack li').each(function(i) {
+		if ( $(this).attr("data-layerid") == displayName ) {
+			layerAlreadyExists = true; //layer already drawn
+			$("div#divLoading").removeClass('show');
+		}
+	});
+	
+	if (!layerAlreadyExists)
+		createSLD(onSuccessFunction);
 }
 
 function addLayerToMap(layername, message, mapp, bboxValue) {
@@ -162,7 +172,8 @@ function readBarMar() {
 	}
 	var periodNamesJquery = $("#periodselect option:selected");
 	for ( i=0; i < periodNamesJquery.length; i++ ) {
-		periodNames[i] = $(periodNamesJquery[i]).attr("id");  
+		periodNames[i] = $(periodNamesJquery[i]).attr("id");
+		periodNames[i] = translateTemperaturePeriodToDb(paramNames, periodNames[i])
 	}
 
 	$('#speciesSubGroupselect option:selected').each(function(i, selected){
@@ -174,6 +185,19 @@ function readBarMar() {
     logscale = $('#logarithm option:selected').attr('id');
     if (logscale == undefined ) logscale = "noLnScale";
 	displayName = createDisplayName(paramNames.toString(), periodNames.toString(), depthNames.toString(), displayType);
+}
+
+function translateTemperaturePeriodToDb( paramNames, aPeriodName ) {
+	if (paramNames.length > 0 && paramNames[0].indexOf("Temperature") > -1 ) {
+		var winterOrSummer = aPeriodName.charAt(aPeriodName.length-1)
+		aPeriodName = aPeriodName.substring(1, periodNames[0].length -2)
+		if (winterOrSummer == 1) {
+			aPeriodName = "M"+ aPeriodName + "03"
+		} else if (winterOrSummer == 3) {
+			aPeriodName = "M"+ aPeriodName + "09"
+		}
+	}
+	return aPeriodName;
 }
 
 function createPDF( mapp, queryObj ) {
@@ -198,18 +222,30 @@ function createPDF( mapp, queryObj ) {
         jQuery.ajax({
             url: pdfUrl,
             method: "post",
+            xhrFields: {
+                responseType : 'blob'
+            },
             success: function(data){
-                var mapImageLink = jQuery("<a id='downloadPrintMap' href='getPDF?printFilename="+data.filename+"' hidden download='" + data.filename + "'></a>");
+                /*var mapImageLink = jQuery("<a id='downloadPrintMap' href='getMap.pdf?printFilename="+data.filename+"' hidden download='" + data.filename + "'></a>");
                 jQuery('body').append(mapImageLink);
                 var formDocument = document.getElementById("downloadPrintMap");
-                formDocument.click();
+                if (document.documentMode || /Edge/.test(navigator.userAgent) ) {
+                    //alert("Hello Microsoft User! Allow popups and try again.")
+                	hostHref = window.location.href;
+                	appPath = hostHref.substring(0, hostHref.lastIndexOf("/"))
+                	window.open( appPath+"/getMap.pdf?printFilename="+data.filename, '_blank');
+                } else {
+                	formDocument.click();
+            	}
                 if (typeof formDocument.remove === 'function') {
                 	formDocument.remove();
                 } else {
                 	$(formDocument).remove();
                 }
-
+                */
                 $("div#divLoading").removeClass('show');
+                pdfName = "BarMarPdf_"+displayName+".pdf"
+            	saveAs(data, pdfName);
             },
             error: function(req, status, errThrown) {
             	onErrorFunction(req, status, errThrown);

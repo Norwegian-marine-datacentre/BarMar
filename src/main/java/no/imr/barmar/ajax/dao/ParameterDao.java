@@ -136,7 +136,7 @@ public class ParameterDao {
 				"SELECT vc.name AS depth "+
 						"FROM parameter_vcell vt, vcell vc, parameter p, grid g " +
 						"WHERE vt.id_vcell = vc.id AND vt.id_parameter = p.id AND vt.id_grid = g.id and p.id=? AND vc.name != 'W' and vc.name != 'F' "+
-						"ORDER BY vc.name != 'F'", 
+						"ORDER BY vc.name ", 
 				new RowMapper<String>() {
 			public String mapRow(ResultSet rs, int rowNum) throws SQLException {
 
@@ -164,9 +164,11 @@ public class ParameterDao {
     	String orderBy = "ORDER BY p.name, tc.name;";
     	String query = "";
     	if ( p.getName().contains("Temperature") || p.getName().contains("Salinity")) { 
-    		query = month + whereQueryRest + " and tc.name != 'F' " + orderBy;
+    		query = "SELECT 'Q' || right(left(tc.name, -2),-1) || '-' || (cast(right(tc.name, 2) as int ) / 3 ) AS periodname " //crooked sql to convert months to quarters
+    				/*month*/ + whereQueryRest + " and tc.name != 'F'  " + " and (tc.name ilike '%3' or tc.name ilike '%9') " + orderBy; //only select Q1 or Q3
     	} else {
-    		query = month + whereQueryRest + orderBy;
+    		//only get Year for fish
+    		query = month + whereQueryRest + " and tc.name ilike 'Y%' " + orderBy;
     	}
     	
 		List<String> periods = jdbcTemplate.query(
@@ -269,13 +271,13 @@ public class ParameterDao {
     }
     
     public Map<String, String> getNewParameterMap() {
-    	String query = "Select name, standard_name from parameter_basename";
+    	String query = "select name, standard_name from parameter_basename";
     	
     	List<Map<String,Object>> rows = jdbcTemplate.queryForList(query);
     	
     	HashMap<String, String> namePairs = new HashMap<String, String>();
-    	for (Map<String,Object> row : rows) {
-    		namePairs.put( (String)row.get("name"), (String)row.get("standard_name"));
+    	for ( Map<String, Object> row : rows ) {
+    		namePairs.put( (String)row.get("name"), (String)row.get("standard_name") );
     	}
     	return namePairs;
     }

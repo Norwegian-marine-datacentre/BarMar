@@ -20,6 +20,16 @@
     </licenses>
     <repositories>
         <repository>
+            <id>central</id>
+            <name>Central Maven Repository</name>
+            <!-- url>http://repo1.maven.org/maven2</url -->
+            <url>http://central.maven.org/maven2/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+            
+        <repository>
             <id>nexus-release</id>
             <name>Nexus release repository for IMR</name>
             <url>http://build.imr.no/nexus/content/repositories/releases/</url>
@@ -32,14 +42,7 @@
                 <enabled>true</enabled>
             </snapshots>
         </repository>
-        <repository>
-            <id>central</id>
-            <name>Central Maven Repository</name>
-            <url>http://repo1.maven.org/maven2</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
+
     </repositories>
 	
     <dependencies>
@@ -183,12 +186,23 @@
 			    <groupId>c3p0</groupId>
 			    <artifactId>c3p0</artifactId>
 			    <version>0.9.1.2</version>
+			    <!-- version>0.9.5</version -->
 			</dependency>	
 			<dependency>
 			    <groupId>postgresql</groupId>
 			    <artifactId>postgresql</artifactId>
 			    <version>9.1-901-1.jdbc4</version>
 			</dependency>
+			
+<!-- https://mvnrepository.com/artifact/org.apache.tomcat/tomcat-catalina -->
+<!-- org.apache.catalina.filters.RemoteAddrFilter -->
+			<!-- dependency>
+			    <groupId>org.apache.tomcat</groupId> 
+			    <artifactId>tomcat-catalina</artifactId>
+			    <version>7.0.85</version>
+			    <scope>provided</scope>
+			</dependency -->
+			
 
 <!-- Temporary -->
 <dependency>
@@ -202,6 +216,13 @@
     <version>1.2</version>
 </dependency> 		
 <!-- Temporary -->	   
+
+<!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
+<dependency>
+    <groupId>commons-io</groupId>
+    <artifactId>commons-io</artifactId>
+    <version>2.6</version>
+</dependency>
 
     </dependencies>
     <properties>

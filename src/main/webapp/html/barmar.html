@@ -70,9 +70,9 @@
 	</div>
 </div>
 
-<div  id="divLoading">
-	<!-- button type="button" class="btn btn-primary" style="opacity : 1.0;position:fixed;top:55%;left:48%">Cancle</button -->
-</div>
+  <div  id="divLoading">
+		<!-- button type="button" class="btn btn-primary" style="opacity : 1.0;position:fixed;top:55%;left:48%">Cancle</button -->
+  </div>
 
   <div class="panel-group" id="accordionMeta" style="position: absolute;bottom: 1em;right: 0.5em;border-width:1px;">
     <div class="panel panel-default">
@@ -101,6 +101,10 @@
           <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapseThree">
             <span class="glyphicon glyphicon-minus"></span>
             Legend
+            <div style="font-size:95%;">
+                <b>Species:</b><i>fish per square nautical mile</i> <b>Temperature:</b><i>range</i>
+                <b style="font-size:80%;">See metadata</b>
+            </div>
           </a>
         </h4>
       </div>
@@ -120,7 +124,7 @@
 		BarMar
 	</button>
 
-		<div class="collapse in" id="collapseDetail" aria-expanded="true">
+  <div class="collapse in" id="collapseDetail" aria-expanded="true">
 	<div  style="background-color:white;outline:1px solid;width: 100%;padding: 20px;
 	display: inline-block;">		
 
@@ -230,10 +234,10 @@
 			  <form id="hidden_pdf" method="post"></form>     
 			</div>
 
-			<!-- div style="float:left">
+			<div style="float:left">
 			  <label for="download" style="background-color:white">&nbsp;</label>
 			  <div>
-				  <button type="button" class="btn btn-default" id="downloadMap"
+				  <button type="button" class="btn btn-default"
 					data-toggle="modal" data-target="#myModal">download data</button>
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
   <div class="modal-dialog" role="document">
@@ -245,9 +249,9 @@
       		
       <div class="modal-body">
 		<form id="loginForm" method="post" action="/BarMar/login" name="f">
-				User name: <input type='text' id="username" name='username' value="user">
+				User name: <input type='text' id="username" name='username' value="">
 				Password: <input type='password' id="password" name='password' value="">
-				<input name="submit" type="submit" value="Login" />
+
 		</form>
       </div>
       <div class="modal-footer">
@@ -260,7 +264,7 @@
 </div>	
 			  
 			  </div>
-			</div -->			
+			</div>			
 		</div>
 	</div>
 </div>
@@ -300,10 +304,10 @@ function doSubmit() {
 		projection.setExtent([-4889334.802954878, -4889334.802954878, 4889334.802954878, 4889334.802954878]);    	
     
         readParametersClosure()( "BarMar" );
-//         $("#downloadMap").click(function() {
-//         	$("div#divLoading").addClass('show');
-//         	downloadMap();
-//         });
+          $("#downloadMap").click(function() {
+          	$("div#divLoading").addClass('show');
+          	downloadMap();
+          });
         $("#createMap").click(function() {
         	$("div#divLoading").addClass('show');
             drawmap(map, bboxValue );

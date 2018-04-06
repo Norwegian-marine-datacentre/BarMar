@@ -14,11 +14,16 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -70,8 +75,8 @@ public class CreatePDFReportController {
 
     private String tempImageFilePath = "";
     
-	@RequestMapping("/createpdfreport")
-    public @ResponseBody PDF_FilenameResponse createpdfreport( 
+	@RequestMapping(value = "/createpdfreport", method = RequestMethod.POST)
+    public void /*@ResponseBody PDF_FilenameResponse*/ createpdfreport( 
     		@RequestParam("width") Integer width,
     		@RequestParam("height") Integer height,
 			@RequestParam("bbox") String bbox,
@@ -80,7 +85,7 @@ public class CreatePDFReportController {
 			@RequestParam("viewparams") String viewparams,
 			@RequestParam("metadataRef") String metadataRef,
 			HttpServletRequest request,
-            HttpServletResponse response) throws IOException, JRException {
+            HttpServletResponse resp) throws IOException, JRException {
 
     	String url = createBaseLayerUrl( width, height, bbox);
     	String secondLayer = createFishExchangeLayer( width, height, bbox, layer, sld, viewparams );
@@ -100,10 +105,6 @@ public class CreatePDFReportController {
         Graphics2D g2d = (Graphics2D) theMapImage.getGraphics();
         g2d.drawImage(baseLayer, 0, 0, null);
         g2d.drawImage(second, 0, 0, null);
-        
-        response.setContentType("application/pdf");
-        response.setHeader("Content-Transfer-Encoding", "Binary");
-        response.setHeader("Content-Disposition", "attachment; filename=\"plot.pdf\";");
 
         if ( theIMRLogoImage == null) {
         	theIMRLogoImage = readImageFromResource( logoHI, request );
@@ -134,18 +135,40 @@ public class CreatePDFReportController {
             tempImageFilePath = path.substring(0,path.lastIndexOf(File.separator));
             findDir.delete();
         }
-        logger.debug(tempImageFilePath);
-        JasperExportManager.exportReportToPdfFile(printWithParameter, tempImageFilePath + File.separator + fileName);
+        logger.error("tempImageFilePath"+tempImageFilePath);
+        byte[] pdfBytes = JasperExportManager.exportReportToPdf(printWithParameter);
+        resp.getOutputStream().write(pdfBytes);
+        resp.getOutputStream().close();
         
-
+        logger.error("pdfBytes.length:"+pdfBytes.length);
+        
+        //JasperExportManager.exportReportToPdfFile(printWithParameter, tempImageFilePath + File.separator + fileName);
+        
+/*
         PDF_FilenameResponse respJson = new PDF_FilenameResponse();
         respJson.setFilename(fileName);
-        return respJson;
+        
+        InputStream pdfStream = new FileInputStream(tempImageFilePath + File.separator + fileName);
+        byte[] buf = new byte[8192];
+        int c = 0;
+        while ((c = pdfStream.read(buf, 0, buf.length)) > 0) {
+            resp.getOutputStream().write(buf, 0, c);
+            resp.getOutputStream().flush();
+        }
+        resp.getOutputStream().close();
+        pdfStream.close();
+        
+        resp.setContentType("application/pdf");
+        resp.setHeader("Content-Transfer-Encoding", "Binary");
+        resp.setHeader("Content-Disposition", "attachment; filename='"+fileName+"';");
+        //return respJson;
+         * 
+         */
 	}
 	
 
-    @RequestMapping(value="/getPDF", method = RequestMethod.GET)
-    public void getMapImage(@RequestParam("printFilename") String filename, HttpServletResponse resp) throws Exception {
+    @RequestMapping(value="/getMap.pdf", method = RequestMethod.GET )
+    public void/*ResponseEntity<byte[]>*/ getMapImage(@RequestParam("printFilename") String filename, HttpServletResponse resp) throws Exception {
         
     	if (filename == null || filename.equals("")) return;
     	
@@ -168,6 +191,13 @@ public class CreatePDFReportController {
         File tempMapFile = new File(tempImageFilePath + File.separator + filename);
         InputStream pdfStream = new FileInputStream(tempMapFile);
         
+        final HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+
+        //return new ResponseEntity<byte[]>(IOUtils.toByteArray(pdfStream), headers, HttpStatus.CREATED);
+        
+        //return IOUtils.toByteArray(pdfStream);
+        
         byte[] buf = new byte[8192];
         int c = 0;
         while ((c = pdfStream.read(buf, 0, buf.length)) > 0) {
@@ -177,9 +207,15 @@ public class CreatePDFReportController {
         resp.getOutputStream().close();
         pdfStream.close();
 
-        resp.setContentType("application/x-pdf");
-        resp.setHeader("Content-disposition", "inline; filename='"+filename+"'");
-        resp.flushBuffer();        
+        resp.setContentType("application/pdf");
+        //resp.setHeader("Content-disposition", "inline; filename='"+filename+"'");
+        resp.setCharacterEncoding("UTF-8");    
+        resp.setHeader("Content-Disposition", "attachment; filename='"+filename+"'");
+        resp.flushBuffer();
+        
+        //HttpHeaders responseHeaders = new HttpHeaders();
+        //responseHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        //return new ResponseEntity<InputStream>(pdfStream, responseHeaders, HttpStatus.CREATED);
     }
 	
 	private void setupJasperReportWithTemplate() throws IOException, JRException {

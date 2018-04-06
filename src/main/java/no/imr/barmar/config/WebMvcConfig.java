@@ -51,7 +51,8 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
                 .defaultContentType(MediaType.APPLICATION_JSON)
                 .mediaType("json", MediaType.APPLICATION_JSON)
                 .mediaType("html", MediaType.TEXT_HTML)
-    			.mediaType("jsp", MediaType.TEXT_HTML); //temporary
+    			.mediaType("jsp", MediaType.TEXT_HTML)
+    			.mediaType("pdf", MediaType.APPLICATION_OCTET_STREAM);
     }
 
     /**
