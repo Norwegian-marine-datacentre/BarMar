@@ -316,27 +316,67 @@ function doSubmit() {
         	$('div#divLoading').addClass('show');
             createPDF(this.map, pdfGen)
         }
-
+        function barmarCreateJPG( pdfGen ) {
+        	$('div#divLoading').addClass('show');
+        	createJPG(this.map, pdfGen)
+        }
+        
         var vectorSource = new ol.source.Vector({wrapX: false});
-        var layers = [
-            new ol.layer.Tile({
-                source: new ol.source.TileWMS({
+        
+      /*** WMTS stuff */  
+      var projectionExtent = projection.getExtent();
+      var size = ol.extent.getWidth(projectionExtent) / 256;
+      var resolutions = new Array(14);
+      var matrixIds = new Array(14);
+      for (var z = 0; z < 14; ++z) {
+        // generate resolutions and matrixIds arrays for this WMTS
+        resolutions[z] = size / Math.pow(2, z);
+        matrixIds[z] = z;
+      }
+      
+        var wmts = new ol.layer.Tile({
+            opacity: 1.0,
+            source: new ol.source.WMTS({
+              url: 'http://basemap.arctic-sdi.org/mapcache/wmts',
+              layer: 'arctic_cascading',
+              matrixSet: '3575',
+              format: 'image/png',
+              projection: projection,
+              tileGrid: new ol.tilegrid.WMTS({
+                origin: ol.extent.getTopLeft(projectionExtent),
+                resolutions: resolutions,
+                matrixIds: matrixIds
+              }),
+              style: 'default',
+              wrapX: true
+            }),
+            name: "Background map"
+          })
+        
+        var layers = [        
+            //new ol.layer.Tile({
+            //    source: new ol.source.TileWMS({
                     //url: 'https://maps.imr.no/geoserver/wms',
-                    url: 'http://opencache.statkart.no/gatekeeper/gk/gk.open',
-                    params: {
+                    //url: 'http://opencache.statkart.no/gatekeeper/gk/gk.open',
+            //        url: 'http://basemap.arctic-sdi.org/mapcache/wmts',
+            //        params: {
                     	//'LAYERS': 'BARMAR:world_land',
 
-                    	'LAYERS': 'arcticsdi_wmts',
+            //           'LAYERS': 'arctic_cascading',
+            
+                    	//'LAYERS': 'arcticsdi_wmts',
                     	//'LAYERS': 'Arctic_background',
                         //'LAYERS': 'landareal_europa',
                         //'LAYERS': 'dybderelieffpolar_v01_wms',
                         //'LAYERS': 'barentswatch_grunnkart',
-                        'VERSION': '1.1.1',
-                        'TRANSPARENT': 'true'
-                    }
-                }),
-                'name' : 'Background map' 
-            }), 
+            
+            //    'VERSION': '1.1.1',
+            //            'TRANSPARENT': 'true'
+            //        }
+            //    }),
+            //    'name' : 'Background map' 
+            //}), 
+            wmts,
 			new ol.layer.Vector({
 			  source: vectorSource,
 			  style: new ol.style.Style({

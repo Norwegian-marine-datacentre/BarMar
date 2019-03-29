@@ -2,7 +2,7 @@
 var MAPS_IMR_NO = "http://maps.imr.no/geoserver/wms?";
 
 //TEST: on local machine - use your ip address instead of localhost 
-//var MAPS_IMR_NO = "http://geb-test.nodc.no/geoserver/wms?";
+//var MAPS_IMR_NO = "http://geb-test.nodc.no:8080/geoserver/wms?";
 
 //DEV:
 //var MAPS_IMR_NO = "http://10.1.9.138:8080/geoserver/wms?";
@@ -203,6 +203,10 @@ function translateTemperaturePeriodToDb( paramNames, aPeriodName ) {
 function createPDF( mapp, queryObj ) {
 
     var onSuccessFunction = function (message) {
+        var params = "'" + parameterIds.toString().replace(/,/g,' ') + "'";
+        var depths = "'" + depthNames.toString().replace(/,/g,' ') + "'"; 
+        var periods = "'" + periodNames.toString().replace(/,/g,' ') + "'"; 
+        
         var projection = mapp.getView().getProjection().getCode();
         projection = "EPSG:3575";
         var pdfUrl = "createpdfreport?bbox="+this.map.getView().calculateExtent(this.map.getSize())+
@@ -214,11 +218,12 @@ function createPDF( mapp, queryObj ) {
             "&displayLayerName="+displayName+
             "&metadataRef="+queryObj.metadataRef+
             "&viewparams=agridname:'"+comboboxGrid+
-            	"';parameter_ids:'"+queryObj.parameterIds+
-            	"';depthlayername:'"+queryObj.depthNames+
-            	"';periodname:'"+queryObj.periodNames+
-            	"';aggregationfunc:'"+queryObj.aggregationfunc+"'";
+            	"';parameter_ids:"+params+
+            	";depthlayername:"+depths+
+            	";periodname:"+periods+
+            	";aggregationfunc:'"+queryObj.aggregationfunc+"'";
 
+        pdfUrl = encodeURI(pdfUrl)
         jQuery.ajax({
             url: pdfUrl,
             method: "post",
@@ -262,6 +267,57 @@ function createPDF( mapp, queryObj ) {
     displayType = queryObj.displayType; 
     
     createSLD(onSuccessFunction);
+}
+
+function createJPG( mapp, queryObj ) {
+
+    var onSuccessFunction = function (message) {
+        var params = "'" + parameterIds.toString().replace(/,/g,' ') + "'";
+        var depths = "'" + depthNames.toString().replace(/,/g,' ') + "'"; 
+        var periods = "'" + periodNames.toString().replace(/,/g,' ') + "'"; 
+        
+        var projection = mapp.getView().getProjection().getCode();
+        projection = "EPSG:3575";
+        var pdfUrl = "createjpg?bbox="+this.map.getView().calculateExtent(this.map.getSize())+
+            "&sld="+BASE_URL + "getsld?file=" + message.filename +
+            "&srs="+projection+
+            "&layer="+layername+
+            "&width="+mapp.getSize()[0]+ //width
+            "&height="+mapp.getSize()[1]+ //height
+            "&displayLayerName="+displayName+
+            "&metadataRef="+queryObj.metadataRef+
+            "&viewparams=agridname:'"+comboboxGrid+
+            	"';parameter_ids:"+params+
+            	";depthlayername:"+depths+
+            	";periodname:"+periods+
+            	";aggregationfunc:'"+queryObj.aggregationfunc+"'";
+
+        jQuery.ajax({
+            url: pdfUrl,
+            method: "post",
+            xhrFields: {
+                responseType : 'blob'
+            },
+            success: function(data){
+                $("div#divLoading").removeClass('show');
+                pdfName = "BarMarJPG_"+displayName+".jpg"
+            	saveAs(data, pdfName);
+            },
+            error: function(req, status, errThrown) {
+            	onErrorFunction(req, status, errThrown);
+            }
+        });    
+    }
+    
+    parameterIds = queryObj.parameterIds;
+    paramNames = queryObj.paramNames;
+    depthNames = queryObj.depthNames;
+    periodNames = queryObj.periodNames;
+    aggregationfunc = queryObj.aggregationfunc;
+    logscale = queryObj.logscale;
+    displayType = queryObj.displayType; 
+    
+    createSLD(onSuccessFunction);    
 }
 
 function createDisplayName(param, period, depth, displayType) {

@@ -2,12 +2,18 @@ package no.imr.barmar.controller;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.imageio.ImageIO;
 import javax.servlet.ServletContext;
@@ -51,9 +57,9 @@ import no.imr.barmar.pdf.pojo.PDF_FilenameResponse;
 public class CreatePDFReportController {
     
     private static final Logger logger = LoggerFactory.getLogger(CreatePDFReportController.class);
-    
+	
 	@Autowired
-	private UrlConsts urlConsts;
+	private GetMapHelper mapHelper;
 	
 	@Autowired
 	private BarMarControllerFromDb barmarController;
@@ -76,7 +82,7 @@ public class CreatePDFReportController {
     private String tempImageFilePath = "";
     
 	@RequestMapping(value = "/createpdfreport", method = RequestMethod.POST)
-    public void /*@ResponseBody PDF_FilenameResponse*/ createpdfreport( 
+    public void createpdfreport( 
     		@RequestParam("width") Integer width,
     		@RequestParam("height") Integer height,
 			@RequestParam("bbox") String bbox,
@@ -87,9 +93,9 @@ public class CreatePDFReportController {
 			HttpServletRequest request,
             HttpServletResponse resp) throws IOException, JRException {
 
-    	String url = createBaseLayerUrl( width, height, bbox);
-    	String secondLayer = createFishExchangeLayer( width, height, bbox, layer, sld, viewparams );
-        String legendUrl = createFishExchangeLegend( layer, sld);
+    	String url = mapHelper.createBaseLayerUrl( width, height, bbox);
+    	String secondLayer = mapHelper.createFishExchangeLayer( width, height, bbox, layer, sld, viewparams );
+        String legendUrl = mapHelper.createFishExchangeLegend( layer, sld);
         
         logger.debug("baselayer:"+url);
         logger.debug("secondLayer:"+secondLayer);
@@ -97,6 +103,39 @@ public class CreatePDFReportController {
         
         BufferedImage baseLayer = ImageIO.read( new URL(url) );
         logger.debug("pdf overlay:"+secondLayer);
+        URL secondImg = new URL(secondLayer);
+        URLConnection conn = secondImg.openConnection();
+        conn.setAllowUserInteraction(true);
+        conn.setRequestProperty("Content-Type", "image/png");
+        conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36");
+        //conn.connect();
+        
+    	Map<String, List<String>> map = conn.getHeaderFields();
+    	for (Map.Entry<String, List<String>> entry : map.entrySet()) {
+    		logger.debug("Key : " + entry.getKey() + 
+                     " ,Value : " + entry.getValue());
+    	}
+        
+        logger.debug("get content length:"+conn.getContentLength());
+        logger.debug("url for second img is:"+secondImg.getHost()+""+secondImg.getPath()+secondImg.getQuery());
+        logger.debug("content type:"+conn.getContentType());
+        HttpURLConnection httpConnection = (HttpURLConnection) conn;
+        InputStream inputStream;
+        if (httpConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+            inputStream = httpConnection.getInputStream();
+            logger.debug("------ inputStream -----");
+        } else {
+        	logger.debug("------ errorStream-----");
+            inputStream = httpConnection.getErrorStream();
+        }
+        
+        BufferedReader in = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
+        String f = in.readLine();
+        in.close();
+        logger.debug("******ERROR STREAM"+f);
+        
+        int code = httpConnection.getResponseCode();
+        logger.debug("second image - url status code:"+code);
         BufferedImage second = ImageIO.read( new URL(secondLayer) );
         logger.debug("pdf overlay image:"+second);
         BufferedImage legendImg = ImageIO.read( new URL(legendUrl) );
@@ -166,58 +205,6 @@ public class CreatePDFReportController {
          */
 	}
 	
-
-    @RequestMapping(value="/getMap.pdf", method = RequestMethod.GET )
-    public void/*ResponseEntity<byte[]>*/ getMapImage(@RequestParam("printFilename") String filename, HttpServletResponse resp) throws Exception {
-        
-    	if (filename == null || filename.equals("")) return;
-    	
-        if ( tempImageFilePath.equals("")) { //Get temporary file path
-            File findDir = File.createTempFile("temp-file-name", ".tmp"); 
-            String path = findDir.getAbsolutePath();
-            String tempFilePath = path.substring(0,path.lastIndexOf(File.separator));
-            tempImageFilePath = tempFilePath;
-        }
-        String[] filesInDir = new File(tempImageFilePath).list();
-        boolean found = false;
-        for ( int i=0;( i < filesInDir.length && !found) ; i++) { // make sure files is local to directory
-            found = ( filesInDir[i].equals(filename));
-        }
-        if ( !found ) {
-        	logger.error("file not found in directory:"+filename+" tempFilePath:"+tempImageFilePath);
-        	return;
-        }
-        
-        File tempMapFile = new File(tempImageFilePath + File.separator + filename);
-        InputStream pdfStream = new FileInputStream(tempMapFile);
-        
-        final HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-
-        //return new ResponseEntity<byte[]>(IOUtils.toByteArray(pdfStream), headers, HttpStatus.CREATED);
-        
-        //return IOUtils.toByteArray(pdfStream);
-        
-        byte[] buf = new byte[8192];
-        int c = 0;
-        while ((c = pdfStream.read(buf, 0, buf.length)) > 0) {
-            resp.getOutputStream().write(buf, 0, c);
-            resp.getOutputStream().flush();
-        }
-        resp.getOutputStream().close();
-        pdfStream.close();
-
-        resp.setContentType("application/pdf");
-        //resp.setHeader("Content-disposition", "inline; filename='"+filename+"'");
-        resp.setCharacterEncoding("UTF-8");    
-        resp.setHeader("Content-Disposition", "attachment; filename='"+filename+"'");
-        resp.flushBuffer();
-        
-        //HttpHeaders responseHeaders = new HttpHeaders();
-        //responseHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-        //return new ResponseEntity<InputStream>(pdfStream, responseHeaders, HttpStatus.CREATED);
-    }
-	
 	private void setupJasperReportWithTemplate() throws IOException, JRException {
 		if (  reportWithParameter == null ) {
 			Resource jasperReport = resourceLoader.getResource( jasperReportUrl );
@@ -235,50 +222,5 @@ public class CreatePDFReportController {
         InputStream imageInputStream = resource.getInputStream();
         return ImageIO.read( imageInputStream );
 	}
-    
-	private String createBaseLayerUrl(Integer width, Integer height, String bbox) {
 
-		String url = "http://wms.geonorge.no/skwms1/wms.europa?" + 
-			"VERSION=1.1.1" + 
-			"&SERVICE=WMS" + 
-			"&REQUEST=GetMap" + 
-			"&SRS=EPSG:3575" + 
-			"&STYLES=" + 
-			"&TRANSPARENT=true" + 
-			"&FORMAT=image/png" + 
-			"&LAYERS=Land,Vmap0Land,Vmap0Kystkontur,Vmap0Hoydepunkt,Vmap0Elver,Vmap0Hoydekontur,Vmap0MyrSump,Vmap0Innsjo,Vmap0Sletteland,Vmap0Dyrketmark,Vmap0Skog,Vmap0Bebyggelse,Vmap0AdministrativeGrenser,Vmap0Isbre" + 
-			"&WIDTH=" + width +
-			"&HEIGHT=" + height + 
-			"&BBOX=" + bbox;
-		return url;
-	}
-    
-    private String createFishExchangeLayer(Integer width, Integer height, String bbox, String layer, String sld, String viewparams) {
-    	//String fishEx = "http://atlas2.nodc.no:8080/geoserver/wms?";
-    	String fishEx = urlConsts.getMainUrl(); 
-    	fishEx = fishEx.concat("REQUEST=GetMap");
-    	fishEx = fishEx.concat("&SERVICE=WMS");
-    	fishEx = fishEx.concat("&FORMAT=image/png");
-    	fishEx = fishEx.concat("&CRS=EPSG:3575");
-        //fishEx = fishEx.concat("&srs=" + request.getParameter("srs"));
-    	fishEx = fishEx.concat("&transparent=true");
-        fishEx = fishEx.concat("&version=1.3.0");
-        fishEx = fishEx.concat("&width=" + width);
-        fishEx = fishEx.concat("&height=" + height);
-        fishEx = fishEx.concat("&SLD=" + sld);
-        fishEx = fishEx.concat("&bbox=" + bbox);
-        fishEx = fishEx.concat("&layers=").concat(layer);
-        fishEx = fishEx.concat("&viewparams=").concat(viewparams);
-        //fishEx = fishEx.concat("&viewparams=").concat("agridname:'BarMar';parameter_ids:'214';depthlayername:'F';periodname:'F';aggregationfunc:'avg'");
-        
-        return fishEx;
-    }
-    
-    private String createFishExchangeLegend( String layer, String sld ) {
-//        String legendUrl = "http://maps.imr.no/geoserver/wms?service=WMS&version=1.1.1&request=GetLegendGraphic&layer=test:pointvalue&width=22&height=24&format=image/png";
-//        String legendUrl = UrlConsts.MAIN_URL_WMS + UrlConsts.TYPE + "layer=test:pointvalue" + UrlConsts.TYPE2;
-        String legendUrl = urlConsts.getMainUrl() + "service=WMS&version=1.1.1&request=GetLegendGraphic&" + "layer=" + layer + "&width=22&height=24&format=image/png";
-        legendUrl = legendUrl.concat("&SLD=" + sld);
-        return legendUrl;
-    }
 }

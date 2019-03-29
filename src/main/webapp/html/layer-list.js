@@ -1,7 +1,8 @@
 function updateLayerStack( alayerName, map ) {
     $('ul.layerstack').append(
             '<li data-layerid="' + alayerName + '"><img id="close_red" src="imr/images/close_red.png"><input type="checkbox" checked="checked"> ' + alayerName
-                    + '<a href="#" id="'+alayerName+'"><img src="imr/images/pdf.jpg" width="16" height="20"/></a></li>');
+                    + '<a class="pdf" href="#" id="'+alayerName+'"><img src="imr/images/pdf.jpg" width="16" height="20"/></a>'
+                    + '<a class="jpg" href="#" id="'+alayerName+'"><img src="imr/images/jpg.png" width="16" height="20"/></a></li>');
     // Change style when select a layer
     $('ul.layerstack li').on('click', function() {
         $('ul.layerstack li').removeClass('selected');
@@ -143,9 +144,16 @@ $(document).ready(function() {
     });
     
     $('ul.layerstack').on('click', 'a', function() {
-        var layer = $(this).attr('id');
-        var pdfGen = pdfHash[layer];
+    	if ( $(this).attr('class') == 'pdf' ) {
+        	var layer = $(this).attr('id');
+        	var pdfGen = pdfHash[layer];
 
-        barmarCreatePDF(pdfGen)
+        	barmarCreatePDF(pdfGen)
+    	} else {
+        	var layer = $(this).attr('id');
+        	var pdfGen = pdfHash[layer];
+
+        	barmarCreateJPG(pdfGen)    		
+    	}
     });
 });
