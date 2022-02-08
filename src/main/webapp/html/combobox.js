@@ -1,5 +1,5 @@
 //PROD
-var MAPS_IMR_NO = "http://maps.imr.no/geoserver/wms?";
+var MAPS_IMR_NO = "https://maps.imr.no/geoserver/wms?";
 
 //TEST: on local machine - use your ip address instead of localhost 
 //var MAPS_IMR_NO = "http://geb-test.nodc.no:8080/geoserver/wms?";

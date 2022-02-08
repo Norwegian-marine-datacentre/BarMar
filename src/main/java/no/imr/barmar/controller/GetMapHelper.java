@@ -44,7 +44,9 @@ public class GetMapHelper {
     
     protected String createBaseLayerUrl(Integer width, Integer height, String bbox) {
 
-		String url = "http://wms.geonorge.no/skwms1/wms.europa?" + 
+		String url = //"https://www.gebco.net/data_and_products/gebco_web_services/web_map_service/mapserv?" +
+		//"http://wms.geonorge.no/skwms1/wms.europa?" +
+		"https://wms.geonorge.no/skwms1/wms.gebco_skyggerelieff2?" +
 			"VERSION=1.1.1" + 
 			"&SERVICE=WMS" + 
 			"&REQUEST=GetMap" + 
@@ -52,7 +54,9 @@ public class GetMapHelper {
 			"&STYLES=" + 
 			"&TRANSPARENT=true" + 
 			"&FORMAT=image/png" + 
-			"&LAYERS=Land,Vmap0Land,Vmap0Kystkontur,Vmap0Hoydepunkt,Vmap0Elver,Vmap0Hoydekontur,Vmap0MyrSump,Vmap0Innsjo,Vmap0Sletteland,Vmap0Dyrketmark,Vmap0Skog,Vmap0Bebyggelse,Vmap0AdministrativeGrenser,Vmap0Isbre" + 
+			//"&LAYERS=Land,Vmap0Land,Vmap0Kystkontur,Vmap0Hoydepunkt,Vmap0Elver,Vmap0Hoydekontur,Vmap0MyrSump,Vmap0Innsjo,Vmap0Sletteland,Vmap0Dyrketmark,Vmap0Skog,Vmap0Bebyggelse,Vmap0AdministrativeGrenser,Vmap0Isbre" +
+			//"&LAYERS=gebco_latest" +
+			"&LAYERS=gebco_shade,nasjonale_grenser,kystlinje" +
 			"&WIDTH=" + width +
 			"&HEIGHT=" + height + 
 			"&BBOX=" + bbox;
